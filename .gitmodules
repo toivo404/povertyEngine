@@ -1,0 +1,3 @@
+[submodule "PovertyEngine/vendor/spdlog"]
+	path = PovertyEngine/vendor/spdlog
+	url = https://github.com/gabime/spdlog.git
