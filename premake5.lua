@@ -35,10 +35,6 @@ workspace "PovertyEngine"
             "%{prj.name}/src/**.cpp"
         }
 		
-		externalincludedirs{
-			"%{ExtDir.SDL2}/include"
-		}
-		
 		libdirs
 		{
 			"%{ExtDir.SDL2}/lib/"
@@ -47,7 +43,8 @@ workspace "PovertyEngine"
         includedirs
         {
             "%{prj.name}/src",
-            "%{IncludeDir.spdlog}"
+            "%{IncludeDir.spdlog}",
+			"%{ExtDir.SDL2}/include"
         }
 
         links
