@@ -15,6 +15,9 @@ workspace "PovertyEngine"
     IncludeDir = {}
     IncludeDir["spdlog"] = "PovertyEngine/vendor/spdlog/include"
 
+	ExtDir = {}
+	ExtDir["SDL2"] = "PovertyEngine/vendor/SDL2"
+	
     -- Engine Project
     project "PovertyEngine"
         location "PovertyEngine"
@@ -31,6 +34,15 @@ workspace "PovertyEngine"
             "%{prj.name}/src/**.h",
             "%{prj.name}/src/**.cpp"
         }
+		
+		externalincludedirs{
+			"%{ExtDir.SDL2}/include"
+		}
+		
+		libdirs
+		{
+			"%{ExtDir.SDL2}/lib/"
+		}
 
         includedirs
         {
@@ -40,7 +52,8 @@ workspace "PovertyEngine"
 
         links
         {
-            -- Add dependencies here
+			"SDL2",
+			"SDL2main"
         }
 
         filter "system:windows"

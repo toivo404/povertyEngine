@@ -59,6 +59,7 @@
     <IntDir>..\bin-int\Debug-windows-x86_64\PovertyEngine\</IntDir>
     <TargetName>PovertyEngine</TargetName>
     <TargetExt>.dll</TargetExt>
+    <ExternalIncludePath>vendor\SDL2\include;$(ExternalIncludePath)</ExternalIncludePath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <LinkIncremental>false</LinkIncremental>
@@ -66,6 +67,7 @@
     <IntDir>..\bin-int\Release-windows-x86_64\PovertyEngine\</IntDir>
     <TargetName>PovertyEngine</TargetName>
     <TargetExt>.dll</TargetExt>
+    <ExternalIncludePath>vendor\SDL2\include;$(ExternalIncludePath)</ExternalIncludePath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Dist|x64'">
     <LinkIncremental>false</LinkIncremental>
@@ -73,6 +75,7 @@
     <IntDir>..\bin-int\Dist-windows-x86_64\PovertyEngine\</IntDir>
     <TargetName>PovertyEngine</TargetName>
     <TargetExt>.dll</TargetExt>
+    <ExternalIncludePath>vendor\SDL2\include;$(ExternalIncludePath)</ExternalIncludePath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <ClCompile>
@@ -89,6 +92,8 @@
     <Link>
       <SubSystem>Windows</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
+      <AdditionalDependencies>SDL2.lib;SDL2main.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>vendor\SDL2\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <ImportLibrary>..\bin\Debug-windows-x86_64\PovertyEngine\PovertyEngine.lib</ImportLibrary>
     </Link>
     <PostBuildEvent>
@@ -114,6 +119,8 @@
       <SubSystem>Windows</SubSystem>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
+      <AdditionalDependencies>SDL2.lib;SDL2main.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>vendor\SDL2\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <ImportLibrary>..\bin\Release-windows-x86_64\PovertyEngine\PovertyEngine.lib</ImportLibrary>
     </Link>
     <PostBuildEvent>
@@ -139,6 +146,8 @@
       <SubSystem>Windows</SubSystem>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
+      <AdditionalDependencies>SDL2.lib;SDL2main.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>vendor\SDL2\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <ImportLibrary>..\bin\Dist-windows-x86_64\PovertyEngine\PovertyEngine.lib</ImportLibrary>
     </Link>
     <PostBuildEvent>
