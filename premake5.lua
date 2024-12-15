@@ -117,6 +117,13 @@ workspace "PovertyEngine"
             {
                 "PE_PLATFORM_WINDOWS"
             }
+			
+			-- Add the SDL2 dll copy step here
+			postbuildcommands
+			{
+				-- Adjust the path if needed, depending on your directory structure
+				("{COPY} \"%{wks.location}/PovertyEngine/vendor/SDL2/bin/SDL2.dll\" \"%{cfg.targetdir}\"")
+			}
 
         filter "configurations:Debug"
             defines "PE_DEBUG"
