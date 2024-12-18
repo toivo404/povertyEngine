@@ -14,7 +14,6 @@ workspace "PovertyEngine"
     -- Include directories relative to root folder (solution directory)
     IncludeDir = {}
     IncludeDir["spdlog"] = "PovertyEngine/vendor/spdlog/include"
-	IncludeDir["SDL2"] = "PovertyEngine/vendor/SDL2"
 	IncludeDir["GLAD"] = "PovertyEngine/vendor/Glad"
 	IncludeDir["GLM"] = "vendor/glm"
 	
@@ -39,14 +38,14 @@ workspace "PovertyEngine"
 		
 		libdirs
 		{
-			"%{IncludeDir.SDL2}/lib/"
+			"PovertyEngine/vendor/SDL2/lib/"
 		}
 
         includedirs
         {
+			"PovertyEngine/vendor/SDL2/include",
             "%{prj.name}/src",
             "%{IncludeDir.spdlog}",
-			"%{IncludeDir.SDL2}/include",
 			"%{IncludeDir.GLAD}/",
 			"%{IncludeDir.GLM}/",
         }
@@ -108,13 +107,20 @@ workspace "PovertyEngine"
             "PovertyEngine/src",
             "%{IncludeDir.spdlog}",
 			"%{IncludeDir.GLM}/",
-			"%{IncludeDir.GLAD}/"
-
+			"%{IncludeDir.GLAD}/",
+			"PovertyEngine/vendor/SDL2/include",
         }
-
+		
+		libdirs{
+			"PovertyEngine/vendor/SDL2/lib/"
+		}
+		
         links
         {
-            "PovertyEngine"
+            "PovertyEngine",
+			"SDL2",
+			"SDL2main",
+
         }
 
         filter "system:windows"
