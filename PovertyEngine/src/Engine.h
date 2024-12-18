@@ -1,5 +1,4 @@
 #pragma once
-#include <SDL.h>
 #include <SDL_video.h>
 #include "Core.h"
 class PE_API Engine

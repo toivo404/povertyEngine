@@ -79,7 +79,7 @@
       <PrecompiledHeader>NotUsing</PrecompiledHeader>
       <WarningLevel>Level3</WarningLevel>
       <PreprocessorDefinitions>PE_PLATFORM_WINDOWS;PE_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>..\PovertyEngine\src;..\PovertyEngine\vendor\spdlog\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\PovertyEngine\src;..\PovertyEngine\vendor\spdlog\include;..\vendor\glm;..\PovertyEngine\vendor\Glad;..\PovertyEngine\vendor\SDL2\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <DebugInformationFormat>EditAndContinue</DebugInformationFormat>
       <Optimization>Disabled</Optimization>
       <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
@@ -89,14 +89,20 @@
     <Link>
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
+      <AdditionalDependencies>SDL2.lib;SDL2main.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>..\PovertyEngine\vendor\SDL2\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
     </Link>
+    <PostBuildEvent>
+      <Command>IF EXIST "$(SolutionDir)\PovertyEngine\vendor\SDL2\bin\SDL2.dll"\ (xcopy /Q /E /Y /I "$(SolutionDir)\PovertyEngine\vendor\SDL2\bin\SDL2.dll" "..\bin\Debug-windows-x86_64\Game" &gt; nul) ELSE (xcopy /Q /Y /I "$(SolutionDir)\PovertyEngine\vendor\SDL2\bin\SDL2.dll" "..\bin\Debug-windows-x86_64\Game" &gt; nul)
+IF EXIST $(SolutionDir)\shaders\ (xcopy /Q /E /Y /I $(SolutionDir)\shaders ..\bin\Debug-windows-x86_64\Game\shaders &gt; nul) ELSE (xcopy /Q /Y /I $(SolutionDir)\shaders ..\bin\Debug-windows-x86_64\Game\shaders &gt; nul)</Command>
+    </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <ClCompile>
       <PrecompiledHeader>NotUsing</PrecompiledHeader>
       <WarningLevel>Level3</WarningLevel>
       <PreprocessorDefinitions>PE_PLATFORM_WINDOWS;PE_RELEASE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>..\PovertyEngine\src;..\PovertyEngine\vendor\spdlog\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\PovertyEngine\src;..\PovertyEngine\vendor\spdlog\include;..\vendor\glm;..\PovertyEngine\vendor\Glad;..\PovertyEngine\vendor\SDL2\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <Optimization>Full</Optimization>
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
@@ -110,14 +116,20 @@
       <SubSystem>Console</SubSystem>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
+      <AdditionalDependencies>SDL2.lib;SDL2main.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>..\PovertyEngine\vendor\SDL2\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
     </Link>
+    <PostBuildEvent>
+      <Command>IF EXIST "$(SolutionDir)\PovertyEngine\vendor\SDL2\bin\SDL2.dll"\ (xcopy /Q /E /Y /I "$(SolutionDir)\PovertyEngine\vendor\SDL2\bin\SDL2.dll" "..\bin\Release-windows-x86_64\Game" &gt; nul) ELSE (xcopy /Q /Y /I "$(SolutionDir)\PovertyEngine\vendor\SDL2\bin\SDL2.dll" "..\bin\Release-windows-x86_64\Game" &gt; nul)
+IF EXIST $(SolutionDir)\shaders\ (xcopy /Q /E /Y /I $(SolutionDir)\shaders ..\bin\Release-windows-x86_64\Game\shaders &gt; nul) ELSE (xcopy /Q /Y /I $(SolutionDir)\shaders ..\bin\Release-windows-x86_64\Game\shaders &gt; nul)</Command>
+    </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Dist|x64'">
     <ClCompile>
       <PrecompiledHeader>NotUsing</PrecompiledHeader>
       <WarningLevel>Level3</WarningLevel>
       <PreprocessorDefinitions>PE_PLATFORM_WINDOWS;PE_DIST;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>..\PovertyEngine\src;..\PovertyEngine\vendor\spdlog\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\PovertyEngine\src;..\PovertyEngine\vendor\spdlog\include;..\vendor\glm;..\PovertyEngine\vendor\Glad;..\PovertyEngine\vendor\SDL2\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <Optimization>Full</Optimization>
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
@@ -131,7 +143,13 @@
       <SubSystem>Console</SubSystem>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
+      <AdditionalDependencies>SDL2.lib;SDL2main.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>..\PovertyEngine\vendor\SDL2\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
     </Link>
+    <PostBuildEvent>
+      <Command>IF EXIST "$(SolutionDir)\PovertyEngine\vendor\SDL2\bin\SDL2.dll"\ (xcopy /Q /E /Y /I "$(SolutionDir)\PovertyEngine\vendor\SDL2\bin\SDL2.dll" "..\bin\Dist-windows-x86_64\Game" &gt; nul) ELSE (xcopy /Q /Y /I "$(SolutionDir)\PovertyEngine\vendor\SDL2\bin\SDL2.dll" "..\bin\Dist-windows-x86_64\Game" &gt; nul)
+IF EXIST $(SolutionDir)\shaders\ (xcopy /Q /E /Y /I $(SolutionDir)\shaders ..\bin\Dist-windows-x86_64\Game\shaders &gt; nul) ELSE (xcopy /Q /Y /I $(SolutionDir)\shaders ..\bin\Dist-windows-x86_64\Game\shaders &gt; nul)</Command>
+    </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="src\Header.h" />
