@@ -14,9 +14,9 @@ workspace "PovertyEngine"
     -- Include directories relative to root folder (solution directory)
     IncludeDir = {}
     IncludeDir["spdlog"] = "PovertyEngine/vendor/spdlog/include"
-
-	ExtDir = {}
-	ExtDir["SDL2"] = "PovertyEngine/vendor/SDL2"
+	IncludeDir["SDL2"] = "PovertyEngine/vendor/SDL2"
+	IncludeDir["GLAD"] = "PovertyEngine/vendor/Glad"
+	IncludeDir["GLM"] = "vendor/glm"
 	
     -- Engine Project
     project "PovertyEngine"
@@ -32,25 +32,29 @@ workspace "PovertyEngine"
         files
         {
             "%{prj.name}/src/**.h",
-            "%{prj.name}/src/**.cpp"
+            "%{prj.name}/src/**.cpp",
+			"%{prj.name}/src/**.cpp",
+			"%{IncludeDir.GLAD}/glad.c"
         }
 		
 		libdirs
 		{
-			"%{ExtDir.SDL2}/lib/"
+			"%{IncludeDir.SDL2}/lib/"
 		}
 
         includedirs
         {
             "%{prj.name}/src",
             "%{IncludeDir.spdlog}",
-			"%{ExtDir.SDL2}/include"
+			"%{IncludeDir.SDL2}/include",
+			"%{IncludeDir.GLAD}/",
+			"%{IncludeDir.GLM}/",
         }
 
         links
         {
 			"SDL2",
-			"SDL2main"
+			"SDL2main",
         }
 
         filter "system:windows"
@@ -102,7 +106,10 @@ workspace "PovertyEngine"
         includedirs
         {
             "PovertyEngine/src",
-            "%{IncludeDir.spdlog}"
+            "%{IncludeDir.spdlog}",
+			"%{IncludeDir.GLM}/",
+			"%{IncludeDir.GLAD}/"
+
         }
 
         links
@@ -122,8 +129,10 @@ workspace "PovertyEngine"
 			postbuildcommands
 			{
 				-- Adjust the path if needed, depending on your directory structure
-				("{COPY} \"%{wks.location}/PovertyEngine/vendor/SDL2/bin/SDL2.dll\" \"%{cfg.targetdir}\"")
+				("{COPY} \"%{wks.location}/PovertyEngine/vendor/SDL2/bin/SDL2.dll\" \"%{cfg.targetdir}\""),
+				("{COPY} %{wks.location}/shaders %{cfg.targetdir}/shaders")
 			}
+			
 
         filter "configurations:Debug"
             defines "PE_DEBUG"
