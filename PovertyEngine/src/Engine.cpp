@@ -19,7 +19,6 @@ void Engine::Init()
 		std::cout << "SDL2 failed to init";
 		exit(1);
 	}
-	ShaderLoader::Init();
 	SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION,4);
 	SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION,5);
 
@@ -38,7 +37,16 @@ void Engine::Init()
 		exit(1);
 	}
 	glContext = SDL_GL_CreateContext(graphicsApplicationWindow);
-	
+	if (!glContext) {
+		std::cerr << "Failed to create OpenGL context: " << SDL_GetError() << std::endl;
+		exit(1);
+	}
+	if (!gladLoadGLLoader((GLADloadproc)SDL_GL_GetProcAddress)) {
+		std::cerr << "Failed to initialize GLAD" << std::endl;
+		exit(1);
+	}
+	ShaderLoader::Init();
+
 	MainLoop();
 	
 	CleanUp();
