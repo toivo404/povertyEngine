@@ -95,7 +95,10 @@ workspace "PovertyEngine"
 
         targetdir ("bin/" .. outputdir .. "/%{prj.name}")
         objdir ("bin-int/" .. outputdir .. "/%{prj.name}")
-
+		
+		-- Set the working directory for debugging
+		debugdir "bin/%{cfg.buildcfg}-%{cfg.system}-%{cfg.architecture}/Game"
+		
         files
         {
             "%{prj.name}/src/**.h",
