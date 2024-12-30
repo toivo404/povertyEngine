@@ -3,8 +3,9 @@
 #include "Engine.h"
 #include <filesystem>
 #include <iostream>
-#include "ShaderLoader.h"
 
+#include "AssimpLoader.h"
+#include "ShaderLoader.h"
 SDL_GLContext Engine::glContext = nullptr;
 SDL_Window* Engine::graphicsApplicationWindow = nullptr;
 bool Engine::quit = false;
@@ -53,9 +54,14 @@ void Engine::Init()
 		exit(1);
 	}
 	ShaderLoader::Init(basePath);
-
-	MainLoop();
+	AssimpLoader loader;
+	if (loader.LoadModel(std::string(basePath)+ "shaders\\monkey.obj")) {
+		std::cout << "Model loaded successfully!" << std::endl;
+	} else {
+		std::cerr << "Failed to load model!" << std::endl;
+	}
 	SDL_free(basePath);
+	MainLoop();
 	CleanUp();
 	
 }
