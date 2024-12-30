@@ -38,7 +38,8 @@ workspace "PovertyEngine"
 		
 		libdirs
 		{
-			"PovertyEngine/vendor/SDL2/lib/"
+			"PovertyEngine/vendor/SDL2/lib/",
+			"vendor/Assimp/lib"
 		}
 
         includedirs
@@ -48,12 +49,14 @@ workspace "PovertyEngine"
             "%{IncludeDir.spdlog}",
 			"%{IncludeDir.GLAD}/",
 			"%{IncludeDir.GLM}/",
+			"vendor/Assimp/include/"
         }
 
         links
         {
 			"SDL2",
 			"SDL2main",
+			"assimp-vc143-mt"
         }
 
         filter "system:windows"
@@ -139,6 +142,7 @@ workspace "PovertyEngine"
 			{
 				-- Adjust the path if needed, depending on your directory structure
 				("{COPY} \"%{wks.location}/PovertyEngine/vendor/SDL2/bin/SDL2.dll\" \"%{cfg.targetdir}\""),
+				("{COPY} \"%{wks.location}/vendor/Assimp/bin/assimp-vc143-mt.dll\" \"%{cfg.targetdir}\""),
 				("{COPY} %{wks.location}/shaders %{cfg.targetdir}/shaders")
 			}
 			
