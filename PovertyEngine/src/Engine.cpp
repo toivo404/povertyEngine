@@ -5,6 +5,9 @@
 #include <iostream>
 #include "AssimpLoader.h"
 #include "ShaderLoader.h"
+#include <glm.hpp>
+#include <gtc/matrix_transform.hpp>
+#include <gtc/type_ptr.hpp>
 
 SDL_GLContext Engine::glContext = nullptr;
 SDL_Window* Engine::graphicsApplicationWindow = nullptr;
@@ -95,37 +98,68 @@ void Engine::MainLoop()
 
     glBindVertexArray(VAO);
 
-    // Upload vertex data
     glBindBuffer(GL_ARRAY_BUFFER, VBO);
     glBufferData(GL_ARRAY_BUFFER, vertices.size() * sizeof(float), vertices.data(), GL_STATIC_DRAW);
 
-    // Upload index data
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
     glBufferData(GL_ELEMENT_ARRAY_BUFFER, indices.size() * sizeof(unsigned int), indices.data(), GL_STATIC_DRAW);
 
-    // Configure vertex attributes
     glEnableVertexAttribArray(0);
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)0); // Position
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)0);
+
     glEnableVertexAttribArray(1);
-    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(3 * sizeof(float))); // Normal
+    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(3 * sizeof(float)));
+
     glEnableVertexAttribArray(2);
-    glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(6 * sizeof(float))); // Texture coords
+    glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(6 * sizeof(float)));
 
     glBindVertexArray(0);
 
+    // Enable depth testing for 3D rendering
+    glEnable(GL_DEPTH_TEST);
     // Main render loop
     while (!quit)
     {
         Input();
 
-        glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
-        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+        // Light properties
+        glm::vec3 lightColor(1.0f, 0.8f, 0.6f);  // Slightly warm light
+        glm::vec3 lightPos(5.0f, 5.0f, 5.0f);    // Position above and to the side
+        glm::vec3 viewPos(0.0f, 0.0f, 3.0f);     // Camera position
 
-        glUseProgram(shader);
-        glBindVertexArray(VAO);
-        glDrawElements(GL_TRIANGLES, indices.size(), GL_UNSIGNED_INT, 0);
-        glBindVertexArray(0);
+        // Pass light properties to shader
+        glUniform3fv(glGetUniformLocation(shader, "lightColor"), 1, glm::value_ptr(lightColor));
+        glUniform3fv(glGetUniformLocation(shader, "lightPos"), 1, glm::value_ptr(lightPos));
+        glUniform3fv(glGetUniformLocation(shader, "viewPos"), 1, glm::value_ptr(viewPos));
 
+        // Object color
+        glm::vec3 objectColor(0.6f, 0.2f, 0.8f); // Purple object
+        glUniform3fv(glGetUniformLocation(shader, "objectColor"), 1, glm::value_ptr(objectColor));
+
+        // Clear screen
+        float time = SDL_GetTicks() / 1000.0f;
+        Uint32 ticks = SDL_GetTicks();
+        float color = (sin(time) * 0.5f) + 0.5f; // Oscillates between 0.0 and 1.0
+        glClearColor(color, 0.1f, 0.1f, 1.0f);
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT); // Clear with new color
+        
+        std::cout << "Raw SDL_GetTicks(): " << ticks << " ms" << std::endl;
+        std::cout << "Elapsed Time: " << time << " seconds" << std::endl;
+
+        // Create rotation matrix
+       glm::mat4 rotation = glm::rotate(glm::mat4(1.0f), glm::radians(50.0f) * time, glm::vec3(0.0f, 1.0f, 0.0f));
+
+      // Pass rotation matrix to shader
+       GLint transformLoc = glGetUniformLocation(shader, "transform");
+       glUniformMatrix4fv(transformLoc, 1, GL_FALSE, glm::value_ptr(rotation));
+
+        // Draw model
+       glUseProgram(shader);
+       glBindVertexArray(VAO);
+       glDrawElements(GL_TRIANGLES, indices.size(), GL_UNSIGNED_INT, 0);
+       glBindVertexArray(0);
+
+        // Swap buffers
         SDL_GL_SwapWindow(graphicsApplicationWindow);
     }
 }
