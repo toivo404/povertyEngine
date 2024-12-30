@@ -7,7 +7,7 @@ class ShaderLoader
 {
 public:
     static std::unordered_map<std::string, GLuint> shaders;
-    static GLuint CompileShaderProgram(const std::string& vertPath, const std::string& fragPath);
-    static void Init();
+    static GLuint CompileShaderProgram(const std::string& vertPath, const std::string& fragPath, char* basePath);
+    static void Init(char* basePath);
     static GLuint GetShaderProgram(const std::string& name);
 };

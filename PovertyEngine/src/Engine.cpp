@@ -19,6 +19,14 @@ void Engine::Init()
 		std::cout << "SDL2 failed to init";
 		exit(1);
 	}
+	SDL_version compiled, linked;
+	SDL_VERSION(&compiled);
+	SDL_GetVersion(&linked);
+	std::cout << "Compiled against SDL version: "
+		   << (int)compiled.major << "." << (int)compiled.minor << "." << (int)compiled.patch << std::endl;
+	std::cout << "Linked against SDL version: "
+			  << (int)linked.major << "." << (int)linked.minor << "." << (int)linked.patch << std::endl;
+
 	SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION,4);
 	SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION,5);
 
@@ -28,9 +36,8 @@ void Engine::Init()
 	SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER,1);
 	// for epic depth checking precision
 	SDL_GL_SetAttribute(SDL_GL_DEPTH_SIZE,24);
-
-	
-	 graphicsApplicationWindow = SDL_CreateWindow("babbys first opengl", 0, 0, 640, 480, SDL_WINDOW_OPENGL);
+	char* basePath = SDL_GetBasePath();
+	graphicsApplicationWindow = SDL_CreateWindow("babbys first opengl", 0, 0, 640, 480, SDL_WINDOW_OPENGL);
 	if(graphicsApplicationWindow == nullptr)
 	{
 		std::cout << "SDL_Window creation failed";
@@ -45,10 +52,10 @@ void Engine::Init()
 		std::cerr << "Failed to initialize GLAD" << std::endl;
 		exit(1);
 	}
-	ShaderLoader::Init();
+	ShaderLoader::Init(basePath);
 
 	MainLoop();
-	
+	SDL_free(basePath);
 	CleanUp();
 	
 }

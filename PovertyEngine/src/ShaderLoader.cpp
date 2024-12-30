@@ -6,16 +6,17 @@
 #include <glad.h>
 #include <iostream>
 #include <unordered_map>
+#include <SDL.h>
 
 std::unordered_map<std::string, GLuint> ShaderLoader::shaders;
 
-void ShaderLoader::Init() {
+void ShaderLoader::Init(char* basePath ) {
     std::cout<<"ShaderLoader::Init" << std::endl;
-    shaders["basic"] = CompileShaderProgram("shaders/simple.vert", "shaders/simple.frag");
+    shaders["basic"] = CompileShaderProgram("shaders/simple.vert", "shaders/simple.frag", basePath);
 }
 
-std::string LoadShaderSource(const std::string& filePath) {
-    std::ifstream file(filePath);
+std::string LoadShaderSource(const std::string& filePath, char* basePath ) {
+    std::ifstream file(std::string(basePath) + filePath);
     if (!file.is_open()) {
         throw std::runtime_error("Failed to open shader file: " + filePath);
     }
@@ -24,9 +25,9 @@ std::string LoadShaderSource(const std::string& filePath) {
     return buffer.str();
 }
 
-GLuint ShaderLoader::CompileShaderProgram(const std::string& vertPath, const std::string& fragPath) {
-    std::string vertCode = LoadShaderSource(vertPath);
-    std::string fragCode = LoadShaderSource(fragPath);
+GLuint ShaderLoader::CompileShaderProgram(const std::string& vertPath, const std::string& fragPath, char* basePath) {
+    std::string vertCode = LoadShaderSource(vertPath, basePath);
+    std::string fragCode = LoadShaderSource(fragPath, basePath);
 
     GLuint vertexShader = glCreateShader(GL_VERTEX_SHADER);
     const char* vertSource = vertCode.c_str();
