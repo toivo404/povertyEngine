@@ -17,6 +17,8 @@ private:
 	static unsigned int shader;
 	static unsigned int VAO;
 	static unsigned int VBO;
+	static unsigned int EBO;
+
 };
 
 Engine::Engine()
