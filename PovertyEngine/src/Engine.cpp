@@ -32,7 +32,13 @@ struct Mesh {
     GLsizei indexCount; // Number of indices
     bool shared;        // Whether VBO and EBO are shared
 };
-
+struct Camera {
+    glm::mat4 projection;  // Projection matrix
+    float fov = 45.0f;     // Field of view (for perspective cameras)
+    float near = 0.1f;     // Near clipping plane
+    float far = 100.0f;    // Far clipping plane
+    bool active = true;    // Whether this camera is active
+};
 SDL_GLContext Engine::glContext = nullptr;
 SDL_Window* Engine::graphicsApplicationWindow = nullptr;
 bool Engine::quit = false;
@@ -194,7 +200,18 @@ void Engine::MainLoop()
 //                     }) // Default transform
 //                     .set<Material>({glm::vec3(0.6f, 0.2f, 0.8f), ShaderLoader::GetShaderProgram("basic")})
 //                     .set<Mesh>(GetMesh("shaders/monkey.obj"));
-auto entity2 = ecs.entity("RenderableObject2")
+    // Camera 1
+    auto camera1 = ecs.entity("MainCamera")
+        .set<Transform>({
+            glm::vec3(0.0f, 0.0f, 5.0f), // Position
+            glm::vec3(1.0f),             // Scale
+            glm::vec3(0.0f)              // Rotation
+        })
+        .set<Camera>({
+            glm::perspective(glm::radians(45.0f), 16.0f / 9.0f, 0.1f, 100.0f), // Projection
+            45.0f, 0.1f, 100.0f, true
+        });
+    auto entity2 = ecs.entity("RenderableObject2")
                   .set<Transform>({
                       glm::vec3(1, 0.0f, 0), // Position
                       glm::vec3(1.0f, 1.0f, 1.0f), // Scale
@@ -211,36 +228,40 @@ auto entity2 = ecs.entity("RenderableObject2")
   //     })
   //     .set<Material>({ glm::vec3(0.2f, 0.6f, 0.2f), ShaderLoader::GetShaderProgram("basic") })
   //     .set<Mesh>(GetMesh("shaders/monkey.obj"));
-    ecs.system<Transform>()
-    .each([](flecs::entity e, Transform& t) {
-        // Start with identity matrix
-        t.model = glm::mat4(1.0f);
+    ecs.system<Camera, Transform>()
+      .each([&](flecs::entity camEntity, const Camera& cam, const Transform& camTransform) {
+          if (!cam.active) return; // Skip inactive cameras
 
-        // Apply transformations in the correct order:
-        // Scale -> Rotate -> Translate
-        t.model = glm::translate(t.model, t.position); // Apply translation
-        t.model = glm::rotate(t.model, glm::radians(t.rotation.x), glm::vec3(1.0f, 0.0f, 0.0f)); // X-axis rotation
-        t.model = glm::rotate(t.model, glm::radians(t.rotation.y), glm::vec3(0.0f, 1.0f, 0.0f)); // Y-axis rotation
-        t.model = glm::rotate(t.model, glm::radians(t.rotation.z), glm::vec3(0.0f, 0.0f, 1.0f)); // Z-axis rotation
-        t.model = glm::scale(t.model, t.scale); // Apply scaling
-    });
-    ecs.system<Mesh, Transform, Material>()
-       .each([](flecs::entity e, const Mesh& mesh, const Transform& transform, const Material& material)
-       {
-           // Use shader
-           glUseProgram(material.shaderProgram);
+          // Compute the view matrix from the camera's Transform
+          glm::mat4 view = glm::lookAt(
+              camTransform.position,                         // Camera position
+              camTransform.position + glm::vec3(0.0f, 0.0f, -1.0f), // Forward direction
+              glm::vec3(0.0f, 1.0f, 0.0f)                    // Up vector
+          );
 
-           // Set uniforms
-           glUniform3fv(glGetUniformLocation(material.shaderProgram, "objectColor"), 1,
-                        glm::value_ptr(material.objectColor));
-           glUniformMatrix4fv(glGetUniformLocation(material.shaderProgram, "transform"), 1, GL_FALSE,
-                              glm::value_ptr(transform.model));
+          // Render all entities with Mesh, Transform, and Material for this camera
+          ecs.system<Mesh, Transform, Material>()
+              .each([&](flecs::entity objEntity, const Mesh& mesh, const Transform& objTransform, const Material& material) {
+                  // Use the shader program from the Material
+                  glUseProgram(material.shaderProgram);
 
-           // Bind and draw
-           glBindVertexArray(mesh.VAO);
-           glDrawElements(GL_TRIANGLES, mesh.indexCount, GL_UNSIGNED_INT, 0);
-           glBindVertexArray(0);
-       });
+                  // Set the camera's view and projection matrices in the shader
+                  GLint viewLoc = glGetUniformLocation(material.shaderProgram, "view");
+                  glUniformMatrix4fv(viewLoc, 1, GL_FALSE, glm::value_ptr(view));
+
+                  GLint projLoc = glGetUniformLocation(material.shaderProgram, "projection");
+                  glUniformMatrix4fv(projLoc, 1, GL_FALSE, glm::value_ptr(cam.projection));
+
+                  // Set the object's model matrix
+                  GLint modelLoc = glGetUniformLocation(material.shaderProgram, "model");
+                  glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(objTransform.model));
+
+                  // Draw the mesh
+                  glBindVertexArray(mesh.VAO);
+                  glDrawElements(GL_TRIANGLES, mesh.indexCount, GL_UNSIGNED_INT, 0);
+                  glBindVertexArray(0);
+              });
+      });
 
     // Enable depth testing for 3D rendering
     glEnable(GL_DEPTH_TEST);

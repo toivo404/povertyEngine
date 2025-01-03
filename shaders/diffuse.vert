@@ -10,8 +10,12 @@ out vec3 FragPos;
 out vec3 Normal;
 out vec2 TexCoord;
 
+uniform mat4 model;
+uniform mat4 view;
+uniform mat4 projection;
+
 void main() {
-    gl_Position = transform * vec4(aPos, 1.0); // Apply transformation
+    gl_Position = projection * view * model * vec4(aPos, 1.0); // Apply transformation
     FragPos = aPos;                            // Pass position to fragment shader
     Normal = aNormal;                          // Pass normal to fragment shader
     TexCoord = aTexCoord;                      // Pass texture coordinates
