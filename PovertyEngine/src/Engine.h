@@ -1,6 +1,10 @@
 #pragma once
 #include <SDL_video.h>
+#include <string>
+#include <unordered_map>
 #include "Core.h"
+struct Mesh;
+
 class PE_API Engine
 {
 public:
