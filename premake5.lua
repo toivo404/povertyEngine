@@ -33,7 +33,8 @@ workspace "PovertyEngine"
             "%{prj.name}/src/**.h",
             "%{prj.name}/src/**.cpp",
 			"%{prj.name}/src/**.cpp",
-			"%{IncludeDir.GLAD}/glad.c"
+			"%{IncludeDir.GLAD}/glad.c",
+			"vendor/flecs/**.c" 
         }
 		
 		libdirs
@@ -49,7 +50,8 @@ workspace "PovertyEngine"
             "%{IncludeDir.spdlog}",
 			"%{IncludeDir.GLAD}/",
 			"%{IncludeDir.GLM}/",
-			"vendor/Assimp/include/"
+			"vendor/Assimp/include/",
+			"vendor/flecs/"
         }
 
         links
@@ -65,7 +67,8 @@ workspace "PovertyEngine"
             defines
             {
                 "PE_PLATFORM_WINDOWS",
-                "PE_BUILD_DLL"
+                "PE_BUILD_DLL",
+				"FLECS_STATIC"
             }
 
             postbuildcommands
