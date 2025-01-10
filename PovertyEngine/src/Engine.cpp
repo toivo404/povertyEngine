@@ -33,6 +33,16 @@ struct Mesh {
     bool shared;        // Whether VBO and EBO are shared
 };
 
+struct Camera
+{
+    
+};
+
+struct View
+{
+    
+};
+
 SDL_GLContext Engine::glContext = nullptr;
 SDL_Window* Engine::graphicsApplicationWindow = nullptr;
 bool Engine::quit = false;
@@ -41,6 +51,7 @@ unsigned int Engine::VAO = 0;
 unsigned int Engine::VBO = 0;
 unsigned int Engine::EBO = 0;
 char* basePath;
+std::vector<View> views;
 
 void Engine::Init()
 {
@@ -212,18 +223,25 @@ auto entity2 = ecs.entity("RenderableObject2")
   //     .set<Material>({ glm::vec3(0.2f, 0.6f, 0.2f), ShaderLoader::GetShaderProgram("basic") })
   //     .set<Mesh>(GetMesh("shaders/monkey.obj"));
     ecs.system<Transform>()
-    .each([](flecs::entity e, Transform& t) {
-        // Start with identity matrix
-        t.model = glm::mat4(1.0f);
+       .each([](flecs::entity e, Transform& t)
+       {
+           // Start with identity matrix
+           t.model = glm::mat4(1.0f);
 
-        // Apply transformations in the correct order:
-        // Scale -> Rotate -> Translate
-        t.model = glm::translate(t.model, t.position); // Apply translation
-        t.model = glm::rotate(t.model, glm::radians(t.rotation.x), glm::vec3(1.0f, 0.0f, 0.0f)); // X-axis rotation
-        t.model = glm::rotate(t.model, glm::radians(t.rotation.y), glm::vec3(0.0f, 1.0f, 0.0f)); // Y-axis rotation
-        t.model = glm::rotate(t.model, glm::radians(t.rotation.z), glm::vec3(0.0f, 0.0f, 1.0f)); // Z-axis rotation
-        t.model = glm::scale(t.model, t.scale); // Apply scaling
+           // Apply transformations in the correct order:
+           // Scale -> Rotate -> Translate
+           t.model = glm::translate(t.model, t.position); // Apply translation
+           t.model = glm::rotate(t.model, glm::radians(t.rotation.x), glm::vec3(1.0f, 0.0f, 0.0f)); // X-axis rotation
+           t.model = glm::rotate(t.model, glm::radians(t.rotation.y), glm::vec3(0.0f, 1.0f, 0.0f)); // Y-axis rotation
+           t.model = glm::rotate(t.model, glm::radians(t.rotation.z), glm::vec3(0.0f, 0.0f, 1.0f)); // Z-axis rotation
+           t.model = glm::scale(t.model, t.scale); // Apply scaling
+       });
+
+    ecs.system<Camera>().each([](flecs::entity e, Camera camera, Transform transform)
+    {
+        views.push_back({});
     });
+    
     ecs.system<Mesh, Transform, Material>()
        .each([](flecs::entity e, const Mesh& mesh, const Transform& transform, const Material& material)
        {
@@ -259,7 +277,7 @@ auto entity2 = ecs.entity("RenderableObject2")
         // Progress the ECS world
         ecs.progress();
         // Draw model
-      
+        views.clear();
 
         // Swap buffers
         SDL_GL_SwapWindow(graphicsApplicationWindow);
@@ -270,9 +288,11 @@ void Engine::CleanUp()
 {
     SDL_free(basePath);
     glDeleteProgram(shader);
-    for (auto& [path, mesh] : meshCache) {
+    for (auto& [path, mesh] : meshCache)
+    {
         glDeleteVertexArrays(1, &mesh.VAO);
-        if (!mesh.shared) {
+        if (!mesh.shared)
+        {
             glDeleteBuffers(1, &mesh.VBO);
             glDeleteBuffers(1, &mesh.EBO);
         }
