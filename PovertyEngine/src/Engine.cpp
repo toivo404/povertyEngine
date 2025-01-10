@@ -31,7 +31,10 @@ struct Mesh {
     bool shared;       
 };
 
-// Instead of a camera component, we’ll just manually do the camera math
+struct Camera
+{
+    int num;
+};
 
 struct Manipulator {
     float moveSpeed   = 2.0f;  
@@ -217,7 +220,9 @@ void PopulateMonkeys(flecs::world& ecs, const Mesh& monkeyMesh) {
         PlaceMonkey(ecs, monkeyMesh, glm::vec3(x, 0.0f, z), color, "Monkey" + std::to_string(i + 1));
     }
 }
-
+glm::vec3 camPos  = glm::vec3(0.0f, 5.0f, 10.0f); // Eye position
+glm::vec3 camLook = glm::vec3(0.0f, 0.0f, 0.0f);  // Look at origin
+glm::vec3 camUp   = glm::vec3(0.0f, 1.0f, 0.0f);
 //----- MAIN LOOP -----
 void Engine::MainLoop()
 {
@@ -251,9 +256,6 @@ void Engine::MainLoop()
     // Also place a bunch more
     PopulateMonkeys(ecs, monkeyMesh);
 
-    // Maybe make a single manipulator entity if you want it to move
-    ecs.entity("DummyController")
-       .set<Manipulator>({2.0f, 50.0f});
 
     // System to update transforms
     ecs.system<Transform>()
@@ -267,7 +269,40 @@ void Engine::MainLoop()
            m = glm::scale(m, t.scale);
            t.model = m;
        });
+    
+    glm::vec3 camPos = glm::vec3(0.0f, 5.0f, 10.0f);
+    glm::vec3 target = glm::vec3(0.0f, 0.0f, 0.0f);
+    glm::vec3 direction = glm::normalize(target - camPos);
 
+    float pitch = glm::degrees(asin(direction.y)); // Angle to look down or up
+    float yaw = glm::degrees(atan2(direction.z, direction.x)); // Angle to rotate left or right
+    // Maybe make a single manipulator entity if you want it to move
+    ecs.entity("Main Camera")
+       .set<Transform>({
+           glm::vec3(0.0f, 5.0f, 10.0f), // camPos as position
+           glm::vec3(1.0f), // Default scale (no scaling)
+           glm::vec3(pitch, yaw, 0.0f) // Rotation (initially aligned to look forward)
+       })
+       .set<Camera>({42})
+       .set<Manipulator>({2.0f, 50.0f});
+
+    ecs.system<Camera, Transform>()
+     .each([&](flecs::entity e, const Camera& camera, const Transform& transform)
+     {
+         // Update camPos to match the Transform's position
+         camPos = transform.position;
+         std::cout << "camPos.x " << camPos.x << "camPos.y" << camPos.y << "camPos.z" << camPos.z << std::endl; 
+
+         // Calculate forward vector based on Transform's rotation
+       glm::vec3 forward = glm::normalize(glm::vec3(
+           cos(glm::radians(transform.rotation.y)) * cos(glm::radians(transform.rotation.x)),
+           sin(glm::radians(transform.rotation.x)),
+           sin(glm::radians(transform.rotation.y)) * cos(glm::radians(transform.rotation.x))
+       ));
+
+        // camLook is the position + forward vector
+        camLook = camPos + forward;
+     });
     // Enable depth testing (for 3D)
     glEnable(GL_DEPTH_TEST);
     glDepthFunc(GL_LESS);
@@ -279,10 +314,6 @@ void Engine::MainLoop()
         Input();
         ecs.progress();
 
-        // --- Build camera matrix manually (NO camera component) ---
-        glm::vec3 camPos  = glm::vec3(0.0f, 5.0f, 10.0f); // Eye position
-        glm::vec3 camLook = glm::vec3(0.0f, 0.0f, 0.0f);  // Look at origin
-        glm::vec3 camUp   = glm::vec3(0.0f, 1.0f, 0.0f);
         glm::mat4 view = glm::lookAt(camPos, camLook, camUp);
 
         glm::mat4 projection = glm::perspective(
