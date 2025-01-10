@@ -18,7 +18,6 @@ private:
 	static SDL_GLContext glContext;
 	static SDL_Window* graphicsApplicationWindow;
 	static bool quit;
-	static unsigned int shader;
 	static unsigned int VAO;
 	static unsigned int VBO;
 	static unsigned int EBO;

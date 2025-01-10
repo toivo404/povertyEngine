@@ -1,6 +1,11 @@
 #include <SDL.h>
 #include <glad.h>
 #include "Engine.h"
+
+#include <common.hpp>
+#include <common.hpp>
+#include <common.hpp>
+#include <common.hpp>
 #include <filesystem>
 #include <iostream>
 #include "AssimpLoader.h"
@@ -38,13 +43,23 @@ struct Camera
 
 struct Manipulator {
     float moveSpeed   = 2.0f;  
-    float rotateSpeed = 50.0f; 
+    float rotateSpeed = 50.0f;
 };
+
+struct Light {
+    glm::vec3 color = glm::vec3(1.0f, 0.8f, 0.6f); 
+};
+
+struct Spin
+{
+    float rotateSpeed = 50.0f;
+};
+
+
 
 SDL_GLContext Engine::glContext = nullptr;
 SDL_Window* Engine::graphicsApplicationWindow = nullptr;
 bool Engine::quit = false;
-unsigned int Engine::shader = 0;
 int windowWidth = 640;
 int windowHeight= 480;
 char* basePath;
@@ -158,6 +173,65 @@ void Engine::Init()
     MainLoop();
     CleanUp();
 }
+bool IsKeyPressed(SDL_Keycode key) {
+    const Uint8* state = SDL_GetKeyboardState(nullptr);
+    return state[SDL_GetScancodeFromKey(key)];
+}
+
+
+float GetDeltaTime() {
+    static Uint32 lastTime = SDL_GetTicks();
+    Uint32 currentTime = SDL_GetTicks();
+    float deltaTime = (currentTime - lastTime) / 1000.0f; 
+    lastTime = currentTime;
+    return deltaTime;
+}
+
+::flecs::entity PlaceMonkey(flecs::world& ecs, const Mesh& monkeyMesh,
+                            const glm::vec3& position, const glm::vec3& color,
+                            const std::string& name = "Monkey") 
+{
+    return ecs.entity(name.c_str())
+        .set<Transform>({
+            position,                // Position
+            glm::vec3(1.0f),        // Scale
+            glm::vec3(0.0f, 45.0f, 0.0f) // Rotation
+        })
+        .set<Material>({
+            color, // Object color
+            ShaderLoader::GetShaderProgram("basic") // Shader
+        })
+        .set<Mesh>(monkeyMesh)
+        .set<Spin>({50.0f}).set<Manipulator>({2,50});
+}
+
+glm::vec3 GetRandomColor()
+{
+    const glm::vec3 baseColor(0.6f, 0.2f, 0.8f);
+    return  baseColor + glm::vec3(
+         static_cast<float>(rand()) / RAND_MAX * 0.2f - 0.1f,
+         static_cast<float>(rand()) / RAND_MAX * 0.2f - 0.1f,
+         static_cast<float>(rand()) / RAND_MAX * 0.2f - 0.1f
+     );
+}
+
+void PopulateMonkeys(flecs::world& ecs, const Mesh& monkeyMesh) {
+    const float spacing = 2.5f; 
+    const int count = 20;      
+    for (int i = 0; i < count; ++i) {
+        float x = (i % 5) * spacing - 5.0f;
+        float z = (i / 5) * spacing - 5.0f;
+
+     
+
+        PlaceMonkey(ecs, monkeyMesh, glm::vec3(x, 0.0f, z), GetRandomColor(), "Monkey" + std::to_string(i + 1));
+    }
+}
+glm::vec3 camPos  = glm::vec3(0.0f, 5.0f, 10.0f); // Eye position
+glm::vec3 camLook = glm::vec3(0.0f, 0.0f, 0.0f);  // Look at origin
+glm::vec3 camUp   = glm::vec3(0.0f, 1.0f, 0.0f);
+glm::vec3 lightColor(1.0f, 0.8f, 0.6f); // Slightly warm light
+glm::vec3 lightDir = glm::vec3(-0.5f, -1.0f, -0.5f); // Default direction
 
 void Engine::Input()
 {
@@ -169,65 +243,17 @@ void Engine::Input()
             quit = true;
         }
         // You can add more input logic here if needed
+
+       
     }
 }
 
-bool IsKeyPressed(SDL_Keycode key) {
-    const Uint8* state = SDL_GetKeyboardState(nullptr);
-    return state[SDL_GetScancodeFromKey(key)];
-}
 
-float GetDeltaTime() {
-    static Uint32 lastTime = SDL_GetTicks();
-    Uint32 currentTime = SDL_GetTicks();
-    float deltaTime = (currentTime - lastTime) / 1000.0f; 
-    lastTime = currentTime;
-    return deltaTime;
-}
 
-void PlaceMonkey(flecs::world& ecs, const Mesh& monkeyMesh, 
-                 const glm::vec3& position, const glm::vec3& color,
-                 const std::string& name = "Monkey") 
-{
-    ecs.entity(name.c_str())
-        .set<Transform>({
-            position,                // Position
-            glm::vec3(1.0f),        // Scale
-            glm::vec3(0.0f, 45.0f, 0.0f) // Rotation
-        })
-        .set<Material>({
-            color, // Object color
-            ShaderLoader::GetShaderProgram("basic") // Shader
-        })
-        .set<Mesh>(monkeyMesh);
-}
 
-void PopulateMonkeys(flecs::world& ecs, const Mesh& monkeyMesh) {
-    const float spacing = 2.5f; 
-    const int count = 20;      
-    const glm::vec3 baseColor(0.6f, 0.2f, 0.8f);
-
-    for (int i = 0; i < count; ++i) {
-        float x = (i % 5) * spacing - 5.0f;
-        float z = (i / 5) * spacing - 5.0f;
-
-        glm::vec3 color = baseColor + glm::vec3(
-            static_cast<float>(rand()) / RAND_MAX * 0.2f - 0.1f,
-            static_cast<float>(rand()) / RAND_MAX * 0.2f - 0.1f,
-            static_cast<float>(rand()) / RAND_MAX * 0.2f - 0.1f
-        );
-
-        PlaceMonkey(ecs, monkeyMesh, glm::vec3(x, 0.0f, z), color, "Monkey" + std::to_string(i + 1));
-    }
-}
-glm::vec3 camPos  = glm::vec3(0.0f, 5.0f, 10.0f); // Eye position
-glm::vec3 camLook = glm::vec3(0.0f, 0.0f, 0.0f);  // Look at origin
-glm::vec3 camUp   = glm::vec3(0.0f, 1.0f, 0.0f);
 //----- MAIN LOOP -----
 void Engine::MainLoop()
 {
-    shader = ShaderLoader::GetShaderProgram("basic");
-
     // Create ECS world
     flecs::world ecs;
 
@@ -240,6 +266,8 @@ void Engine::MainLoop()
            if (IsKeyPressed(SDLK_s)) { transform.position.z += manipulator.moveSpeed * deltaTime; }
            if (IsKeyPressed(SDLK_a)) { transform.position.x -= manipulator.moveSpeed * deltaTime; }
            if (IsKeyPressed(SDLK_d)) { transform.position.x += manipulator.moveSpeed * deltaTime; }
+           if (IsKeyPressed(SDLK_PLUS)) { transform.position.y -= manipulator.moveSpeed * deltaTime; }
+           if (IsKeyPressed(SDLK_MINUS)) { transform.position.y += manipulator.moveSpeed * deltaTime; }
 
            // Rotation with arrow keys
            if (IsKeyPressed(SDLK_UP))    { transform.rotation.x -= manipulator.rotateSpeed * deltaTime; }
@@ -252,9 +280,9 @@ void Engine::MainLoop()
 
     auto monkeyMesh = GetMesh("shaders/monkey.obj");
     // Place a single monkey at origin
-    PlaceMonkey(ecs, monkeyMesh, glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(1.0f, 0.5f, 0.2f));
+    //PlaceMonkey(ecs, monkeyMesh, glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(1.0f, 0.5f, 0.2f));
     // Also place a bunch more
-    PopulateMonkeys(ecs, monkeyMesh);
+    //PopulateMonkeys(ecs, monkeyMesh);
 
 
     // System to update transforms
@@ -269,13 +297,25 @@ void Engine::MainLoop()
            m = glm::scale(m, t.scale);
            t.model = m;
        });
-    
-    glm::vec3 camPos = glm::vec3(0.0f, 5.0f, 10.0f);
-    glm::vec3 target = glm::vec3(0.0f, 0.0f, 0.0f);
-    glm::vec3 direction = glm::normalize(target - camPos);
 
-    float pitch = glm::degrees(asin(direction.y)); // Angle to look down or up
-    float yaw = glm::degrees(atan2(direction.z, direction.x)); // Angle to rotate left or right
+    ecs.system<Spin,Transform>()
+       .each([](flecs::entity e, Spin& s,Transform& t)
+       {
+           std::cout << e << std::endl;
+           float deltaTime = GetDeltaTime();
+           // Update rotation
+           t.rotation.y += s.rotateSpeed * deltaTime;
+
+           // Clamp rotation to 0-360 degrees
+           t.rotation.y = glm::mod(t.rotation.y, 360.0f);
+       });
+    
+
+    glm::vec3 origCamTarget = glm::vec3(0.0f, 0.0f, 0.0f);
+    glm::vec3 origDirection = glm::normalize(origCamTarget - camPos);
+
+    float pitch = glm::degrees(asin(origDirection.y)); // Angle to look down or up
+    float yaw = glm::degrees(atan2(origDirection.z, origDirection.x)); // Angle to rotate left or right
     // Maybe make a single manipulator entity if you want it to move
     ecs.entity("Main Camera")
        .set<Transform>({
@@ -284,34 +324,79 @@ void Engine::MainLoop()
            glm::vec3(pitch, yaw, 0.0f) // Rotation (initially aligned to look forward)
        })
        .set<Camera>({42})
-       .set<Manipulator>({2.0f, 50.0f});
-
+       .set<Manipulator>({5,100});
+        
     ecs.system<Camera, Transform>()
-     .each([&](flecs::entity e, const Camera& camera, const Transform& transform)
-     {
-         // Update camPos to match the Transform's position
-         camPos = transform.position;
-         std::cout << "camPos.x " << camPos.x << "camPos.y" << camPos.y << "camPos.z" << camPos.z << std::endl; 
+       .each([&](flecs::entity e, const Camera& camera, const Transform& transform)
+       {
+           // Update camPos to match the Transform's position
+           camPos = transform.position;
 
-         // Calculate forward vector based on Transform's rotation
-       glm::vec3 forward = glm::normalize(glm::vec3(
-           cos(glm::radians(transform.rotation.y)) * cos(glm::radians(transform.rotation.x)),
-           sin(glm::radians(transform.rotation.x)),
-           sin(glm::radians(transform.rotation.y)) * cos(glm::radians(transform.rotation.x))
-       ));
+           // Calculate forward vector based on Transform's rotation
+           glm::vec3 forward = glm::normalize(glm::vec3(
+               cos(glm::radians(transform.rotation.y)) * cos(glm::radians(transform.rotation.x)),
+               sin(glm::radians(transform.rotation.x)),
+               sin(glm::radians(transform.rotation.y)) * cos(glm::radians(transform.rotation.x))
+           ));
 
-        // camLook is the position + forward vector
-        camLook = camPos + forward;
-     });
+           // camLook is the position + forward vector
+           camLook = camPos + forward;
+       });
+
+    
+
+    // Example of passing multiple lights to the shader
+    ecs.entity("Main Light")
+       .set<Transform>({
+           glm::vec3(0.0f, 0.0f, 0.0f), // camPos as position
+           glm::vec3(0,0,0 ), // Default scale (no scaling)
+           glm::vec3(15,0, 0.0f) // Rotation (initially aligned to look forward)
+       })
+       .set<Spin>({300})
+       .set<Light>({glm::vec3(1.0f, 1.0f, 1.0f)});
+        
+
+    
+    // Light system: Correct computation of lightDir
+    ecs.system<Light, Transform>()
+       .each([](flecs::entity e, const Light& light, const Transform& transform)
+       {
+           lightDir = glm::normalize(glm::vec3(
+               cos(glm::radians(transform.rotation.y)) * cos(glm::radians(transform.rotation.x)),
+               sin(glm::radians(transform.rotation.x)),
+               sin(glm::radians(transform.rotation.y)) * cos(glm::radians(transform.rotation.x))
+           ));
+       });
+
     // Enable depth testing (for 3D)
     glEnable(GL_DEPTH_TEST);
     glDepthFunc(GL_LESS);
-
+    flecs::entity prevEntity;
+    std::vector<flecs::entity> monkeys;
     // MAIN RENDER LOOP
     while (!quit)
     {
         // --- Input & ECS Update ---
         Input();
+        
+        if (IsKeyPressed(SDLK_PERIOD)) {
+            auto newMonkey = PlaceMonkey(ecs, monkeyMesh, glm::vec3(0), GetRandomColor(), "monkey"+monkeys.size());
+            monkeys.push_back(newMonkey);
+            std::cout << "Added a monkey! Total monkeys: " << monkeys.size() << std::endl;
+        }
+
+        // Remove the last monkey when the comma key is pressed
+        if (IsKeyPressed(SDLK_COMMA)) {
+            if (!monkeys.empty()) {
+                auto lastMonkey = monkeys.back();
+                lastMonkey.destruct(); // Remove the entity from the ECS
+                monkeys.pop_back();    // Remove from the tracking vector
+                std::cout << "Removed a monkey! Total monkeys: " << monkeys.size() << std::endl;
+            } else {
+                std::cout << "No monkeys left to remove!" << std::endl;
+            }
+        }
+        
         ecs.progress();
 
         glm::mat4 view = glm::lookAt(camPos, camLook, camUp);
@@ -348,6 +433,11 @@ void Engine::MainLoop()
                 GLint modelLoc = glGetUniformLocation(material.shaderProgram, "model");
                 glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(transform.model));
 
+                // Pass light properties to shader
+                glUniform3fv(glGetUniformLocation(material.shaderProgram, "lightColor"), 1, glm::value_ptr(lightColor));
+                glUniform3fv(glGetUniformLocation(material.shaderProgram, "lightDir"), 1, glm::value_ptr(lightDir));
+                glUniform3fv(glGetUniformLocation(material.shaderProgram, "viewPos"), 1, glm::value_ptr(camPos));
+
                 // Pass color
                 GLint colorLoc = glGetUniformLocation(material.shaderProgram, "objectColor");
                 glUniform3fv(colorLoc, 1, glm::value_ptr(material.objectColor));
@@ -358,7 +448,7 @@ void Engine::MainLoop()
                 glBindVertexArray(0);
             });
         }
-
+        
         // Check for errors
         GLenum error = glGetError();
         if (error != GL_NO_ERROR)
@@ -372,7 +462,7 @@ void Engine::MainLoop()
 void Engine::CleanUp()
 {
     SDL_free(basePath);
-    glDeleteProgram(shader);
+    ShaderLoader::CleanUp();
 
     for (auto& [path, mesh] : meshCache)
     {
