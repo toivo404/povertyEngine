@@ -15,6 +15,7 @@
 #include <gtc/type_ptr.hpp>
 #include <flecs.h>
 #include <cstdlib> // For random color generation
+#include "EngineInfo.h"
 
 // Components
 struct Transform {
@@ -168,6 +169,7 @@ void Engine::Init()
     // IMPORTANT: set the viewport after creating the context
     glViewport(0, 0, windowWidth, windowHeight);
 
+    EngineInfo::LogInfo();
     ShaderLoader::Init(basePath);
 
     MainLoop();
