@@ -202,7 +202,8 @@ float GetDeltaTime() {
             ShaderLoader::GetShaderProgram("basic") // Shader
         })
         .set<Mesh>(monkeyMesh)
-        .set<Spin>({50.0f}).set<Manipulator>({2,50});
+        .set<Spin>({50.0f})
+        .set<Manipulator>({2,50});
 }
 
 glm::vec3 GetRandomColor()
@@ -287,6 +288,7 @@ void Engine::MainLoop()
 
     // System to update transforms
     ecs.system<Transform>()
+       .kind(flecs::PreUpdate)
        .each([](flecs::entity e, Transform& t)
        {
            glm::mat4 m(1.0f);
@@ -323,8 +325,7 @@ void Engine::MainLoop()
            glm::vec3(1.0f), // Default scale (no scaling)
            glm::vec3(pitch, yaw, 0.0f) // Rotation (initially aligned to look forward)
        })
-       .set<Camera>({42})
-       .set<Manipulator>({5,100});
+       .set<Camera>({42});
         
     ecs.system<Camera, Transform>()
        .each([&](flecs::entity e, const Camera& camera, const Transform& transform)
@@ -380,9 +381,8 @@ void Engine::MainLoop()
         Input();
         
         if (IsKeyPressed(SDLK_PERIOD)) {
-            auto newMonkey = PlaceMonkey(ecs, monkeyMesh, glm::vec3(0), GetRandomColor(), "monkey"+monkeys.size());
+            auto newMonkey = PlaceMonkey(ecs, monkeyMesh, glm::vec3(0), GetRandomColor(), "monkey"+std::to_string(monkeys.size()));
             monkeys.push_back(newMonkey);
-            std::cout << "Added a monkey! Total monkeys: " << monkeys.size() << std::endl;
         }
 
         // Remove the last monkey when the comma key is pressed
