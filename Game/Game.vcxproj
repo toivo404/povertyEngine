@@ -94,6 +94,7 @@
     </Link>
     <PostBuildEvent>
       <Command>IF EXIST "$(SolutionDir)\PovertyEngine\vendor\SDL2\bin\SDL2.dll"\ (xcopy /Q /E /Y /I "$(SolutionDir)\PovertyEngine\vendor\SDL2\bin\SDL2.dll" "..\bin\Debug-windows-x86_64\Game" &gt; nul) ELSE (xcopy /Q /Y /I "$(SolutionDir)\PovertyEngine\vendor\SDL2\bin\SDL2.dll" "..\bin\Debug-windows-x86_64\Game" &gt; nul)
+IF EXIST "$(SolutionDir)\vendor\Assimp\bin\assimp-vc143-mt.dll"\ (xcopy /Q /E /Y /I "$(SolutionDir)\vendor\Assimp\bin\assimp-vc143-mt.dll" "..\bin\Debug-windows-x86_64\Game" &gt; nul) ELSE (xcopy /Q /Y /I "$(SolutionDir)\vendor\Assimp\bin\assimp-vc143-mt.dll" "..\bin\Debug-windows-x86_64\Game" &gt; nul)
 IF EXIST $(SolutionDir)\shaders\ (xcopy /Q /E /Y /I $(SolutionDir)\shaders ..\bin\Debug-windows-x86_64\Game\shaders &gt; nul) ELSE (xcopy /Q /Y /I $(SolutionDir)\shaders ..\bin\Debug-windows-x86_64\Game\shaders &gt; nul)</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
@@ -121,6 +122,7 @@ IF EXIST $(SolutionDir)\shaders\ (xcopy /Q /E /Y /I $(SolutionDir)\shaders ..\bi
     </Link>
     <PostBuildEvent>
       <Command>IF EXIST "$(SolutionDir)\PovertyEngine\vendor\SDL2\bin\SDL2.dll"\ (xcopy /Q /E /Y /I "$(SolutionDir)\PovertyEngine\vendor\SDL2\bin\SDL2.dll" "..\bin\Release-windows-x86_64\Game" &gt; nul) ELSE (xcopy /Q /Y /I "$(SolutionDir)\PovertyEngine\vendor\SDL2\bin\SDL2.dll" "..\bin\Release-windows-x86_64\Game" &gt; nul)
+IF EXIST "$(SolutionDir)\vendor\Assimp\bin\assimp-vc143-mt.dll"\ (xcopy /Q /E /Y /I "$(SolutionDir)\vendor\Assimp\bin\assimp-vc143-mt.dll" "..\bin\Release-windows-x86_64\Game" &gt; nul) ELSE (xcopy /Q /Y /I "$(SolutionDir)\vendor\Assimp\bin\assimp-vc143-mt.dll" "..\bin\Release-windows-x86_64\Game" &gt; nul)
 IF EXIST $(SolutionDir)\shaders\ (xcopy /Q /E /Y /I $(SolutionDir)\shaders ..\bin\Release-windows-x86_64\Game\shaders &gt; nul) ELSE (xcopy /Q /Y /I $(SolutionDir)\shaders ..\bin\Release-windows-x86_64\Game\shaders &gt; nul)</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
@@ -148,13 +150,16 @@ IF EXIST $(SolutionDir)\shaders\ (xcopy /Q /E /Y /I $(SolutionDir)\shaders ..\bi
     </Link>
     <PostBuildEvent>
       <Command>IF EXIST "$(SolutionDir)\PovertyEngine\vendor\SDL2\bin\SDL2.dll"\ (xcopy /Q /E /Y /I "$(SolutionDir)\PovertyEngine\vendor\SDL2\bin\SDL2.dll" "..\bin\Dist-windows-x86_64\Game" &gt; nul) ELSE (xcopy /Q /Y /I "$(SolutionDir)\PovertyEngine\vendor\SDL2\bin\SDL2.dll" "..\bin\Dist-windows-x86_64\Game" &gt; nul)
+IF EXIST "$(SolutionDir)\vendor\Assimp\bin\assimp-vc143-mt.dll"\ (xcopy /Q /E /Y /I "$(SolutionDir)\vendor\Assimp\bin\assimp-vc143-mt.dll" "..\bin\Dist-windows-x86_64\Game" &gt; nul) ELSE (xcopy /Q /Y /I "$(SolutionDir)\vendor\Assimp\bin\assimp-vc143-mt.dll" "..\bin\Dist-windows-x86_64\Game" &gt; nul)
 IF EXIST $(SolutionDir)\shaders\ (xcopy /Q /E /Y /I $(SolutionDir)\shaders ..\bin\Dist-windows-x86_64\Game\shaders &gt; nul) ELSE (xcopy /Q /Y /I $(SolutionDir)\shaders ..\bin\Dist-windows-x86_64\Game\shaders &gt; nul)</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="..\vendor\flecs\flecs.h" />
     <ClInclude Include="src\Header.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="..\vendor\flecs\flecs.c" />
     <ClCompile Include="src\Main.cpp" />
   </ItemGroup>
   <ItemGroup>

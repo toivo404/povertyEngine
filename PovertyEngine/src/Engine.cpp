@@ -250,7 +250,6 @@ void Engine::Input()
     }
 }
 
-
 void Engine::SetupSystems(Mesh& monkeyMesh, std::vector<flecs::entity>& monkeys)
 {
     // Movement system for entities that have a Manipulator + Transform
@@ -370,7 +369,6 @@ void Engine::SetupSystems(Mesh& monkeyMesh, std::vector<flecs::entity>& monkeys)
     glDepthFunc(GL_LESS);
     flecs::entity prevEntity;
 }
-
 //----- MAIN LOOP -----
 void Engine::MainLoop()
 {

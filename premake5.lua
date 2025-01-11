@@ -34,7 +34,8 @@ workspace "PovertyEngine"
             "%{prj.name}/src/**.cpp",
 			"%{prj.name}/src/**.cpp",
 			"%{IncludeDir.GLAD}/glad.c",
-			"vendor/flecs/**.c" 
+			"vendor/flecs/**.c", 
+			"vendor/flecs/**.h" 
         }
 		
 		libdirs
@@ -108,7 +109,9 @@ workspace "PovertyEngine"
         files
         {
             "%{prj.name}/src/**.h",
-            "%{prj.name}/src/**.cpp"
+            "%{prj.name}/src/**.cpp",
+			"vendor/flecs/**.c", 
+			"vendor/flecs/**.h" 
         }
 
         includedirs

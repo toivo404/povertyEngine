@@ -1,11 +1,10 @@
 #pragma once
-#include <flecs.h>
 #include <iosfwd>
 #include <SDL_video.h>
 #include <string>
 #include <unordered_map>
 #include <vector>
-
+#include <flecs.h>
 #include "Core.h"
 struct Mesh;
 
