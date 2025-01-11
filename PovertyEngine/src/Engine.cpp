@@ -16,6 +16,8 @@
 #include <flecs.h>
 #include <cstdlib> // For random color generation
 #include "EngineInfo.h"
+#include "imgui.h"
+#include "ImGUIHelper.h"
 
 // Components
 struct Transform {
@@ -72,6 +74,8 @@ Mesh monkeyMesh;
 std::vector<flecs::entity> monkeys;
 float deltaTime;
 bool deltaTimeCalculated;
+ImGUIHelper imguiHelper;
+
 // Forward declarations
 Mesh GetMesh(const std::string& path) {
     // Check if the mesh is already in the cache
@@ -149,15 +153,16 @@ void Engine::Init()
         std::cout << "SDL2 failed to init";
         exit(1);
     }
-    SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 4);
-    SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 5);
+    SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 3);
+    SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 3);
     SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_CORE);
     SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, 1);
     SDL_GL_SetAttribute(SDL_GL_DEPTH_SIZE, 24);
+    
 
     basePath = SDL_GetBasePath();
     graphicsApplicationWindow = SDL_CreateWindow("babbys first opengl", 
-        0, 0, windowWidth, windowHeight, SDL_WINDOW_OPENGL);
+        5000, 0, windowWidth, windowHeight, SDL_WINDOW_OPENGL);
     if (!graphicsApplicationWindow) {
         std::cerr << "SDL_Window creation failed\n";
         exit(1);
@@ -179,6 +184,7 @@ void Engine::Init()
     ShaderLoader::Init(basePath);
 
     SetupSystems(monkeyMesh, monkeys);
+    imguiHelper.Init(graphicsApplicationWindow, glContext);
     MainLoop();
     CleanUp();
 }
@@ -235,7 +241,7 @@ glm::vec3 camUp   = glm::vec3(0.0f, 1.0f, 0.0f);
 glm::vec3 lightColor(1.0f, 0.8f, 0.6f); // Slightly warm light
 glm::vec3 lightDir = glm::vec3(-0.5f, -1.0f, -0.5f); // Default direction
 
-void Engine::Input()
+void Engine::ProcessEvents()
 {
     SDL_Event e;
     while (SDL_PollEvent(&e) != 0)
@@ -244,9 +250,7 @@ void Engine::Input()
             std::cout << "goodbye" << std::endl;
             quit = true;
         }
-        // You can add more input logic here if needed
-
-       
+        imguiHelper.OnSDLEvent(e);
     }
 }
 
@@ -372,7 +376,6 @@ void Engine::SetupSystems(Mesh& monkeyMesh, std::vector<flecs::entity>& monkeys)
 //----- MAIN LOOP -----
 void Engine::MainLoop()
 {
-
     // MAIN RENDER LOOP
     while (!quit)
     {
@@ -382,7 +385,7 @@ void Engine::MainLoop()
         deltaTime = (currentTime - lastTime) / 1000.0f; 
         lastTime = currentTime;
         
-        Input();
+        ProcessEvents();
         if (IsKeyPressed(SDLK_PERIOD)) {
             auto newMonkey = PlaceMonkey(ecs, monkeyMesh, glm::vec3(monkeys.size(),0,0), GetRandomColor(), "monkey"+std::to_string(monkeys.size()));
             monkeys.push_back(newMonkey);
@@ -420,6 +423,12 @@ void Engine::MainLoop()
         glClearColor(color, 0.1f, 0.1f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
+        imguiHelper.OnFrameStart();
+
+        ImGui::Begin("Hello, World!"); // Begin window
+        ImGui::Text("This is a Hello World window in ImGui!"); // Text content
+        ImGui::End(); // End window
+        
         // --- Draw all your entities ---
         //   Instead of letting a "camera system" store matrices, we 
         //   just pass camMatrix directly
@@ -460,6 +469,7 @@ void Engine::MainLoop()
         if (error != GL_NO_ERROR)
             std::cerr << "OpenGL error: " << error << std::endl;
 
+        imguiHelper.OnFrameEnd();
         // Swap buffers
         SDL_GL_SwapWindow(graphicsApplicationWindow);
 
@@ -482,7 +492,7 @@ void Engine::CleanUp()
         }
     }
     meshCache.clear();
-
+    imguiHelper.CleanUp();
     SDL_GL_DeleteContext(glContext);
     SDL_DestroyWindow(graphicsApplicationWindow);
     SDL_Quit();

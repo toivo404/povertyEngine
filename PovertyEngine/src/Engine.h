@@ -6,6 +6,7 @@
 #include <vector>
 #include <flecs.h>
 #include "Core.h"
+#include "ImGUIHelper.h"
 struct Mesh;
 
 class PE_API Engine
@@ -14,7 +15,7 @@ public:
 	Engine();
 	~Engine();
 	static void Init();
-	static void Input();
+	static void ProcessEvents();
 	static void SetupSystems(Mesh& monkeyMesh, std::vector<flecs::entity>& monkeys);
 	static void MainLoop();
 	static void CleanUp();

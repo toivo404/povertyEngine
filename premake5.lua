@@ -36,10 +36,10 @@ workspace "PovertyEngine"
 			"%{IncludeDir.GLAD}/glad.c",
 			"vendor/flecs/**.h" ,
 			"vendor/flecs/**.c", 
-			"vendor/imgui/**.c",
-			"vendor/imgui/backends/**.c",
+			"vendor/imgui/**.cpp",
 			"vendor/imgui/**.h",
-			"vendor/imgui/backends/**.h"
+			--"vendor/imgui/backends/**.c",
+			--"vendor/imgui/backends/**.h"
         }
 		
 		libdirs
@@ -58,7 +58,7 @@ workspace "PovertyEngine"
 			"vendor/Assimp/include/",
 			"vendor/flecs/",
 			"vendor/imgui/",
-			"vendor/imgui/backends"
+		--	"vendor/imgui/backends"
         }
 
         links
@@ -117,7 +117,9 @@ workspace "PovertyEngine"
             "%{prj.name}/src/**.h",
             "%{prj.name}/src/**.cpp",
 			"vendor/flecs/**.h",
-			"vendor/flecs/**.c" 
+			"vendor/flecs/**.c",
+			"vendor/imgui/**.cpp",
+			"vendor/imgui/**.h",
         }
 
         includedirs
@@ -127,8 +129,8 @@ workspace "PovertyEngine"
 			"%{IncludeDir.GLM}/",
 			"%{IncludeDir.GLAD}/",
 			"PovertyEngine/vendor/SDL2/include",
-			"vendor/flecs/"
-
+			"vendor/flecs/",
+			"vendor/imgui/"
         }
 		
 		libdirs{
