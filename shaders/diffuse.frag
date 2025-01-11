@@ -8,18 +8,18 @@ in vec2 TexCoord;  // Texture coordinates (not used yet but available)
 
 uniform vec3 objectColor;   // Base object color
 uniform vec3 lightColor;    // Color of the light
-uniform vec3 lightPos;      // Position of the light source
+uniform vec3 lightDir;      // Direction of the light (normalized)
 uniform vec3 viewPos;       // Position of the viewer/camera
 
 void main() {
     // Normalize the normal vector
     vec3 norm = normalize(Normal);
 
-    // Calculate the light direction
-    vec3 lightDir = normalize(lightPos - FragPos);
+    // Use the normalized light direction (negative for consistency with OpenGL conventions)
+    vec3 lightDirection = normalize(-lightDir);
 
     // Diffuse shading: max(dot product of normal and light direction, 0.0)
-    float diff = max(dot(norm, lightDir), 0.0);
+    float diff = max(dot(norm, lightDirection), 0.0);
 
     // Combine diffuse shading with light color and object color
     vec3 diffuse = diff * lightColor;

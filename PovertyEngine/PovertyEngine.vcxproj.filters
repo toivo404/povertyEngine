@@ -7,15 +7,30 @@
     <Filter Include="vendor">
       <UniqueIdentifier>{B3738122-9F15-ACF8-88D0-BF4C74113349}</UniqueIdentifier>
     </Filter>
+    <Filter Include="vendor\flecs">
+      <UniqueIdentifier>{AF5A99F0-9BBD-2895-4443-614B3085F417}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="vendor">
+      <UniqueIdentifier>{B3738122-9F15-ACF8-88D0-BF4C74113349}</UniqueIdentifier>
+    </Filter>
     <Filter Include="vendor\Glad">
       <UniqueIdentifier>{7A0268C1-E6B7-E0B6-6FAC-DA8DDB60D7BA}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="..\vendor\flecs\flecs.h">
+      <Filter>vendor\flecs</Filter>
+    </ClInclude>
+    <ClInclude Include="src\AssimpLoader.h">
+      <Filter>src</Filter>
+    </ClInclude>
     <ClInclude Include="src\Core.h">
       <Filter>src</Filter>
     </ClInclude>
     <ClInclude Include="src\Engine.h">
+      <Filter>src</Filter>
+    </ClInclude>
+    <ClInclude Include="src\EngineInfo.h">
       <Filter>src</Filter>
     </ClInclude>
     <ClInclude Include="src\ShaderLoader.h">
@@ -23,7 +38,16 @@
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="..\vendor\flecs\flecs.c">
+      <Filter>vendor\flecs</Filter>
+    </ClCompile>
+    <ClCompile Include="src\AssimpLoader.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
     <ClCompile Include="src\Engine.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="src\EngineInfo.cpp">
       <Filter>src</Filter>
     </ClCompile>
     <ClCompile Include="src\ShaderLoader.cpp">

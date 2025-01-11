@@ -77,3 +77,12 @@ GLuint ShaderLoader::CompileShaderProgram(const std::string& vertPath, const std
 GLuint ShaderLoader::GetShaderProgram(const std::string& name) {
     return shaders[name];
 }
+
+void ShaderLoader::CleanUp()
+{
+    for (auto shader : shaders)
+    {
+        glDeleteProgram(shader.second);
+    } 
+}
+

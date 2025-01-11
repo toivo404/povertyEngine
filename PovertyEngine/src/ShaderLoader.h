@@ -10,4 +10,5 @@ public:
     static GLuint CompileShaderProgram(const std::string& vertPath, const std::string& fragPath, char* basePath);
     static void Init(char* basePath);
     static GLuint GetShaderProgram(const std::string& name);
+    static void CleanUp();
 };

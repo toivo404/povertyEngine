@@ -1,22 +1,30 @@
-#version 450 core
+#version 330 core
 
-layout (location = 0) in vec3 aPos;      // Vertex position
-layout (location = 1) in vec3 aNormal;   // Vertex normal
-layout (location = 2) in vec2 aTexCoord; // Texture coordinates
+// Positions/Coordinates
+layout (location = 0) in vec3 aPos;    // Vertex position
+layout (location = 1) in vec3 aNormal; // Vertex normal
+layout (location = 2) in vec2 aTex;    // Texture coordinates
 
-uniform mat4 transform; // Transformation matrix
+// Outputs for the Fragment Shader
+out vec3 FragPos;   // Fragment position in world space
+out vec3 Normal;    // Normal vector in world space
+out vec2 TexCoord;  // Texture coordinates
 
-out vec3 FragPos;
-out vec3 Normal;
-out vec2 TexCoord;
+// Uniforms
+uniform mat4 camMatrix; // Combined view-projection matrix
+uniform mat4 model;     // Model matrix
 
-uniform mat4 model;
-uniform mat4 view;
-uniform mat4 projection;
+void main()
+{
+    // Transform the vertex position into world space
+    FragPos = vec3(model * vec4(aPos, 1.0));
 
-void main() {
-    gl_Position = projection * view * model * vec4(aPos, 1.0); // Apply transformation
-    FragPos = aPos;                            // Pass position to fragment shader
-    Normal = aNormal;                          // Pass normal to fragment shader
-    TexCoord = aTexCoord;                      // Pass texture coordinates
+    // Transform the normal vector into world space
+    Normal = mat3(transpose(inverse(model))) * aNormal;
+
+    // Pass the texture coordinates directly to the fragment shader
+    TexCoord = aTex;
+
+    // Transform the vertex position into clip space
+    gl_Position = camMatrix * vec4(FragPos, 1.0);
 }
