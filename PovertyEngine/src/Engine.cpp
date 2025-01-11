@@ -66,6 +66,12 @@ int windowHeight= 480;
 char* basePath;
 std::unordered_map<std::string, Mesh> meshCache;
 
+// Create ECS world
+flecs::world ecs;
+Mesh monkeyMesh;
+std::vector<flecs::entity> monkeys;
+float deltaTime;
+bool deltaTimeCalculated;
 // Forward declarations
 Mesh GetMesh(const std::string& path) {
     // Check if the mesh is already in the cache
@@ -172,6 +178,7 @@ void Engine::Init()
     EngineInfo::LogInfo();
     ShaderLoader::Init(basePath);
 
+    SetupSystems(monkeyMesh, monkeys);
     MainLoop();
     CleanUp();
 }
@@ -180,14 +187,6 @@ bool IsKeyPressed(SDL_Keycode key) {
     return state[SDL_GetScancodeFromKey(key)];
 }
 
-
-float GetDeltaTime() {
-    static Uint32 lastTime = SDL_GetTicks();
-    Uint32 currentTime = SDL_GetTicks();
-    float deltaTime = (currentTime - lastTime) / 1000.0f; 
-    lastTime = currentTime;
-    return deltaTime;
-}
 
 ::flecs::entity PlaceMonkey(flecs::world& ecs, const Mesh& monkeyMesh,
                             const glm::vec3& position, const glm::vec3& color,
@@ -204,8 +203,8 @@ float GetDeltaTime() {
             ShaderLoader::GetShaderProgram("basic") // Shader
         })
         .set<Mesh>(monkeyMesh)
-        .set<Spin>({50.0f})
-        .set<Manipulator>({2,50});
+        .set<Spin>({50.0f});
+       // .set<Manipulator>({2,50});
 }
 
 glm::vec3 GetRandomColor()
@@ -252,18 +251,11 @@ void Engine::Input()
 }
 
 
-
-
-//----- MAIN LOOP -----
-void Engine::MainLoop()
+void Engine::SetupSystems(Mesh& monkeyMesh, std::vector<flecs::entity>& monkeys)
 {
-    // Create ECS world
-    flecs::world ecs;
-
     // Movement system for entities that have a Manipulator + Transform
     ecs.system<Manipulator, Transform>()
        .each([](flecs::entity e, Manipulator& manipulator, Transform& transform) {
-           float deltaTime = GetDeltaTime();
            // Basic WASD
            if (IsKeyPressed(SDLK_w)) { transform.position.z -= manipulator.moveSpeed * deltaTime; }
            if (IsKeyPressed(SDLK_s)) { transform.position.z += manipulator.moveSpeed * deltaTime; }
@@ -281,7 +273,7 @@ void Engine::MainLoop()
            if (IsKeyPressed(SDLK_e))     { transform.rotation.z += manipulator.rotateSpeed * deltaTime; }
        });
 
-    auto monkeyMesh = GetMesh("shaders/monkey.obj");
+    monkeyMesh = GetMesh("shaders/monkey.obj");
     // Place a single monkey at origin
     //PlaceMonkey(ecs, monkeyMesh, glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(1.0f, 0.5f, 0.2f));
     // Also place a bunch more
@@ -300,18 +292,19 @@ void Engine::MainLoop()
            m = glm::rotate(m, glm::radians(t.rotation.z), glm::vec3(0.0f, 0.0f, 1.0f));
            m = glm::scale(m, t.scale);
            t.model = m;
+           std::cout << "Entity with Transform: " << e.name() << std::endl;
+
        });
 
     ecs.system<Spin,Transform>()
        .each([](flecs::entity e, Spin& s,Transform& t)
        {
-           std::cout << e << std::endl;
-           float deltaTime = GetDeltaTime();
            // Update rotation
            t.rotation.y += s.rotateSpeed * deltaTime;
-
+            t.position.y = t.position.y + sin(deltaTime);
            // Clamp rotation to 0-360 degrees
            t.rotation.y = glm::mod(t.rotation.y, 360.0f);
+         //  std::cout << "Entity with Spin: " << e.name() << std::endl;
        });
     
 
@@ -327,7 +320,8 @@ void Engine::MainLoop()
            glm::vec3(1.0f), // Default scale (no scaling)
            glm::vec3(pitch, yaw, 0.0f) // Rotation (initially aligned to look forward)
        })
-       .set<Camera>({42});
+       .set<Camera>({42})
+        .set<Manipulator>({2,50});
         
     ecs.system<Camera, Transform>()
        .each([&](flecs::entity e, const Camera& camera, const Transform& transform)
@@ -355,8 +349,9 @@ void Engine::MainLoop()
            glm::vec3(0,0,0 ), // Default scale (no scaling)
            glm::vec3(15,0, 0.0f) // Rotation (initially aligned to look forward)
        })
-       .set<Spin>({300})
-       .set<Light>({glm::vec3(1.0f, 1.0f, 1.0f)});
+      // .set<Spin>({300})
+       .set<Light>({glm::vec3(1.0f, 1.0f, 1.0f)})
+       .set<Spin>({50});
         
 
     
@@ -370,21 +365,30 @@ void Engine::MainLoop()
                sin(glm::radians(transform.rotation.y)) * cos(glm::radians(transform.rotation.x))
            ));
        });
-
     // Enable depth testing (for 3D)
     glEnable(GL_DEPTH_TEST);
     glDepthFunc(GL_LESS);
     flecs::entity prevEntity;
-    std::vector<flecs::entity> monkeys;
+}
+
+//----- MAIN LOOP -----
+void Engine::MainLoop()
+{
+
     // MAIN RENDER LOOP
     while (!quit)
     {
         // --- Input & ECS Update ---
-        Input();
+        static Uint32 lastTime = SDL_GetTicks();
+        Uint32 currentTime = SDL_GetTicks();
+        deltaTime = (currentTime - lastTime) / 1000.0f; 
+        lastTime = currentTime;
         
+        Input();
         if (IsKeyPressed(SDLK_PERIOD)) {
-            auto newMonkey = PlaceMonkey(ecs, monkeyMesh, glm::vec3(0), GetRandomColor(), "monkey"+std::to_string(monkeys.size()));
+            auto newMonkey = PlaceMonkey(ecs, monkeyMesh, glm::vec3(monkeys.size(),0,0), GetRandomColor(), "monkey"+std::to_string(monkeys.size()));
             monkeys.push_back(newMonkey);
+            std::cout << "Added a monkey! Total monkeys: " << monkeys.size() << std::endl;
         }
 
         // Remove the last monkey when the comma key is pressed
@@ -448,6 +452,8 @@ void Engine::MainLoop()
                 glBindVertexArray(mesh.VAO);
                 glDrawElements(GL_TRIANGLES, mesh.indexCount, GL_UNSIGNED_INT, 0);
                 glBindVertexArray(0);
+                std::cout << "Draw: " << e.name() << std::endl;
+
             });
         }
         
@@ -458,6 +464,8 @@ void Engine::MainLoop()
 
         // Swap buffers
         SDL_GL_SwapWindow(graphicsApplicationWindow);
+
+        
     }
 }
 

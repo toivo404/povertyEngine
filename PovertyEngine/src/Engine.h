@@ -1,7 +1,11 @@
 #pragma once
+#include <flecs.h>
+#include <iosfwd>
 #include <SDL_video.h>
 #include <string>
 #include <unordered_map>
+#include <vector>
+
 #include "Core.h"
 struct Mesh;
 
@@ -12,6 +16,7 @@ public:
 	~Engine();
 	static void Init();
 	static void Input();
+	static void SetupSystems(Mesh& monkeyMesh, std::vector<flecs::entity>& monkeys);
 	static void MainLoop();
 	static void CleanUp();
 private:
