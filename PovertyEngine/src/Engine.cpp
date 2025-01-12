@@ -3,9 +3,6 @@
 #include "Engine.h"
 
 #include <common.hpp>
-#include <common.hpp>
-#include <common.hpp>
-#include <common.hpp>
 #include <filesystem>
 #include <iostream>
 #include "AssimpLoader.h"
@@ -162,7 +159,7 @@ void Engine::Init()
 
     basePath = SDL_GetBasePath();
     graphicsApplicationWindow = SDL_CreateWindow("babbys first opengl", 
-        5000, 0, windowWidth, windowHeight, SDL_WINDOW_OPENGL);
+        0, 0, windowWidth, windowHeight, SDL_WINDOW_OPENGL);
     if (!graphicsApplicationWindow) {
         std::cerr << "SDL_Window creation failed\n";
         exit(1);
