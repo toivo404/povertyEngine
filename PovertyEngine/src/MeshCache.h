@@ -7,6 +7,7 @@
 class MeshCache
 {
 public:
+    static void SetGLVertexAttributes();
     static Mesh GetMesh(const std::string& path);
     static void CleanUp();
 

@@ -3,6 +3,8 @@
 #include <flecs.h>
 #include <glad.h>
 #include <glm.hpp>
+#include <string>
+#include <vector>
 #include <gtc/type_ptr.hpp>
 
 struct Material {
@@ -10,12 +12,21 @@ struct Material {
     GLuint shaderProgram;
 };
 
+struct Texture {
+    GLuint id;
+    std::string type; // e.g., "diffuse", "specular"
+    std::string path;
+};
+
 struct Mesh {
     GLuint VAO;
     GLuint VBO, EBO;
     GLsizei indexCount;
     bool shared;
+    std::vector<Texture> textures; // Add this for textures
 };
+
+
 
 struct Camera
 {
