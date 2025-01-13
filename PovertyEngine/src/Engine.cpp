@@ -56,6 +56,7 @@ struct Spin
 };
 
 
+float Engine::deltaTime;
 
 SDL_GLContext Engine::glContext = nullptr;
 SDL_Window* Engine::graphicsApplicationWindow = nullptr;
@@ -69,7 +70,6 @@ std::unordered_map<std::string, Mesh> meshCache;
 flecs::world ecs;
 Mesh monkeyMesh;
 std::vector<flecs::entity> monkeys;
-float deltaTime;
 bool deltaTimeCalculated;
 ImGUIHelper imguiHelper;
 
@@ -185,7 +185,7 @@ void Engine::Init()
     MainLoop();
     CleanUp();
 }
-bool IsKeyPressed(SDL_Keycode key) {
+bool Engine::IsKeyPressed(SDL_Keycode key) {
     const Uint8* state = SDL_GetKeyboardState(nullptr);
     return state[SDL_GetScancodeFromKey(key)];
 }
@@ -232,11 +232,12 @@ void PopulateMonkeys(flecs::world& ecs, const Mesh& monkeyMesh) {
         PlaceMonkey(ecs, monkeyMesh, glm::vec3(x, 0.0f, z), GetRandomColor(), "Monkey" + std::to_string(i + 1));
     }
 }
-glm::vec3 camPos  = glm::vec3(0.0f, 5.0f, 10.0f); // Eye position
-glm::vec3 camLook = glm::vec3(0.0f, 0.0f, 0.0f);  // Look at origin
-glm::vec3 camUp   = glm::vec3(0.0f, 1.0f, 0.0f);
-glm::vec3 lightColor(1.0f, 0.8f, 0.6f); // Slightly warm light
-glm::vec3 lightDir = glm::vec3(-0.5f, -1.0f, -0.5f); // Default direction
+glm::mat4 Engine::camMatrix;
+glm::vec3 Engine::camPos  = glm::vec3(0.0f, 5.0f, 10.0f); // Eye position
+glm::vec3 Engine::camLook = glm::vec3(0.0f, 0.0f, 0.0f);  // Look at origin
+glm::vec3 Engine::camUp   = glm::vec3(0.0f, 1.0f, 0.0f);
+glm::vec3 Engine::lightColor = glm::vec3(1.0f, 0.8f, 0.6f); // Slightly warm light
+glm::vec3 Engine::lightDir = glm::vec3(-0.5f, -1.0f, -0.5f); // Default direction
 
 void Engine::ProcessEvents()
 {
@@ -412,7 +413,7 @@ void Engine::MainLoop()
         );
 
         // Combined
-        glm::mat4 camMatrix = projection * view;
+        camMatrix = projection * view;
 
         // --- Clear screen ---
         float time = SDL_GetTicks() / 1000.0f;
