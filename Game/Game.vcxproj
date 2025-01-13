@@ -156,11 +156,11 @@ IF EXIST $(SolutionDir)\shaders\ (xcopy /Q /E /Y /I $(SolutionDir)\shaders ..\bi
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="..\vendor\flecs\flecs.h" />
+    <ClInclude Include="..\vendor\imgui\backends\imgui_impl_opengl3.h" />
+    <ClInclude Include="..\vendor\imgui\backends\imgui_impl_opengl3_loader.h" />
+    <ClInclude Include="..\vendor\imgui\backends\imgui_impl_sdl2.h" />
     <ClInclude Include="..\vendor\imgui\imconfig.h" />
     <ClInclude Include="..\vendor\imgui\imgui.h" />
-    <ClInclude Include="..\vendor\imgui\imgui_impl_opengl3.h" />
-    <ClInclude Include="..\vendor\imgui\imgui_impl_opengl3_loader.h" />
-    <ClInclude Include="..\vendor\imgui\imgui_impl_sdl2.h" />
     <ClInclude Include="..\vendor\imgui\imgui_internal.h" />
     <ClInclude Include="..\vendor\imgui\imstb_rectpack.h" />
     <ClInclude Include="..\vendor\imgui\imstb_textedit.h" />
@@ -169,11 +169,11 @@ IF EXIST $(SolutionDir)\shaders\ (xcopy /Q /E /Y /I $(SolutionDir)\shaders ..\bi
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\vendor\flecs\flecs.c" />
+    <ClCompile Include="..\vendor\imgui\backends\imgui_impl_opengl3.cpp" />
+    <ClCompile Include="..\vendor\imgui\backends\imgui_impl_sdl2.cpp" />
     <ClCompile Include="..\vendor\imgui\imgui.cpp" />
     <ClCompile Include="..\vendor\imgui\imgui_demo.cpp" />
     <ClCompile Include="..\vendor\imgui\imgui_draw.cpp" />
-    <ClCompile Include="..\vendor\imgui\imgui_impl_opengl3.cpp" />
-    <ClCompile Include="..\vendor\imgui\imgui_impl_sdl2.cpp" />
     <ClCompile Include="..\vendor\imgui\imgui_tables.cpp" />
     <ClCompile Include="..\vendor\imgui\imgui_widgets.cpp" />
     <ClCompile Include="src\Main.cpp" />

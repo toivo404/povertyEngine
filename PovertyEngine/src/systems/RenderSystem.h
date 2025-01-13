@@ -9,7 +9,6 @@
 
 struct Material {
     glm::vec3 objectColor;
-    GLuint shaderProgram;
 };
 
 struct Texture {
@@ -26,6 +25,10 @@ struct Mesh {
     std::vector<Texture> textures; // Add this for textures
 };
 
+struct Shader
+{
+    GLuint program;
+};
 
 
 struct Camera

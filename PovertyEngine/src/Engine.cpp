@@ -135,9 +135,11 @@ bool Engine::IsKeyPressed(SDL_Keycode key)
                   glm::vec3(1.0f),
                   glm::vec3(0.0f, 45.0f, 0.0f)
               })
+              .set<Shader>({
+                  ShaderLoader::GetShaderProgram("basic")
+              })
               .set<Material>({
                   color,
-                  ShaderLoader::GetShaderProgram("basic")
               })
               .set<Mesh>(monkeyMesh)
               .set<Spin>({50.0f});

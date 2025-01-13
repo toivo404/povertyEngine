@@ -13,6 +13,9 @@
     <Filter Include="vendor\imgui">
       <UniqueIdentifier>{5D3BD0F0-499E-5F95-F223-984BDE652B18}</UniqueIdentifier>
     </Filter>
+    <Filter Include="vendor\imgui\backends">
+      <UniqueIdentifier>{27CEAEAF-933A-6AAA-5C2E-0208C8598C12}</UniqueIdentifier>
+    </Filter>
     <Filter Include="vendor">
       <UniqueIdentifier>{B3738122-9F15-ACF8-88D0-BF4C74113349}</UniqueIdentifier>
     </Filter>
@@ -24,19 +27,19 @@
     <ClInclude Include="..\vendor\flecs\flecs.h">
       <Filter>vendor\flecs</Filter>
     </ClInclude>
+    <ClInclude Include="..\vendor\imgui\backends\imgui_impl_opengl3.h">
+      <Filter>vendor\imgui\backends</Filter>
+    </ClInclude>
+    <ClInclude Include="..\vendor\imgui\backends\imgui_impl_opengl3_loader.h">
+      <Filter>vendor\imgui\backends</Filter>
+    </ClInclude>
+    <ClInclude Include="..\vendor\imgui\backends\imgui_impl_sdl2.h">
+      <Filter>vendor\imgui\backends</Filter>
+    </ClInclude>
     <ClInclude Include="..\vendor\imgui\imconfig.h">
       <Filter>vendor\imgui</Filter>
     </ClInclude>
     <ClInclude Include="..\vendor\imgui\imgui.h">
-      <Filter>vendor\imgui</Filter>
-    </ClInclude>
-    <ClInclude Include="..\vendor\imgui\imgui_impl_opengl3.h">
-      <Filter>vendor\imgui</Filter>
-    </ClInclude>
-    <ClInclude Include="..\vendor\imgui\imgui_impl_opengl3_loader.h">
-      <Filter>vendor\imgui</Filter>
-    </ClInclude>
-    <ClInclude Include="..\vendor\imgui\imgui_impl_sdl2.h">
       <Filter>vendor\imgui</Filter>
     </ClInclude>
     <ClInclude Include="..\vendor\imgui\imgui_internal.h">
@@ -74,6 +77,12 @@
     <ClCompile Include="..\vendor\flecs\flecs.c">
       <Filter>vendor\flecs</Filter>
     </ClCompile>
+    <ClCompile Include="..\vendor\imgui\backends\imgui_impl_opengl3.cpp">
+      <Filter>vendor\imgui\backends</Filter>
+    </ClCompile>
+    <ClCompile Include="..\vendor\imgui\backends\imgui_impl_sdl2.cpp">
+      <Filter>vendor\imgui\backends</Filter>
+    </ClCompile>
     <ClCompile Include="..\vendor\imgui\imgui.cpp">
       <Filter>vendor\imgui</Filter>
     </ClCompile>
@@ -81,12 +90,6 @@
       <Filter>vendor\imgui</Filter>
     </ClCompile>
     <ClCompile Include="..\vendor\imgui\imgui_draw.cpp">
-      <Filter>vendor\imgui</Filter>
-    </ClCompile>
-    <ClCompile Include="..\vendor\imgui\imgui_impl_opengl3.cpp">
-      <Filter>vendor\imgui</Filter>
-    </ClCompile>
-    <ClCompile Include="..\vendor\imgui\imgui_impl_sdl2.cpp">
       <Filter>vendor\imgui</Filter>
     </ClCompile>
     <ClCompile Include="..\vendor\imgui\imgui_tables.cpp">

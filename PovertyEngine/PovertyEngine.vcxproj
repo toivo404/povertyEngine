@@ -153,11 +153,11 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="..\vendor\flecs\flecs.h" />
+    <ClInclude Include="..\vendor\imgui\backends\imgui_impl_opengl3.h" />
+    <ClInclude Include="..\vendor\imgui\backends\imgui_impl_opengl3_loader.h" />
+    <ClInclude Include="..\vendor\imgui\backends\imgui_impl_sdl2.h" />
     <ClInclude Include="..\vendor\imgui\imconfig.h" />
     <ClInclude Include="..\vendor\imgui\imgui.h" />
-    <ClInclude Include="..\vendor\imgui\imgui_impl_opengl3.h" />
-    <ClInclude Include="..\vendor\imgui\imgui_impl_opengl3_loader.h" />
-    <ClInclude Include="..\vendor\imgui\imgui_impl_sdl2.h" />
     <ClInclude Include="..\vendor\imgui\imgui_internal.h" />
     <ClInclude Include="..\vendor\imgui\imstb_rectpack.h" />
     <ClInclude Include="..\vendor\imgui\imstb_textedit.h" />
@@ -167,22 +167,32 @@
     <ClInclude Include="src\Engine.h" />
     <ClInclude Include="src\EngineInfo.h" />
     <ClInclude Include="src\ImGUIHelper.h" />
+    <ClInclude Include="src\MeshCache.h" />
     <ClInclude Include="src\ShaderLoader.h" />
+    <ClInclude Include="src\systems\ManipulatorSystem.h" />
+    <ClInclude Include="src\systems\RenderSystem.h" />
+    <ClInclude Include="src\systems\SpinSystem.h" />
+    <ClInclude Include="src\systems\TransformSystem.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\vendor\flecs\flecs.c" />
+    <ClCompile Include="..\vendor\imgui\backends\imgui_impl_opengl3.cpp" />
+    <ClCompile Include="..\vendor\imgui\backends\imgui_impl_sdl2.cpp" />
     <ClCompile Include="..\vendor\imgui\imgui.cpp" />
     <ClCompile Include="..\vendor\imgui\imgui_demo.cpp" />
     <ClCompile Include="..\vendor\imgui\imgui_draw.cpp" />
-    <ClCompile Include="..\vendor\imgui\imgui_impl_opengl3.cpp" />
-    <ClCompile Include="..\vendor\imgui\imgui_impl_sdl2.cpp" />
     <ClCompile Include="..\vendor\imgui\imgui_tables.cpp" />
     <ClCompile Include="..\vendor\imgui\imgui_widgets.cpp" />
     <ClCompile Include="src\AssimpLoader.cpp" />
     <ClCompile Include="src\Engine.cpp" />
     <ClCompile Include="src\EngineInfo.cpp" />
     <ClCompile Include="src\ImGUIHelper.cpp" />
+    <ClCompile Include="src\MeshCache.cpp" />
     <ClCompile Include="src\ShaderLoader.cpp" />
+    <ClCompile Include="src\systems\ManipulatorSystem.cpp" />
+    <ClCompile Include="src\systems\RenderSystem.cpp" />
+    <ClCompile Include="src\systems\SpinSystem.cpp" />
+    <ClCompile Include="src\systems\TransformSystem.cpp" />
     <ClCompile Include="vendor\Glad\glad.c" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
