@@ -6,7 +6,7 @@
 #include <vec3.hpp>
 #include "Core.h"
 #include "ImGUIHelper.h"
-struct Mesh;
+#include "systems/RenderSystem.h"
 
 class PE_API Engine
 {
@@ -17,6 +17,8 @@ public:
 	static void MainLoop();
 	static void CleanUp();
 	static bool	IsKeyPressed(SDL_Keycode key);
+	
+	static char* baseFilePath;
 	static float deltaTime;
 	static glm::vec3 camPos;
 	static glm::vec3 camLook;

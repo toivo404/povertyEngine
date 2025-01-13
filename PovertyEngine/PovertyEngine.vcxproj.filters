@@ -4,6 +4,9 @@
     <Filter Include="src">
       <UniqueIdentifier>{2DAB880B-99B4-887C-2230-9F7C8E38947C}</UniqueIdentifier>
     </Filter>
+    <Filter Include="src\systems">
+      <UniqueIdentifier>{547605C4-C02B-7EB9-4920-7890B5D474BD}</UniqueIdentifier>
+    </Filter>
     <Filter Include="vendor">
       <UniqueIdentifier>{B3738122-9F15-ACF8-88D0-BF4C74113349}</UniqueIdentifier>
     </Filter>
@@ -15,6 +18,9 @@
     </Filter>
     <Filter Include="vendor\imgui\backends">
       <UniqueIdentifier>{27CEAEAF-933A-6AAA-5C2E-0208C8598C12}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="vendor\stb">
+      <UniqueIdentifier>{8BD3C5A8-778B-07F6-E092-E051CC69A2E6}</UniqueIdentifier>
     </Filter>
     <Filter Include="vendor">
       <UniqueIdentifier>{B3738122-9F15-ACF8-88D0-BF4C74113349}</UniqueIdentifier>
@@ -54,6 +60,9 @@
     <ClInclude Include="..\vendor\imgui\imstb_truetype.h">
       <Filter>vendor\imgui</Filter>
     </ClInclude>
+    <ClInclude Include="..\vendor\stb\stb_image.h">
+      <Filter>vendor\stb</Filter>
+    </ClInclude>
     <ClInclude Include="src\AssimpLoader.h">
       <Filter>src</Filter>
     </ClInclude>
@@ -69,8 +78,26 @@
     <ClInclude Include="src\ImGUIHelper.h">
       <Filter>src</Filter>
     </ClInclude>
+    <ClInclude Include="src\MeshCache.h">
+      <Filter>src</Filter>
+    </ClInclude>
     <ClInclude Include="src\ShaderLoader.h">
       <Filter>src</Filter>
+    </ClInclude>
+    <ClInclude Include="src\systems\ManipulatorSystem.h">
+      <Filter>src\systems</Filter>
+    </ClInclude>
+    <ClInclude Include="src\systems\MaterialSystem.h">
+      <Filter>src\systems</Filter>
+    </ClInclude>
+    <ClInclude Include="src\systems\RenderSystem.h">
+      <Filter>src\systems</Filter>
+    </ClInclude>
+    <ClInclude Include="src\systems\SpinSystem.h">
+      <Filter>src\systems</Filter>
+    </ClInclude>
+    <ClInclude Include="src\systems\TransformSystem.h">
+      <Filter>src\systems</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -110,8 +137,26 @@
     <ClCompile Include="src\ImGUIHelper.cpp">
       <Filter>src</Filter>
     </ClCompile>
+    <ClCompile Include="src\MeshCache.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
     <ClCompile Include="src\ShaderLoader.cpp">
       <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="src\systems\ManipulatorSystem.cpp">
+      <Filter>src\systems</Filter>
+    </ClCompile>
+    <ClCompile Include="src\systems\MaterialSystem.cpp">
+      <Filter>src\systems</Filter>
+    </ClCompile>
+    <ClCompile Include="src\systems\RenderSystem.cpp">
+      <Filter>src\systems</Filter>
+    </ClCompile>
+    <ClCompile Include="src\systems\SpinSystem.cpp">
+      <Filter>src\systems</Filter>
+    </ClCompile>
+    <ClCompile Include="src\systems\TransformSystem.cpp">
+      <Filter>src\systems</Filter>
     </ClCompile>
     <ClCompile Include="vendor\Glad\glad.c">
       <Filter>vendor\Glad</Filter>

@@ -2,14 +2,41 @@
 #include "TransformSystem.h" 
 #include <unordered_map>
 #include "Engine.h"
+#include "MaterialSystem.h"
+
+struct RenderBatchKey {
+    GLuint shaderProgram;     // Shader program ID
+    GLuint VAO;               // Vertex Array Object
+    int materialId;               // Vertex Array Object
+
+    bool operator==(const RenderBatchKey& other) const {
+        return shaderProgram == other.shaderProgram &&
+               VAO == other.VAO &&
+               materialId == other.materialId;
+    }
+};
+
+// Custom hash function for RenderBatchKey
+namespace std {
+    template <>
+    struct hash<RenderBatchKey> {
+        std::size_t operator()(const RenderBatchKey& key) const {
+            std::size_t hash = std::hash<GLuint>()(key.shaderProgram);
+            hash ^= std::hash<GLuint>()(key.VAO) << 1;
+            hash ^= std::hash<GLuint>()(key.materialId) << 1;
+            return hash;
+        }
+    };
+}
 
 struct RenderQueItem
 {
-    flecs::entity entity;
-    GLuint shaderProgram;
+    flecs::entity e;
+    glm::mat4 model = glm::mat4(1.0f);
+    int meshIndexCount;
 };
 
-std::unordered_map<GLuint, std::vector<RenderQueItem>> renderQueue;
+std::unordered_map<RenderBatchKey, std::vector<RenderQueItem>> renderQueue;
 
 void RenderSystem::SetupSystems(flecs::world& ecs) {
     Engine::camUp   = glm::vec3(0.0f, 1.0f, 0.0f);
@@ -39,67 +66,59 @@ void RenderSystem::SetupSystems(flecs::world& ecs) {
        });
 
     ecs.system<Mesh, Transform, Material, Shader>()
-       .kind(flecs::PostUpdate)
-       .each([](flecs::entity e, const Mesh& mesh, const Transform& transform, Material& material, Shader& shader)
-       {
-           renderQueue[shader.program].push_back({e, shader.program});
-       });
+     .kind(flecs::PostUpdate)
+     .each([](flecs::entity e, const Mesh& mesh, const Transform& transform, Material& material, Shader& shader)
+     {
+             // Create a render batch key
+           RenderBatchKey key;
+           key.shaderProgram = shader.program;
+           key.VAO = mesh.VAO;
+           key.materialId = material.materialId;
+           
+           // Insert the entity into the render queue
+           renderQueue[key].push_back({e, transform.model, mesh.indexCount});
+     });
 }
-
 
 
 void RenderSystem::Render(flecs::world& ecs)
 {
-    for (const auto& [shaderProgram, items] : renderQueue)
+    for (const auto& [key, items] : renderQueue)
     {
         // Bind the shader program
-        glUseProgram(shaderProgram);
+        glUseProgram(key.shaderProgram);
 
         // Set global uniforms for this shader
-        GLint camMatrixLoc = glGetUniformLocation(shaderProgram, "camMatrix");
+        GLint camMatrixLoc = glGetUniformLocation(key.shaderProgram, "camMatrix");
         glUniformMatrix4fv(camMatrixLoc, 1, GL_FALSE, glm::value_ptr(Engine::camMatrix));
 
-        GLint lightColorLoc = glGetUniformLocation(shaderProgram, "lightColor");
+        GLint lightColorLoc = glGetUniformLocation(key.shaderProgram, "lightColor");
         glUniform3fv(lightColorLoc, 1, glm::value_ptr(Engine::lightColor));
 
-        GLint lightDirLoc = glGetUniformLocation(shaderProgram, "lightDir");
+        GLint lightDirLoc = glGetUniformLocation(key.shaderProgram, "lightDir");
         glUniform3fv(lightDirLoc, 1, glm::value_ptr(Engine::lightDir));
 
-        GLint viewPosLoc = glGetUniformLocation(shaderProgram, "viewPos");
+        GLint viewPosLoc = glGetUniformLocation(key.shaderProgram, "viewPos");
         glUniform3fv(viewPosLoc, 1, glm::value_ptr(Engine::camPos));
 
-        // Render each item in this shader program group
+        // Bind the VAO
+        glBindVertexArray(key.VAO);
+        
+        // Render each entity in this batch
         for (const auto& item : items) {
-            // Retrieve components dynamically to avoid dangling pointers
-            const Transform* transform = item.entity.get<Transform>();
-            const Material* material = item.entity.get<Material>();
-            const Mesh* mesh = item.entity.get<Mesh>();
 
-            // Ensure components are valid
-            if (!transform || !material || !mesh) {
-                continue;
-            }
+            // Set the model matrix for the current entity
+            GLint modelLoc = glGetUniformLocation(key.shaderProgram, "model");
+            glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(item.model));
 
-            // Set per-entity uniforms
-            GLint modelLoc = glGetUniformLocation(shaderProgram, "model");
-            glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(transform->model));
-
-            GLint colorLoc = glGetUniformLocation(shaderProgram, "objectColor");
-            glUniform3fv(colorLoc, 1, glm::value_ptr(material->objectColor));
-
-          //  // Bind textures
-          //  int textureUnit = 0;
-          //  for (auto tex : mesh->textures) {
-          //      glActiveTexture(GL_TEXTURE0 + textureUnit);
-          //      glBindTexture(GL_TEXTURE_2D, tex.id);
-          //      textureUnit++;
-          //  }
-
-            // Bind VAO and draw
-            glBindVertexArray(mesh->VAO);
-            glDrawElements(GL_TRIANGLES, mesh->indexCount, GL_UNSIGNED_INT, nullptr);
-            glBindVertexArray(0);
+            // Draw the mesh
+            glDrawElements(GL_TRIANGLES, item.meshIndexCount, GL_UNSIGNED_INT, nullptr);
         }
+
+        // Unbind the VAO
+        glBindVertexArray(0);
     }
+
+    // Clear the render queue after rendering
     renderQueue.clear();
 }

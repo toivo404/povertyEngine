@@ -37,15 +37,14 @@ Mesh MeshCache::GetMesh(const std::string& path)
 
         SetGLVertexAttributes();
 
-        return {newVAO, cachedMesh.VBO, cachedMesh.EBO, cachedMesh.indexCount, true, cachedMesh.textures};
+        return {newVAO, cachedMesh.VBO, cachedMesh.EBO, cachedMesh.indexCount, true};
     }
 
     AssimpLoader loader;
     std::vector<float> vertices;
     std::vector<unsigned int> indices;
-    std::vector<Texture> textures;
 
-    if (!loader.LoadModel(path, vertices, indices, textures)) {
+    if (!loader.LoadModel(path, vertices, indices)) {
         std::cerr << "Failed to load model from: " << path << std::endl;
         exit(1);
     }
@@ -64,7 +63,7 @@ Mesh MeshCache::GetMesh(const std::string& path)
 
     SetGLVertexAttributes();
 
-    Mesh mesh = {VAO, VBO, EBO, static_cast<GLsizei>(indices.size()), false, textures};
+    Mesh mesh = {VAO, VBO, EBO, static_cast<GLsizei>(indices.size()), false};
     cache[path] = mesh;
 
     return mesh;

@@ -16,6 +16,9 @@
     <Filter Include="vendor\imgui\backends">
       <UniqueIdentifier>{27CEAEAF-933A-6AAA-5C2E-0208C8598C12}</UniqueIdentifier>
     </Filter>
+    <Filter Include="vendor\stb">
+      <UniqueIdentifier>{8BD3C5A8-778B-07F6-E092-E051CC69A2E6}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\vendor\flecs\flecs.h">
@@ -47,6 +50,9 @@
     </ClInclude>
     <ClInclude Include="..\vendor\imgui\imstb_truetype.h">
       <Filter>vendor\imgui</Filter>
+    </ClInclude>
+    <ClInclude Include="..\vendor\stb\stb_image.h">
+      <Filter>vendor\stb</Filter>
     </ClInclude>
     <ClInclude Include="src\Header.h">
       <Filter>src</Filter>

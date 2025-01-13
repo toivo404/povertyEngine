@@ -79,7 +79,7 @@
       <PrecompiledHeader>NotUsing</PrecompiledHeader>
       <WarningLevel>Level3</WarningLevel>
       <PreprocessorDefinitions>PE_PLATFORM_WINDOWS;PE_BUILD_DLL;FLECS_STATIC;PE_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>vendor\SDL2\include;src;vendor\spdlog\include;vendor\Glad;..\vendor\glm;..\vendor\Assimp\include;..\vendor\flecs;..\vendor\imgui;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>vendor\SDL2\include;src;vendor\spdlog\include;vendor\Glad;..\vendor\glm;..\vendor\Assimp\include;..\vendor\flecs;..\vendor\imgui;..\vendor\stb;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <DebugInformationFormat>EditAndContinue</DebugInformationFormat>
       <Optimization>Disabled</Optimization>
       <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
@@ -102,7 +102,7 @@
       <PrecompiledHeader>NotUsing</PrecompiledHeader>
       <WarningLevel>Level3</WarningLevel>
       <PreprocessorDefinitions>PE_PLATFORM_WINDOWS;PE_BUILD_DLL;FLECS_STATIC;PE_RELEASE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>vendor\SDL2\include;src;vendor\spdlog\include;vendor\Glad;..\vendor\glm;..\vendor\Assimp\include;..\vendor\flecs;..\vendor\imgui;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>vendor\SDL2\include;src;vendor\spdlog\include;vendor\Glad;..\vendor\glm;..\vendor\Assimp\include;..\vendor\flecs;..\vendor\imgui;..\vendor\stb;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <Optimization>Full</Optimization>
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
@@ -129,7 +129,7 @@
       <PrecompiledHeader>NotUsing</PrecompiledHeader>
       <WarningLevel>Level3</WarningLevel>
       <PreprocessorDefinitions>PE_PLATFORM_WINDOWS;PE_BUILD_DLL;FLECS_STATIC;PE_DIST;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>vendor\SDL2\include;src;vendor\spdlog\include;vendor\Glad;..\vendor\glm;..\vendor\Assimp\include;..\vendor\flecs;..\vendor\imgui;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>vendor\SDL2\include;src;vendor\spdlog\include;vendor\Glad;..\vendor\glm;..\vendor\Assimp\include;..\vendor\flecs;..\vendor\imgui;..\vendor\stb;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <Optimization>Full</Optimization>
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
@@ -162,6 +162,7 @@
     <ClInclude Include="..\vendor\imgui\imstb_rectpack.h" />
     <ClInclude Include="..\vendor\imgui\imstb_textedit.h" />
     <ClInclude Include="..\vendor\imgui\imstb_truetype.h" />
+    <ClInclude Include="..\vendor\stb\stb_image.h" />
     <ClInclude Include="src\AssimpLoader.h" />
     <ClInclude Include="src\Core.h" />
     <ClInclude Include="src\Engine.h" />
@@ -170,6 +171,7 @@
     <ClInclude Include="src\MeshCache.h" />
     <ClInclude Include="src\ShaderLoader.h" />
     <ClInclude Include="src\systems\ManipulatorSystem.h" />
+    <ClInclude Include="src\systems\MaterialSystem.h" />
     <ClInclude Include="src\systems\RenderSystem.h" />
     <ClInclude Include="src\systems\SpinSystem.h" />
     <ClInclude Include="src\systems\TransformSystem.h" />
@@ -190,6 +192,7 @@
     <ClCompile Include="src\MeshCache.cpp" />
     <ClCompile Include="src\ShaderLoader.cpp" />
     <ClCompile Include="src\systems\ManipulatorSystem.cpp" />
+    <ClCompile Include="src\systems\MaterialSystem.cpp" />
     <ClCompile Include="src\systems\RenderSystem.cpp" />
     <ClCompile Include="src\systems\SpinSystem.cpp" />
     <ClCompile Include="src\systems\TransformSystem.cpp" />

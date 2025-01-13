@@ -38,6 +38,7 @@ workspace "PovertyEngine"
 			"vendor/flecs/**.c", 
 			"vendor/imgui/**.cpp",
 			"vendor/imgui/**.h",
+			"vendor/stb/stb_image.h"
 			--"vendor/imgui/backends/**.c",
 			--"vendor/imgui/backends/**.h"
         }
@@ -58,6 +59,7 @@ workspace "PovertyEngine"
 			"vendor/Assimp/include/",
 			"vendor/flecs/",
 			"vendor/imgui/",
+			"vendor/stb/"
 		--	"vendor/imgui/backends"
         }
 
@@ -120,6 +122,7 @@ workspace "PovertyEngine"
 			"vendor/flecs/**.c",
 			"vendor/imgui/**.cpp",
 			"vendor/imgui/**.h",
+			"vendor/stb/stb_image.h"
         }
 
         includedirs
@@ -130,7 +133,8 @@ workspace "PovertyEngine"
 			"%{IncludeDir.GLAD}/",
 			"PovertyEngine/vendor/SDL2/include",
 			"vendor/flecs/",
-			"vendor/imgui/"
+			"vendor/imgui/",
+			"vendor/stb/"
         }
 		
 		libdirs{

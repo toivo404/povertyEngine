@@ -16,10 +16,12 @@
 #include "ImGUIHelper.h"
 #include "MeshCache.h"
 #include "systems/ManipulatorSystem.h"
+#include "systems/MaterialSystem.h"
 #include "systems/RenderSystem.h"
 #include "systems/SpinSystem.h"
 #include "systems/TransformSystem.h"
 
+char*   Engine::baseFilePath;
 glm::mat4 Engine::camMatrix;
 glm::vec3 Engine::camPos  = glm::vec3(0.0f, 5.0f, 10.0f); 
 glm::vec3 Engine::camLook = glm::vec3(0.0f, 0.0f, 0.0f);  
@@ -33,15 +35,12 @@ SDL_Window* Engine::graphicsApplicationWindow = nullptr;
 bool Engine::quit = false;
 int windowWidth = 640;
 int windowHeight= 480;
-char* basePath;
 
 flecs::world ecs;
 Mesh monkeyMesh;
 std::vector<flecs::entity> monkeys;
 bool deltaTimeCalculated;
 ImGUIHelper imguiHelper;
-
-
 
 void Engine::Init()
 {
@@ -55,10 +54,8 @@ void Engine::Init()
     SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, 1);
     SDL_GL_SetAttribute(SDL_GL_DEPTH_SIZE, 24);
     
-
-    basePath = SDL_GetBasePath();
-    graphicsApplicationWindow = SDL_CreateWindow("babbys first opengl", 
-        0, 0, windowWidth, windowHeight, SDL_WINDOW_OPENGL);
+    baseFilePath = SDL_GetBasePath();
+    graphicsApplicationWindow = SDL_CreateWindow("babbys first opengl",0, 0, windowWidth, windowHeight, SDL_WINDOW_OPENGL);
     if (!graphicsApplicationWindow) {
         std::cerr << "SDL_Window creation failed\n";
         exit(1);
@@ -76,9 +73,9 @@ void Engine::Init()
     glViewport(0, 0, windowWidth, windowHeight);
 
     EngineInfo::LogInfo();
-    ShaderLoader::Init(basePath);
+    ShaderLoader::Init(baseFilePath);
     
-    monkeyMesh = MeshCache::GetMesh("shaders/monkey.obj");
+    monkeyMesh = MeshCache::GetMesh("shaders/monkey.fbx");
     ManipulatorSystem::RegisterSystem(ecs);
     TransformSystem::RegisterSystem(ecs);
     SpinSystem::RegisterSystem(ecs);
@@ -135,12 +132,8 @@ bool Engine::IsKeyPressed(SDL_Keycode key)
                   glm::vec3(1.0f),
                   glm::vec3(0.0f, 45.0f, 0.0f)
               })
-              .set<Shader>({
-                  ShaderLoader::GetShaderProgram("basic")
-              })
-              .set<Material>({
-                  color,
-              })
+              .set<Shader>({ShaderLoader::GetShaderProgram("basic")})
+              .set<Material>(MaterialSystem::LoadMaterial("MonkeyMaterial"))
               .set<Mesh>(monkeyMesh)
               .set<Spin>({50.0f});
 }
@@ -253,7 +246,7 @@ void Engine::MainLoop()
 
 void Engine::CleanUp()
 {
-    SDL_free(basePath);
+    SDL_free(baseFilePath);
     ShaderLoader::CleanUp();
 
     MeshCache::CleanUp();
