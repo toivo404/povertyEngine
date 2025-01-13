@@ -14,6 +14,7 @@
 #include "EngineInfo.h"
 #include "imgui.h"
 #include "ImGUIHelper.h"
+#include "MeshCache.h"
 #include "systems/ManipulatorSystem.h"
 #include "systems/RenderSystem.h"
 #include "systems/SpinSystem.h"
@@ -33,7 +34,6 @@ bool Engine::quit = false;
 int windowWidth = 640;
 int windowHeight= 480;
 char* basePath;
-std::unordered_map<std::string, Mesh> meshCache;
 
 flecs::world ecs;
 Mesh monkeyMesh;
@@ -42,73 +42,6 @@ bool deltaTimeCalculated;
 ImGUIHelper imguiHelper;
 
 
-Mesh GetMesh(const std::string& path)
-{
-    auto it = meshCache.find(path);
-    if (it != meshCache.end())
-    {
-        Mesh cachedMesh = it->second;
-
-        GLuint newVAO;
-        glGenVertexArrays(1, &newVAO);
-        glBindVertexArray(newVAO);
-
-        glBindBuffer(GL_ARRAY_BUFFER, cachedMesh.VBO);
-        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, cachedMesh.EBO);
-
-        glEnableVertexAttribArray(0);
-        glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)0);
-
-        glEnableVertexAttribArray(1);
-        glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(3 * sizeof(float)));
-
-        glEnableVertexAttribArray(2);
-        glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(6 * sizeof(float)));
-
-        glBindVertexArray(0);
-
-        return {newVAO, cachedMesh.VBO, cachedMesh.EBO, cachedMesh.indexCount, true};
-    }
-
-    AssimpLoader loader;
-    std::vector<float> vertices;
-    std::vector<unsigned int> indices;
-
-    if (!loader.LoadModel(path, vertices, indices))
-    {
-        std::cerr << "Failed to load model from: " << path << std::endl;
-        exit(1);
-    }
-
-    GLuint VAO, VBO, EBO;
-    glGenVertexArrays(1, &VAO);
-    glGenBuffers(1, &VBO);
-    glGenBuffers(1, &EBO);
-
-    glBindVertexArray(VAO);
-
-    glBindBuffer(GL_ARRAY_BUFFER, VBO);
-    glBufferData(GL_ARRAY_BUFFER, vertices.size() * sizeof(float), vertices.data(), GL_STATIC_DRAW);
-
-    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
-    glBufferData(GL_ELEMENT_ARRAY_BUFFER, indices.size() * sizeof(unsigned int), indices.data(), GL_STATIC_DRAW);
-
-    glEnableVertexAttribArray(0);
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)0);
-
-    glEnableVertexAttribArray(1);
-    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(3 * sizeof(float)));
-
-    glEnableVertexAttribArray(2);
-    glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(6 * sizeof(float)));
-
-    glBindVertexArray(0);
-
-    Mesh mesh = {VAO, VBO, EBO, static_cast<GLsizei>(indices.size()), false};
-    meshCache[path] = mesh;
-
-    return mesh;
-}
 
 void Engine::Init()
 {
@@ -145,7 +78,7 @@ void Engine::Init()
     EngineInfo::LogInfo();
     ShaderLoader::Init(basePath);
     
-    monkeyMesh = GetMesh("shaders/monkey.obj");
+    monkeyMesh = MeshCache::GetMesh("shaders/monkey.obj");
     ManipulatorSystem::RegisterSystem(ecs);
     TransformSystem::RegisterSystem(ecs);
     SpinSystem::RegisterSystem(ecs);
@@ -321,16 +254,7 @@ void Engine::CleanUp()
     SDL_free(basePath);
     ShaderLoader::CleanUp();
 
-    for (auto& [path, mesh] : meshCache)
-    {
-        glDeleteVertexArrays(1, &mesh.VAO);
-        if (!mesh.shared)
-        {
-            glDeleteBuffers(1, &mesh.VBO);
-            glDeleteBuffers(1, &mesh.EBO);
-        }
-    }
-    meshCache.clear();
+    MeshCache::CleanUp();
     imguiHelper.CleanUp();
     SDL_GL_DeleteContext(glContext);
     SDL_DestroyWindow(graphicsApplicationWindow);
