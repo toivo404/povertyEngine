@@ -1,7 +1,6 @@
 #include <SDL.h>
 #include <glad.h>
 #include "Engine.h"
-
 #include <common.hpp>
 #include <filesystem>
 #include <iostream>
@@ -11,51 +10,21 @@
 #include <gtc/matrix_transform.hpp>
 #include <gtc/type_ptr.hpp>
 #include <flecs.h>
-#include <cstdlib> // For random color generation
+#include <cstdlib>
 #include "EngineInfo.h"
 #include "imgui.h"
 #include "ImGUIHelper.h"
+#include "systems/ManipulatorSystem.h"
+#include "systems/RenderSystem.h"
+#include "systems/SpinSystem.h"
+#include "systems/TransformSystem.h"
 
-// Components
-struct Transform {
-    glm::vec3 position = glm::vec3(0.0f);  
-    glm::vec3 scale    = glm::vec3(1.0f);     
-    glm::vec3 rotation = glm::vec3(0.0f);  
-    glm::mat4 model    = glm::mat4(1.0f);     
-};
-
-struct Material {
-    glm::vec3 objectColor;
-    GLuint shaderProgram;
-};
-
-struct Mesh {
-    GLuint VAO;       
-    GLuint VBO, EBO;  
-    GLsizei indexCount; 
-    bool shared;       
-};
-
-struct Camera
-{
-    int num;
-};
-
-struct Manipulator {
-    float moveSpeed   = 2.0f;  
-    float rotateSpeed = 50.0f;
-};
-
-struct Light {
-    glm::vec3 color = glm::vec3(1.0f, 0.8f, 0.6f); 
-};
-
-struct Spin
-{
-    float rotateSpeed = 50.0f;
-};
-
-
+glm::mat4 Engine::camMatrix;
+glm::vec3 Engine::camPos  = glm::vec3(0.0f, 5.0f, 10.0f); 
+glm::vec3 Engine::camLook = glm::vec3(0.0f, 0.0f, 0.0f);  
+glm::vec3 Engine::camUp   = glm::vec3(0.0f, 1.0f, 0.0f);
+glm::vec3 Engine::lightColor = glm::vec3(1.0f, 0.8f, 0.6f); 
+glm::vec3 Engine::lightDir = glm::vec3(-0.5f, -1.0f, -0.5f); 
 float Engine::deltaTime;
 
 SDL_GLContext Engine::glContext = nullptr;
@@ -66,19 +35,18 @@ int windowHeight= 480;
 char* basePath;
 std::unordered_map<std::string, Mesh> meshCache;
 
-// Create ECS world
 flecs::world ecs;
 Mesh monkeyMesh;
 std::vector<flecs::entity> monkeys;
 bool deltaTimeCalculated;
 ImGUIHelper imguiHelper;
 
-// Forward declarations
-Mesh GetMesh(const std::string& path) {
-    // Check if the mesh is already in the cache
+
+Mesh GetMesh(const std::string& path)
+{
     auto it = meshCache.find(path);
-    if (it != meshCache.end()) {
-        // Create a new VAO while reusing the cached VBO and EBO
+    if (it != meshCache.end())
+    {
         Mesh cachedMesh = it->second;
 
         GLuint newVAO;
@@ -99,20 +67,19 @@ Mesh GetMesh(const std::string& path) {
 
         glBindVertexArray(0);
 
-        return { newVAO, cachedMesh.VBO, cachedMesh.EBO, cachedMesh.indexCount, true };
+        return {newVAO, cachedMesh.VBO, cachedMesh.EBO, cachedMesh.indexCount, true};
     }
 
-    // Load the model using a loader
     AssimpLoader loader;
     std::vector<float> vertices;
     std::vector<unsigned int> indices;
 
-    if (!loader.LoadModel(path, vertices, indices)) {
+    if (!loader.LoadModel(path, vertices, indices))
+    {
         std::cerr << "Failed to load model from: " << path << std::endl;
         exit(1);
     }
 
-    // Create buffers
     GLuint VAO, VBO, EBO;
     glGenVertexArrays(1, &VAO);
     glGenBuffers(1, &VBO);
@@ -137,8 +104,7 @@ Mesh GetMesh(const std::string& path) {
 
     glBindVertexArray(0);
 
-    // Cache the shared buffers (VBO and EBO) and return the unique VAO
-    Mesh mesh = { VAO, VBO, EBO, static_cast<GLsizei>(indices.size()), false };
+    Mesh mesh = {VAO, VBO, EBO, static_cast<GLsizei>(indices.size()), false};
     meshCache[path] = mesh;
 
     return mesh;
@@ -173,41 +139,75 @@ void Engine::Init()
         std::cerr << "Failed to initialize GLAD" << std::endl;
         exit(1);
     }
-
-    // IMPORTANT: set the viewport after creating the context
+    
     glViewport(0, 0, windowWidth, windowHeight);
 
     EngineInfo::LogInfo();
     ShaderLoader::Init(basePath);
+    
+    monkeyMesh = GetMesh("shaders/monkey.obj");
+    ManipulatorSystem::RegisterSystem(ecs);
+    TransformSystem::RegisterSystem(ecs);
+    SpinSystem::RegisterSystem(ecs);
+ 
+    RenderSystem::SetupSystems(ecs);   
+    glm::vec3 origCamTarget = glm::vec3(0.0f, 0.0f, 0.0f);
+    glm::vec3 origDirection = glm::normalize(origCamTarget - camPos);
 
-    SetupSystems(monkeyMesh, monkeys);
+    float pitch = glm::degrees(asin(origDirection.y)); 
+    float yaw = glm::degrees(atan2(origDirection.z, origDirection.x)); 
+
+    ecs.entity("Main Camera")
+       .set<Transform>({
+           glm::vec3(0.0f, 5.0f, 10.0f), 
+           glm::vec3(1.0f),
+           glm::vec3(pitch, yaw, 0.0f) 
+       })
+       .set<Camera>({42})
+       .set<Manipulator>({2, 50});
+    ecs.entity("Main Light")
+       .set<Transform>({
+           glm::vec3(0.0f, 0.0f, 0.0f), 
+           glm::vec3(0,0,0 ), 
+           glm::vec3(15,0, 0.0f) 
+       })
+      
+       .set<Light>({glm::vec3(1.0f, 1.0f, 1.0f)})
+       .set<Spin>({50});
+   
+    glEnable(GL_DEPTH_TEST);
+    glDepthFunc(GL_LESS);
+    flecs::entity prevEntity;
+    
     imguiHelper.Init(graphicsApplicationWindow, glContext);
-    MainLoop();
+    while (!quit)
+    {
+        MainLoop();
+    }
     CleanUp();
 }
-bool Engine::IsKeyPressed(SDL_Keycode key) {
+
+bool Engine::IsKeyPressed(SDL_Keycode key)
+{
     const Uint8* state = SDL_GetKeyboardState(nullptr);
     return state[SDL_GetScancodeFromKey(key)];
 }
 
 
-::flecs::entity PlaceMonkey(flecs::world& ecs, const Mesh& monkeyMesh,
-                            const glm::vec3& position, const glm::vec3& color,
-                            const std::string& name = "Monkey") 
+::flecs::entity PlaceMonkey(flecs::world& ecs, const Mesh& monkeyMesh, const glm::vec3& position, const glm::vec3& color, const std::string& name = "Monkey")
 {
     return ecs.entity(name.c_str())
-        .set<Transform>({
-            position,                // Position
-            glm::vec3(1.0f),        // Scale
-            glm::vec3(0.0f, 45.0f, 0.0f) // Rotation
-        })
-        .set<Material>({
-            color, // Object color
-            ShaderLoader::GetShaderProgram("basic") // Shader
-        })
-        .set<Mesh>(monkeyMesh)
-        .set<Spin>({50.0f});
-       // .set<Manipulator>({2,50});
+              .set<Transform>({
+                  position,
+                  glm::vec3(1.0f),
+                  glm::vec3(0.0f, 45.0f, 0.0f)
+              })
+              .set<Material>({
+                  color,
+                  ShaderLoader::GetShaderProgram("basic")
+              })
+              .set<Mesh>(monkeyMesh)
+              .set<Spin>({50.0f});
 }
 
 glm::vec3 GetRandomColor()
@@ -232,12 +232,6 @@ void PopulateMonkeys(flecs::world& ecs, const Mesh& monkeyMesh) {
         PlaceMonkey(ecs, monkeyMesh, glm::vec3(x, 0.0f, z), GetRandomColor(), "Monkey" + std::to_string(i + 1));
     }
 }
-glm::mat4 Engine::camMatrix;
-glm::vec3 Engine::camPos  = glm::vec3(0.0f, 5.0f, 10.0f); // Eye position
-glm::vec3 Engine::camLook = glm::vec3(0.0f, 0.0f, 0.0f);  // Look at origin
-glm::vec3 Engine::camUp   = glm::vec3(0.0f, 1.0f, 0.0f);
-glm::vec3 Engine::lightColor = glm::vec3(1.0f, 0.8f, 0.6f); // Slightly warm light
-glm::vec3 Engine::lightDir = glm::vec3(-0.5f, -1.0f, -0.5f); // Default direction
 
 void Engine::ProcessEvents()
 {
@@ -251,228 +245,75 @@ void Engine::ProcessEvents()
         imguiHelper.OnSDLEvent(e);
     }
 }
-
-void Engine::SetupSystems(Mesh& monkeyMesh, std::vector<flecs::entity>& monkeys)
+void InputMonkeys()
 {
-    // Movement system for entities that have a Manipulator + Transform
-    ecs.system<Manipulator, Transform>()
-       .each([](flecs::entity e, Manipulator& manipulator, Transform& transform) {
-           // Basic WASD
-           if (IsKeyPressed(SDLK_w)) { transform.position.z -= manipulator.moveSpeed * deltaTime; }
-           if (IsKeyPressed(SDLK_s)) { transform.position.z += manipulator.moveSpeed * deltaTime; }
-           if (IsKeyPressed(SDLK_a)) { transform.position.x -= manipulator.moveSpeed * deltaTime; }
-           if (IsKeyPressed(SDLK_d)) { transform.position.x += manipulator.moveSpeed * deltaTime; }
-           if (IsKeyPressed(SDLK_PLUS)) { transform.position.y -= manipulator.moveSpeed * deltaTime; }
-           if (IsKeyPressed(SDLK_MINUS)) { transform.position.y += manipulator.moveSpeed * deltaTime; }
-
-           // Rotation with arrow keys
-           if (IsKeyPressed(SDLK_UP))    { transform.rotation.x -= manipulator.rotateSpeed * deltaTime; }
-           if (IsKeyPressed(SDLK_DOWN))  { transform.rotation.x += manipulator.rotateSpeed * deltaTime; }
-           if (IsKeyPressed(SDLK_LEFT))  { transform.rotation.y -= manipulator.rotateSpeed * deltaTime; }
-           if (IsKeyPressed(SDLK_RIGHT)) { transform.rotation.y += manipulator.rotateSpeed * deltaTime; }
-           if (IsKeyPressed(SDLK_q))     { transform.rotation.z -= manipulator.rotateSpeed * deltaTime; }
-           if (IsKeyPressed(SDLK_e))     { transform.rotation.z += manipulator.rotateSpeed * deltaTime; }
-       });
-
-    monkeyMesh = GetMesh("shaders/monkey.obj");
-    // Place a single monkey at origin
-    //PlaceMonkey(ecs, monkeyMesh, glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(1.0f, 0.5f, 0.2f));
-    // Also place a bunch more
-    //PopulateMonkeys(ecs, monkeyMesh);
-
-
-    // System to update transforms
-    ecs.system<Transform>()
-       .kind(flecs::PreUpdate)
-       .each([](flecs::entity e, Transform& t)
-       {
-           glm::mat4 m(1.0f);
-           m = glm::translate(m, t.position);
-           m = glm::rotate(m, glm::radians(t.rotation.x), glm::vec3(1.0f, 0.0f, 0.0f));
-           m = glm::rotate(m, glm::radians(t.rotation.y), glm::vec3(0.0f, 1.0f, 0.0f));
-           m = glm::rotate(m, glm::radians(t.rotation.z), glm::vec3(0.0f, 0.0f, 1.0f));
-           m = glm::scale(m, t.scale);
-           t.model = m;
-           std::cout << "Entity with Transform: " << e.name() << std::endl;
-
-       });
-
-    ecs.system<Spin,Transform>()
-       .each([](flecs::entity e, Spin& s,Transform& t)
-       {
-           // Update rotation
-           t.rotation.y += s.rotateSpeed * deltaTime;
-            t.position.y = t.position.y + sin(deltaTime);
-           // Clamp rotation to 0-360 degrees
-           t.rotation.y = glm::mod(t.rotation.y, 360.0f);
-         //  std::cout << "Entity with Spin: " << e.name() << std::endl;
-       });
-    
-
-    glm::vec3 origCamTarget = glm::vec3(0.0f, 0.0f, 0.0f);
-    glm::vec3 origDirection = glm::normalize(origCamTarget - camPos);
-
-    float pitch = glm::degrees(asin(origDirection.y)); // Angle to look down or up
-    float yaw = glm::degrees(atan2(origDirection.z, origDirection.x)); // Angle to rotate left or right
-    // Maybe make a single manipulator entity if you want it to move
-    ecs.entity("Main Camera")
-       .set<Transform>({
-           glm::vec3(0.0f, 5.0f, 10.0f), // camPos as position
-           glm::vec3(1.0f), // Default scale (no scaling)
-           glm::vec3(pitch, yaw, 0.0f) // Rotation (initially aligned to look forward)
-       })
-       .set<Camera>({42})
-        .set<Manipulator>({2,50});
-        
-    ecs.system<Camera, Transform>()
-       .each([&](flecs::entity e, const Camera& camera, const Transform& transform)
-       {
-           // Update camPos to match the Transform's position
-           camPos = transform.position;
-
-           // Calculate forward vector based on Transform's rotation
-           glm::vec3 forward = glm::normalize(glm::vec3(
-               cos(glm::radians(transform.rotation.y)) * cos(glm::radians(transform.rotation.x)),
-               sin(glm::radians(transform.rotation.x)),
-               sin(glm::radians(transform.rotation.y)) * cos(glm::radians(transform.rotation.x))
-           ));
-
-           // camLook is the position + forward vector
-           camLook = camPos + forward;
-       });
-
-    
-
-    // Example of passing multiple lights to the shader
-    ecs.entity("Main Light")
-       .set<Transform>({
-           glm::vec3(0.0f, 0.0f, 0.0f), // camPos as position
-           glm::vec3(0,0,0 ), // Default scale (no scaling)
-           glm::vec3(15,0, 0.0f) // Rotation (initially aligned to look forward)
-       })
-      // .set<Spin>({300})
-       .set<Light>({glm::vec3(1.0f, 1.0f, 1.0f)})
-       .set<Spin>({50});
-        
-
-    
-    // Light system: Correct computation of lightDir
-    ecs.system<Light, Transform>()
-       .each([](flecs::entity e, const Light& light, const Transform& transform)
-       {
-           lightDir = glm::normalize(glm::vec3(
-               cos(glm::radians(transform.rotation.y)) * cos(glm::radians(transform.rotation.x)),
-               sin(glm::radians(transform.rotation.x)),
-               sin(glm::radians(transform.rotation.y)) * cos(glm::radians(transform.rotation.x))
-           ));
-       });
-    // Enable depth testing (for 3D)
-    glEnable(GL_DEPTH_TEST);
-    glDepthFunc(GL_LESS);
-    flecs::entity prevEntity;
+    if (Engine::IsKeyPressed(SDLK_PERIOD))
+    {
+        auto newMonkey = PlaceMonkey(ecs, monkeyMesh, glm::vec3(monkeys.size(), 0, 0), GetRandomColor(),
+                                     "monkey" + std::to_string(monkeys.size()));
+        monkeys.push_back(newMonkey);
+        std::cout << "Added a monkey! Total monkeys: " << monkeys.size() << std::endl;
+    }
+    if (Engine::IsKeyPressed(SDLK_COMMA))
+    {
+        if (!monkeys.empty())
+        {
+            auto lastMonkey = monkeys.back();
+            lastMonkey.destruct();
+            monkeys.pop_back(); 
+            std::cout << "Removed a monkey! Total monkeys: " << monkeys.size() << std::endl;
+        }
+        else
+        {
+            std::cout << "No monkeys left to remove!" << std::endl;
+        }
+    }
 }
-//----- MAIN LOOP -----
+
+
 void Engine::MainLoop()
 {
-    // MAIN RENDER LOOP
-    while (!quit)
-    {
-        // --- Input & ECS Update ---
-        static Uint32 lastTime = SDL_GetTicks();
-        Uint32 currentTime = SDL_GetTicks();
-        deltaTime = (currentTime - lastTime) / 1000.0f; 
-        lastTime = currentTime;
-        
-        ProcessEvents();
-        if (IsKeyPressed(SDLK_PERIOD)) {
-            auto newMonkey = PlaceMonkey(ecs, monkeyMesh, glm::vec3(monkeys.size(),0,0), GetRandomColor(), "monkey"+std::to_string(monkeys.size()));
-            monkeys.push_back(newMonkey);
-            std::cout << "Added a monkey! Total monkeys: " << monkeys.size() << std::endl;
-        }
+    static Uint32 lastTime = SDL_GetTicks();
+    Uint32 currentTime = SDL_GetTicks();
+    deltaTime = (currentTime - lastTime) / 1000.0f;
+    lastTime = currentTime;
 
-        // Remove the last monkey when the comma key is pressed
-        if (IsKeyPressed(SDLK_COMMA)) {
-            if (!monkeys.empty()) {
-                auto lastMonkey = monkeys.back();
-                lastMonkey.destruct(); // Remove the entity from the ECS
-                monkeys.pop_back();    // Remove from the tracking vector
-                std::cout << "Removed a monkey! Total monkeys: " << monkeys.size() << std::endl;
-            } else {
-                std::cout << "No monkeys left to remove!" << std::endl;
-            }
-        }
-        
-        ecs.progress();
+    ProcessEvents();
+    InputMonkeys();
+    
+    ecs.progress();
 
-        glm::mat4 view = glm::lookAt(camPos, camLook, camUp);
+    glm::mat4 view = glm::lookAt(camPos, camLook, camUp);
 
-        glm::mat4 projection = glm::perspective(
-            glm::radians(45.0f), 
-            (float)windowWidth / (float)windowHeight,
-            0.1f, 100.0f
-        );
+    glm::mat4 projection = glm::perspective(
+        glm::radians(45.0f),
+        (float)windowWidth / (float)windowHeight,
+        0.1f, 100.0f
+    );
 
-        // Combined
-        camMatrix = projection * view;
+    camMatrix = projection * view;
 
-        // --- Clear screen ---
-        float time = SDL_GetTicks() / 1000.0f;
-        float color = (sin(time) * 0.5f) + 0.5f;
-        glClearColor(color, 0.1f, 0.1f, 1.0f);
-        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+    float time = SDL_GetTicks() / 1000.0f;
+    float color = (sin(time) * 0.5f) + 0.5f;
+    glClearColor(color, 0.1f, 0.1f, 1.0f);
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-        imguiHelper.OnFrameStart();
+    imguiHelper.OnFrameStart();
 
-        ImGui::Begin("Hello, World!"); // Begin window
-        ImGui::Text("This is a Hello World window in ImGui!"); // Text content
-        ImGui::End(); // End window
-        
-        // --- Draw all your entities ---
-        //   Instead of letting a "camera system" store matrices, we 
-        //   just pass camMatrix directly
-        {
-            auto drawQuery = ecs.query<Mesh, Transform, Material>();
-            drawQuery.each([&](flecs::entity e, const Mesh& mesh, const Transform& transform, const Material& material)
-            {
-                glUseProgram(material.shaderProgram);
+    ImGui::Begin("Hello, World!"); 
+    ImGui::Text("This is a Hello World window in ImGui!"); 
+    ImGui::End(); 
 
-                // Pass camMatrix
-                GLint camMatrixLoc = glGetUniformLocation(material.shaderProgram, "camMatrix");
-                glUniformMatrix4fv(camMatrixLoc, 1, GL_FALSE, glm::value_ptr(camMatrix));
 
-                // Pass model matrix
-                GLint modelLoc = glGetUniformLocation(material.shaderProgram, "model");
-                glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(transform.model));
+    RenderSystem::Render(ecs);
 
-                // Pass light properties to shader
-                glUniform3fv(glGetUniformLocation(material.shaderProgram, "lightColor"), 1, glm::value_ptr(lightColor));
-                glUniform3fv(glGetUniformLocation(material.shaderProgram, "lightDir"), 1, glm::value_ptr(lightDir));
-                glUniform3fv(glGetUniformLocation(material.shaderProgram, "viewPos"), 1, glm::value_ptr(camPos));
+    GLenum error = glGetError();
+    if (error != GL_NO_ERROR)
+        std::cerr << "OpenGL error: " << error << std::endl;
 
-                // Pass color
-                GLint colorLoc = glGetUniformLocation(material.shaderProgram, "objectColor");
-                glUniform3fv(colorLoc, 1, glm::value_ptr(material.objectColor));
-
-                // Bind & draw
-                glBindVertexArray(mesh.VAO);
-                glDrawElements(GL_TRIANGLES, mesh.indexCount, GL_UNSIGNED_INT, 0);
-                glBindVertexArray(0);
-                std::cout << "Draw: " << e.name() << std::endl;
-
-            });
-        }
-        
-        // Check for errors
-        GLenum error = glGetError();
-        if (error != GL_NO_ERROR)
-            std::cerr << "OpenGL error: " << error << std::endl;
-
-        imguiHelper.OnFrameEnd();
-        // Swap buffers
-        SDL_GL_SwapWindow(graphicsApplicationWindow);
-
-        
-    }
+    imguiHelper.OnFrameEnd();
+    
+    SDL_GL_SwapWindow(graphicsApplicationWindow);
 }
 
 void Engine::CleanUp()
