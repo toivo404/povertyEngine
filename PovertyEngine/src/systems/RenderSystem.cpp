@@ -1,8 +1,15 @@
 #include "RenderSystem.h"
 #include "TransformSystem.h" 
-#include <iostream>
+#include <unordered_map>
 #include "Engine.h"
 
+struct RenderQueItem
+{
+    flecs::entity entity;
+    GLuint shaderProgram;
+};
+
+std::unordered_map<GLuint, std::vector<RenderQueItem>> renderQueue;
 
 void RenderSystem::SetupSystems(flecs::world& ecs) {
     Engine::camUp   = glm::vec3(0.0f, 1.0f, 0.0f);
@@ -31,56 +38,24 @@ void RenderSystem::SetupSystems(flecs::world& ecs) {
            Engine::camLook = Engine::camPos + forward;
        });
 
+    ecs.system<Mesh, Transform, Material, Shader>()
+       .kind(flecs::PostUpdate)
+       .each([](flecs::entity e, const Mesh& mesh, const Transform& transform, Material& material, Shader& shader)
+       {
+           renderQueue[shader.program].push_back({e, shader.program});
+       });
 }
 
-
-uint64_t group_by_shader(flecs::world_t* world, flecs::table_t* table, flecs::id_t id, void* ctx)
-{
-    // The context provides the ID of the Shader component
-    flecs::entity_t shader_id = reinterpret_cast<flecs::entity_t>(ctx);
-
-    // Use Flecs's API to check if the table has the Shader component
-    const Shader* shader = static_cast<const Shader*>(table->column(shader_id));
-    if (shader)
-    {
-        return shader->program; // Return the shader program ID as the group ID
-    }
-
-    return 0; // Default group if Shader is not present
-}
 
 
 void RenderSystem::Render(flecs::world& ecs)
 {
-    
-    
-     auto query = ecs.query_builder<Mesh, Transform, Shader, Material>()
-        .group_by<Shader>(
-            // group_by callback
-            [&](flecs::world_t* world, flecs::table_t *table, flecs::id_t id, void* ctx) -> uint64_t 
-            {
-                // Wrap the raw C pointers in C++ Flecs types for convenience
-                flecs::world w(world);
-                flecs::table* t(table);
-
-                // We want the column that has the Shader component:
-                if ( t->has<Shader>()) {
-                    // Return the GLuint program as the group_id
-                    return static_cast<uint64_t>(shader->program);
-                }
-                // If there's no Shader, default to 0
-                return 0ULL;
-            }
-        )
-        .build();
-
-    // Now iterate each group (i.e., each unique Shader::program)
-    query.each([&](flecs::id_t group_id, flecs::iter& it) {
-        // group_id corresponds to Shader::program
-        GLuint shaderProgram = static_cast<GLuint>(group_id);
+    for (const auto& [shaderProgram, items] : renderQueue)
+    {
+        // Bind the shader program
         glUseProgram(shaderProgram);
 
-        // Set uniforms common to this shader:
+        // Set global uniforms for this shader
         GLint camMatrixLoc = glGetUniformLocation(shaderProgram, "camMatrix");
         glUniformMatrix4fv(camMatrixLoc, 1, GL_FALSE, glm::value_ptr(Engine::camMatrix));
 
@@ -93,38 +68,38 @@ void RenderSystem::Render(flecs::world& ecs)
         GLint viewPosLoc = glGetUniformLocation(shaderProgram, "viewPos");
         glUniform3fv(viewPosLoc, 1, glm::value_ptr(Engine::camPos));
 
-        // Iterate all entities in this group
-        for (auto i : it) {
-            // Retrieve each component for this entity
-            const Mesh& mesh       = it.get<Mesh>(i);
-            const Transform& trans = it.get<Transform>(i);
-            const Material& mat    = it.get<Material>(i);
+        // Render each item in this shader program group
+        for (const auto& item : items) {
+            // Retrieve components dynamically to avoid dangling pointers
+            const Transform* transform = item.entity.get<Transform>();
+            const Material* material = item.entity.get<Material>();
+            const Mesh* mesh = item.entity.get<Mesh>();
 
-            // Per-entity uniforms
-            GLint modelLoc = glGetUniformLocation(shaderProgram, "model");
-            glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(trans.model));
-
-            GLint colorLoc = glGetUniformLocation(shaderProgram, "objectColor");
-            glUniform3fv(colorLoc, 1, glm::value_ptr(mat.objectColor));
-
-            // Bind each texture and set uniforms for them
-            int textureUnit = 0;
-            for (auto &texInfo : mesh.textures) {
-                glActiveTexture(GL_TEXTURE0 + textureUnit);
-                glBindTexture(GL_TEXTURE_2D, texInfo.id);
-
-                if (texInfo.type == "diffuse") {
-                    glUniform1i(glGetUniformLocation(shaderProgram, "diffuseTexture"), textureUnit);
-                } else if (texInfo.type == "specular") {
-                    glUniform1i(glGetUniformLocation(shaderProgram, "specularTexture"), textureUnit);
-                }
-                textureUnit++;
+            // Ensure components are valid
+            if (!transform || !material || !mesh) {
+                continue;
             }
 
-            // Bind and draw
-            glBindVertexArray(mesh.VAO);
-            glDrawElements(GL_TRIANGLES, mesh.indexCount, GL_UNSIGNED_INT, nullptr);
+            // Set per-entity uniforms
+            GLint modelLoc = glGetUniformLocation(shaderProgram, "model");
+            glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(transform->model));
+
+            GLint colorLoc = glGetUniformLocation(shaderProgram, "objectColor");
+            glUniform3fv(colorLoc, 1, glm::value_ptr(material->objectColor));
+
+          //  // Bind textures
+          //  int textureUnit = 0;
+          //  for (auto tex : mesh->textures) {
+          //      glActiveTexture(GL_TEXTURE0 + textureUnit);
+          //      glBindTexture(GL_TEXTURE_2D, tex.id);
+          //      textureUnit++;
+          //  }
+
+            // Bind VAO and draw
+            glBindVertexArray(mesh->VAO);
+            glDrawElements(GL_TRIANGLES, mesh->indexCount, GL_UNSIGNED_INT, nullptr);
             glBindVertexArray(0);
         }
-    });
+    }
+    renderQueue.clear();
 }
