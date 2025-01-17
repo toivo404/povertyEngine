@@ -163,7 +163,7 @@ workspace "PovertyEngine"
 				-- Adjust the path if needed, depending on your directory structure
 				("{COPY} \"%{wks.location}/PovertyEngine/vendor/SDL2/bin/SDL2.dll\" \"%{cfg.targetdir}\""),
 				("{COPY} \"%{wks.location}/vendor/Assimp/bin/assimp-vc143-mt.dll\" \"%{cfg.targetdir}\""),
-				("{COPY} %{wks.location}/shaders %{cfg.targetdir}/shaders")
+				("{COPY} %{wks.location}/assets %{cfg.targetdir}/assets")
 			}
 			
 
