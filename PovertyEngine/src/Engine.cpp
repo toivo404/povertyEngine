@@ -28,6 +28,9 @@ glm::vec3 Engine::camUp   = glm::vec3(0.0f, 1.0f, 0.0f);
 glm::vec3 Engine::lightColor = glm::vec3(1.0f, 0.8f, 0.6f); 
 glm::vec3 Engine::lightDir = glm::vec3(-0.5f, -1.0f, -0.5f); 
 std::vector<secs::System> Engine::systems;
+std::unordered_map<SDL_Keycode, bool> Engine::heldKeys;        
+std::unordered_map<SDL_Keycode, bool> Engine::justPressedKeys; 
+std::unordered_map<SDL_Keycode, bool> Engine::justReleasedKeys;
 float Engine::deltaTime;
 
 SDL_GLContext Engine::glContext = nullptr;
@@ -122,6 +125,16 @@ Mesh Engine::GetMesh(const std::string& string)
     return  MeshCache::GetMesh(string);
 }
 
+void Engine::AddSystem(secs::System& system)
+{
+    systems.push_back(system); 
+}
+
+bool Engine::GetKeyUp(SDL_Keycode key)
+{
+    return justReleasedKeys.find(key) != justReleasedKeys.end();
+}
+
 
 void Engine::ProcessEvents()
 {
@@ -132,6 +145,24 @@ void Engine::ProcessEvents()
             std::cout << "goodbye" << std::endl;
             quit = true;
         }
+
+        if (e.type == SDL_KEYDOWN && !e.key.repeat) {
+            SDL_Keycode key = e.key.keysym.sym;
+
+            if (heldKeys.find(key) == heldKeys.end()) {
+                justPressedKeys[key] = true;
+                heldKeys[key] = true;
+            }
+        } else if (e.type == SDL_KEYUP) {
+            SDL_Keycode key = e.key.keysym.sym;
+
+            // Remove from heldKeys and add to justReleasedKeys
+            if (heldKeys.find(key) != heldKeys.end()) {
+                justReleasedKeys[key] = true;
+                heldKeys.erase(key);
+            }
+        }
+        
         imguiHelper.OnSDLEvent(e);
     }
 }
@@ -183,7 +214,9 @@ void Engine::MainLoop()
         std::cerr << "OpenGL error: " << error << std::endl;
 
     imguiHelper.OnFrameEnd();
-    
+
+    justPressedKeys.clear();
+    justReleasedKeys.clear();
     SDL_GL_SwapWindow(graphicsApplicationWindow);
 }
 
