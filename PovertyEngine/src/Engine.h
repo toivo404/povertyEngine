@@ -1,35 +1,30 @@
 #pragma once
 #include <SDL_video.h>
 #include <vector>
-#include <flecs.h>
 #include <fwd.hpp>
+#include <memory>
 #include <vec3.hpp>
 #include "Core.h"
 #include "GameClient.h"
 #include "ImGUIHelper.h"
-#include "systems/MaterialSystem.h"
+#include "MaterialCache.h"
 #include "systems/RenderSystem.h"
 
 class PE_API Engine
 {
 public:
+	static std::vector<secs::System> systems;
+
 	static void Init(GameClient* gameClientImplementation);
 	static void ProcessEvents();
-	static void SetupSystems(Mesh& monkeyMesh, std::vector<flecs::entity>& monkeys);
 	static void MainLoop();
 	static void CleanUp();
 	static bool	IsKeyPressed(SDL_Keycode key);
 	static GLuint GetShader(const std::string& str);
 	static Material GetMaterial(const std::string& str);
 	static Mesh GetMesh(const std::string& string);
-	
-	template<typename... Components>
-	static flecs::entity CreateEntity(const std::string& name, Components&&... components) {
-		flecs::entity entity = client->ecs.entity(name.c_str());
-		(entity.set<Components>(std::forward<Components>(components)), ...);
-		return entity;
-	}
-
+	static void AddSystem(secs::System& createSystem);
+	static bool GetKeyUp(SDL_Keycode key);
 
 	static GameClient* client;
 	static char* baseFilePath;
@@ -48,5 +43,7 @@ private:
 	static unsigned int VAO;
 	static unsigned int VBO;
 	static unsigned int EBO;
-
+	static std::unordered_map<SDL_Keycode, bool> heldKeys;
+	static std::unordered_map<SDL_Keycode, bool> justPressedKeys;
+	static std::unordered_map<SDL_Keycode, bool> justReleasedKeys;
 };

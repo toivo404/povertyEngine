@@ -9,16 +9,14 @@
 #include <glm.hpp>
 #include <gtc/matrix_transform.hpp>
 #include <gtc/type_ptr.hpp>
-#include <flecs.h>
+#include <Secs.h>
 #include <cstdlib>
 #include "EngineInfo.h"
 #include "imgui.h"
 #include "ImGUIHelper.h"
 #include "MeshCache.h"
-#include "systems/ManipulatorSystem.h"
-#include "systems/MaterialSystem.h"
+#include "MaterialCache.h"
 #include "systems/RenderSystem.h"
-#include "systems/SpinSystem.h"
 #include "systems/TransformSystem.h"
 
 GameClient* Engine::client;
@@ -29,7 +27,7 @@ glm::vec3 Engine::camLook = glm::vec3(0.0f, 0.0f, 0.0f);
 glm::vec3 Engine::camUp   = glm::vec3(0.0f, 1.0f, 0.0f);
 glm::vec3 Engine::lightColor = glm::vec3(1.0f, 0.8f, 0.6f); 
 glm::vec3 Engine::lightDir = glm::vec3(-0.5f, -1.0f, -0.5f); 
-
+std::vector<secs::System> Engine::systems;
 float Engine::deltaTime;
 
 SDL_GLContext Engine::glContext = nullptr;
@@ -74,15 +72,28 @@ void Engine::Init(GameClient* gameClientImplementation)
 
     EngineInfo::LogInfo();
     ShaderLoader::Init(baseFilePath);
-    
- //   ManipulatorSystem::RegisterSystem(client->ecs);
 
     glEnable(GL_DEPTH_TEST);
     glDepthFunc(GL_LESS);
-    flecs::entity prevEntity;
-    
     imguiHelper.Init(graphicsApplicationWindow, glContext);
+
+    RenderSystem::RegisterComponents(&client->world, &client->componentRegistry);
+    TransformSystem::RegisterComponents(&client->world, &client->componentRegistry);
+    if(client->componentRegistry.getidToNameSize() == 0 || client->componentRegistry.getTypeToIdSize() == 0)
+    {
+        std::cerr << "Components not registering" << std::endl;
+        quit = true;
+    }
+    if (client->componentRegistry.getTypeToIdSize() != client->componentRegistry.getidToNameSize())
+    {
+        std::cerr << "Something bad" << std::endl;
+        quit = true;
+    }
+    
+    RenderSystem::CreateSystems(&client->componentRegistry, &systems);
+    systems.push_back(TransformSystem::CreateSystem(&client->componentRegistry));
     client->OnInit();
+    std::cout << "Systems:" << systems.size() << std::endl;
     while (!quit)
     {
         MainLoop();
@@ -141,7 +152,7 @@ void Engine::MainLoop()
     */
     client->OnUpdate(deltaTime);
 
-    client->ecs.progress();
+    client->world.progress(&systems);
 
     glm::mat4 view = glm::lookAt(camPos, camLook, camUp);
 
@@ -165,7 +176,7 @@ void Engine::MainLoop()
     ImGui::End(); 
 
 
-    RenderSystem::Render(client->ecs);
+    RenderSystem::Render();
 
     GLenum error = glGetError();
     if (error != GL_NO_ERROR)
