@@ -66,6 +66,9 @@
     <ClInclude Include="src\AssimpLoader.h">
       <Filter>src</Filter>
     </ClInclude>
+    <ClInclude Include="src\CachedMesh.h">
+      <Filter>src</Filter>
+    </ClInclude>
     <ClInclude Include="src\Core.h">
       <Filter>src</Filter>
     </ClInclude>
@@ -126,6 +129,9 @@
       <Filter>vendor\imgui</Filter>
     </ClCompile>
     <ClCompile Include="src\AssimpLoader.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="src\CachedMesh.cpp">
       <Filter>src</Filter>
     </ClCompile>
     <ClCompile Include="src\Engine.cpp">

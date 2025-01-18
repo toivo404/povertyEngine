@@ -164,11 +164,15 @@
     <ClInclude Include="..\vendor\imgui\imstb_truetype.h" />
     <ClInclude Include="..\vendor\stb\stb_image.h" />
     <ClInclude Include="src\AssimpLoader.h" />
+    <ClInclude Include="src\CachedMesh.h" />
     <ClInclude Include="src\Core.h" />
     <ClInclude Include="src\Engine.h" />
     <ClInclude Include="src\EngineInfo.h" />
+    <ClInclude Include="src\GameClient.h" />
     <ClInclude Include="src\ImGUIHelper.h" />
     <ClInclude Include="src\MeshCache.h" />
+    <ClInclude Include="src\Secs.h" />
+    <ClInclude Include="src\SecsTest.h" />
     <ClInclude Include="src\ShaderLoader.h" />
     <ClInclude Include="src\systems\ManipulatorSystem.h" />
     <ClInclude Include="src\systems\MaterialSystem.h" />
@@ -186,8 +190,10 @@
     <ClCompile Include="..\vendor\imgui\imgui_tables.cpp" />
     <ClCompile Include="..\vendor\imgui\imgui_widgets.cpp" />
     <ClCompile Include="src\AssimpLoader.cpp" />
+    <ClCompile Include="src\CachedMesh.cpp" />
     <ClCompile Include="src\Engine.cpp" />
     <ClCompile Include="src\EngineInfo.cpp" />
+    <ClCompile Include="src\GameClient.cpp" />
     <ClCompile Include="src\ImGUIHelper.cpp" />
     <ClCompile Include="src\MeshCache.cpp" />
     <ClCompile Include="src\ShaderLoader.cpp" />

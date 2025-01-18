@@ -95,7 +95,7 @@
     <PostBuildEvent>
       <Command>IF EXIST "$(SolutionDir)\PovertyEngine\vendor\SDL2\bin\SDL2.dll"\ (xcopy /Q /E /Y /I "$(SolutionDir)\PovertyEngine\vendor\SDL2\bin\SDL2.dll" "..\bin\Debug-windows-x86_64\Game" &gt; nul) ELSE (xcopy /Q /Y /I "$(SolutionDir)\PovertyEngine\vendor\SDL2\bin\SDL2.dll" "..\bin\Debug-windows-x86_64\Game" &gt; nul)
 IF EXIST "$(SolutionDir)\vendor\Assimp\bin\assimp-vc143-mt.dll"\ (xcopy /Q /E /Y /I "$(SolutionDir)\vendor\Assimp\bin\assimp-vc143-mt.dll" "..\bin\Debug-windows-x86_64\Game" &gt; nul) ELSE (xcopy /Q /Y /I "$(SolutionDir)\vendor\Assimp\bin\assimp-vc143-mt.dll" "..\bin\Debug-windows-x86_64\Game" &gt; nul)
-IF EXIST $(SolutionDir)\shaders\ (xcopy /Q /E /Y /I $(SolutionDir)\shaders ..\bin\Debug-windows-x86_64\Game\shaders &gt; nul) ELSE (xcopy /Q /Y /I $(SolutionDir)\shaders ..\bin\Debug-windows-x86_64\Game\shaders &gt; nul)</Command>
+IF EXIST $(SolutionDir)\assets\ (xcopy /Q /E /Y /I $(SolutionDir)\assets ..\bin\Debug-windows-x86_64\Game\assets &gt; nul) ELSE (xcopy /Q /Y /I $(SolutionDir)\assets ..\bin\Debug-windows-x86_64\Game\assets &gt; nul)</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
@@ -123,7 +123,7 @@ IF EXIST $(SolutionDir)\shaders\ (xcopy /Q /E /Y /I $(SolutionDir)\shaders ..\bi
     <PostBuildEvent>
       <Command>IF EXIST "$(SolutionDir)\PovertyEngine\vendor\SDL2\bin\SDL2.dll"\ (xcopy /Q /E /Y /I "$(SolutionDir)\PovertyEngine\vendor\SDL2\bin\SDL2.dll" "..\bin\Release-windows-x86_64\Game" &gt; nul) ELSE (xcopy /Q /Y /I "$(SolutionDir)\PovertyEngine\vendor\SDL2\bin\SDL2.dll" "..\bin\Release-windows-x86_64\Game" &gt; nul)
 IF EXIST "$(SolutionDir)\vendor\Assimp\bin\assimp-vc143-mt.dll"\ (xcopy /Q /E /Y /I "$(SolutionDir)\vendor\Assimp\bin\assimp-vc143-mt.dll" "..\bin\Release-windows-x86_64\Game" &gt; nul) ELSE (xcopy /Q /Y /I "$(SolutionDir)\vendor\Assimp\bin\assimp-vc143-mt.dll" "..\bin\Release-windows-x86_64\Game" &gt; nul)
-IF EXIST $(SolutionDir)\shaders\ (xcopy /Q /E /Y /I $(SolutionDir)\shaders ..\bin\Release-windows-x86_64\Game\shaders &gt; nul) ELSE (xcopy /Q /Y /I $(SolutionDir)\shaders ..\bin\Release-windows-x86_64\Game\shaders &gt; nul)</Command>
+IF EXIST $(SolutionDir)\assets\ (xcopy /Q /E /Y /I $(SolutionDir)\assets ..\bin\Release-windows-x86_64\Game\assets &gt; nul) ELSE (xcopy /Q /Y /I $(SolutionDir)\assets ..\bin\Release-windows-x86_64\Game\assets &gt; nul)</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Dist|x64'">
@@ -151,7 +151,7 @@ IF EXIST $(SolutionDir)\shaders\ (xcopy /Q /E /Y /I $(SolutionDir)\shaders ..\bi
     <PostBuildEvent>
       <Command>IF EXIST "$(SolutionDir)\PovertyEngine\vendor\SDL2\bin\SDL2.dll"\ (xcopy /Q /E /Y /I "$(SolutionDir)\PovertyEngine\vendor\SDL2\bin\SDL2.dll" "..\bin\Dist-windows-x86_64\Game" &gt; nul) ELSE (xcopy /Q /Y /I "$(SolutionDir)\PovertyEngine\vendor\SDL2\bin\SDL2.dll" "..\bin\Dist-windows-x86_64\Game" &gt; nul)
 IF EXIST "$(SolutionDir)\vendor\Assimp\bin\assimp-vc143-mt.dll"\ (xcopy /Q /E /Y /I "$(SolutionDir)\vendor\Assimp\bin\assimp-vc143-mt.dll" "..\bin\Dist-windows-x86_64\Game" &gt; nul) ELSE (xcopy /Q /Y /I "$(SolutionDir)\vendor\Assimp\bin\assimp-vc143-mt.dll" "..\bin\Dist-windows-x86_64\Game" &gt; nul)
-IF EXIST $(SolutionDir)\shaders\ (xcopy /Q /E /Y /I $(SolutionDir)\shaders ..\bin\Dist-windows-x86_64\Game\shaders &gt; nul) ELSE (xcopy /Q /Y /I $(SolutionDir)\shaders ..\bin\Dist-windows-x86_64\Game\shaders &gt; nul)</Command>
+IF EXIST $(SolutionDir)\assets\ (xcopy /Q /E /Y /I $(SolutionDir)\assets ..\bin\Dist-windows-x86_64\Game\assets &gt; nul) ELSE (xcopy /Q /Y /I $(SolutionDir)\assets ..\bin\Dist-windows-x86_64\Game\assets &gt; nul)</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
@@ -166,6 +166,7 @@ IF EXIST $(SolutionDir)\shaders\ (xcopy /Q /E /Y /I $(SolutionDir)\shaders ..\bi
     <ClInclude Include="..\vendor\imgui\imstb_textedit.h" />
     <ClInclude Include="..\vendor\imgui\imstb_truetype.h" />
     <ClInclude Include="..\vendor\stb\stb_image.h" />
+    <ClInclude Include="src\GameClientImplementation.h" />
     <ClInclude Include="src\Header.h" />
   </ItemGroup>
   <ItemGroup>
@@ -177,6 +178,7 @@ IF EXIST $(SolutionDir)\shaders\ (xcopy /Q /E /Y /I $(SolutionDir)\shaders ..\bi
     <ClCompile Include="..\vendor\imgui\imgui_draw.cpp" />
     <ClCompile Include="..\vendor\imgui\imgui_tables.cpp" />
     <ClCompile Include="..\vendor\imgui\imgui_widgets.cpp" />
+    <ClCompile Include="src\GameClientImplementation.cpp" />
     <ClCompile Include="src\Main.cpp" />
   </ItemGroup>
   <ItemGroup>
