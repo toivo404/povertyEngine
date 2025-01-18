@@ -75,36 +75,8 @@ void Engine::Init(GameClient* gameClientImplementation)
     EngineInfo::LogInfo();
     ShaderLoader::Init(baseFilePath);
     
-    
  //   ManipulatorSystem::RegisterSystem(client->ecs);
-    TransformSystem::RegisterSystem(client->ecs);
-    SpinSystem::RegisterSystem(client->ecs);
- 
-    RenderSystem::SetupSystems(client->ecs);   
-    glm::vec3 origCamTarget = glm::vec3(0.0f, 0.0f, 0.0f);
-    glm::vec3 origDirection = glm::normalize(origCamTarget - camPos);
 
-    float pitch = glm::degrees(asin(origDirection.y)); 
-    float yaw = glm::degrees(atan2(origDirection.z, origDirection.x)); 
-
-    client->ecs.entity("Main Camera")
-       .set<Transform>({
-           glm::vec3(0.0f, 5.0f, 10.0f), 
-           glm::vec3(1.0f),
-           glm::vec3(pitch, yaw, 0.0f) 
-       })
-       .set<Camera>({42})
-       .set<Manipulator>({2, 50});
-    client->ecs.entity("Main Light")
-       .set<Transform>({
-           glm::vec3(0.0f, 0.0f, 0.0f), 
-           glm::vec3(0,0,0 ), 
-           glm::vec3(15,0, 0.0f) 
-       })
-      
-       .set<Light>({glm::vec3(1.0f, 1.0f, 1.0f)})
-       .set<Spin>({50});
-   
     glEnable(GL_DEPTH_TEST);
     glDepthFunc(GL_LESS);
     flecs::entity prevEntity;

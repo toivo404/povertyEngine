@@ -1,7 +1,7 @@
 #pragma once
 #include <flecs.h>
-
-struct Spin {
+#include <core.h>
+struct PE_API Spin {
     float rotateSpeed = 50.0f; // Rotation speed in degrees per second
 };
 
