@@ -1,28 +1,30 @@
 #pragma once
 #include <Core.h>
-#include <flecs.h>
 #include <glad.h>
 #include <glm.hpp>
+#include <memory>
 #include <gtc/type_ptr.hpp>
 
+#include "Secs.h"
 
-struct PE_API Shader
+
+struct Shader
 {
     GLuint program;
 };
 
-struct PE_API Mesh {
+struct Mesh {
     GLuint VAO;
     GLuint VBO, EBO;
     GLsizei indexCount;
 };
 
-struct PE_API Camera
+struct Camera
 {
     float fov;
 };
 
-struct PE_API Light {
+struct Light {
     glm::vec3 color = glm::vec3(1.0f, 0.8f, 0.6f); 
 };
 
@@ -30,7 +32,8 @@ struct PE_API Light {
 class RenderSystem
 {
 public:
-    static void SetupSystems(flecs::world& ecs);
-    static void Render(flecs::world& ecs);
+    static void Render();
+    static void RegisterComponents(secs::World* world, secs::ComponentRegistry* compReg);
+    static void CreateSystems(secs::ComponentRegistry* compReg, std::vector<secs::System>* systems);
 };
 

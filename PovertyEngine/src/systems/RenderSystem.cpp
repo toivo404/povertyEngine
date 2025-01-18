@@ -2,7 +2,7 @@
 #include "TransformSystem.h" 
 #include <unordered_map>
 #include "Engine.h"
-#include "MaterialSystem.h"
+#include "MaterialCache.h"
 
 struct RenderBatchKey {
     GLuint shaderProgram;     // Shader program ID
@@ -31,57 +31,25 @@ namespace std {
 
 struct RenderQueItem
 {
-    flecs::entity e;
+    secs::Entity e;
     glm::mat4 model = glm::mat4(1.0f);
     int meshIndexCount;
 };
 
 std::unordered_map<RenderBatchKey, std::vector<RenderQueItem>> renderQueue;
 
-void RenderSystem::SetupSystems(flecs::world& ecs) {
-    Engine::camUp   = glm::vec3(0.0f, 1.0f, 0.0f);
-    
-    ecs.system<Light, Transform>()
-       .each([](flecs::entity e, const Light& light, const Transform& transform)
-       {
-           Engine::lightDir = glm::normalize(glm::vec3(
-               cos(glm::radians(transform.rotation.y)) * cos(glm::radians(transform.rotation.x)),
-               sin(glm::radians(transform.rotation.x)),
-               sin(glm::radians(transform.rotation.y)) * cos(glm::radians(transform.rotation.x))
-           ));
-       });
 
-    ecs.system<Camera, Transform>()
-       .each([&](flecs::entity e, const Camera& camera, const Transform& transform)
-       {
-           Engine::camPos = transform.position;
+void RenderSystem::RegisterComponents(secs::World* world, secs::ComponentRegistry* compReg)
+{
+    compReg->registerType<Material>("Material");
+    compReg->registerType<Shader>("Shader");
+    compReg->registerType<Light>("Light");
+    compReg->registerType<Camera>("Camera");
+    compReg->registerType<Mesh>("Mesh");
 
-           glm::vec3 forward = glm::normalize(glm::vec3(
-               cos(glm::radians(transform.rotation.y)) * cos(glm::radians(transform.rotation.x)),
-               sin(glm::radians(transform.rotation.x)),
-               sin(glm::radians(transform.rotation.y)) * cos(glm::radians(transform.rotation.x))
-           ));
-           
-           Engine::camLook = Engine::camPos + forward;
-       });
-
-    ecs.system<Mesh, Transform, Material, Shader>()
-     .kind(flecs::PostUpdate)
-     .each([](flecs::entity e, const Mesh& mesh, const Transform& transform, Material& material, Shader& shader)
-     {
-             // Create a render batch key
-           RenderBatchKey key;
-           key.shaderProgram = shader.program;
-           key.VAO = mesh.VAO;
-           key.materialId = material.materialId;
-           
-           // Insert the entity into the render queue
-           renderQueue[key].push_back({e, transform.model, mesh.indexCount});
-     });
 }
 
-
-void RenderSystem::Render(flecs::world& ecs)
+void RenderSystem::Render()
 {
     for (const auto& [key, items] : renderQueue)
     {
@@ -122,3 +90,70 @@ void RenderSystem::Render(flecs::world& ecs)
     // Clear the render queue after rendering
     renderQueue.clear();
 }
+
+
+
+void RenderSystem::CreateSystems(secs::ComponentRegistry* compReg, std::vector<secs::System>* systems)
+{
+    int meshTypeId = compReg->getID<Mesh>();
+    int transformTypeId = compReg->getID<Transform>();
+    int materialTypeId = compReg->getID<Material>();
+    int shaderTypeId = compReg->getID<Shader>();
+    int lightTypeId = compReg->getID<Light>();
+    int cameraTypeId = compReg->getID<Camera>();
+
+    auto renderSystem = secs::System(
+        {meshTypeId, transformTypeId, materialTypeId, shaderTypeId},
+        [meshTypeId, transformTypeId, materialTypeId, shaderTypeId](secs::Entity e, secs::World& w)
+        {
+            const auto& mesh = w.getComponent<Mesh>(e, meshTypeId);
+            const auto& transform = w.getComponent<Transform>(e, transformTypeId);
+            const auto& material = w.getComponent<Material>(e, materialTypeId);
+            const auto& shader = w.getComponent<Shader>(e, shaderTypeId);
+
+            RenderBatchKey key;
+            key.shaderProgram = shader.program;
+            key.VAO = mesh.VAO;
+            key.materialId = material.materialId;
+
+            renderQueue[key].push_back(RenderQueItem{e, transform.model, mesh.indexCount});
+        });
+    systems->push_back(renderSystem);
+
+    auto lightSystem = secs::System(
+        {lightTypeId, transformTypeId},
+        [lightTypeId, transformTypeId](secs::Entity e, secs::World& w)
+        {
+            const auto& light = w.getComponent<Light>(e, lightTypeId);
+            const auto& transform = w.getComponent<Transform>(e, transformTypeId);
+
+            Engine::lightDir = glm::normalize(glm::vec3(
+                cos(glm::radians(transform.rotation.y)) * cos(glm::radians(transform.rotation.x)),
+                sin(glm::radians(transform.rotation.x)),
+                sin(glm::radians(transform.rotation.y)) * cos(glm::radians(transform.rotation.x))
+            ));
+        });
+    systems->push_back(lightSystem);
+
+
+    auto camSystem =
+        secs::System(
+            {cameraTypeId, transformTypeId},
+            [cameraTypeId, transformTypeId](secs::Entity e, secs::World& w)
+            {
+                const auto& transform = w.getComponent<Transform>(e, transformTypeId);
+                Engine::camPos = transform.position;
+
+                glm::vec3 forward = glm::normalize(glm::vec3(
+                    cos(glm::radians(transform.rotation.y)) * cos(glm::radians(transform.rotation.x)),
+                    sin(glm::radians(transform.rotation.x)),
+                    sin(glm::radians(transform.rotation.y)) * cos(glm::radians(transform.rotation.x))
+                ));
+
+                Engine::camLook = Engine::camPos + forward;
+            });
+    systems->push_back(camSystem);
+}
+
+
+

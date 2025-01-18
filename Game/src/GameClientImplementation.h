@@ -5,7 +5,10 @@
 
 class GameClientImplementation : public GameClient {
 public:
+    secs::Entity PlaceAsset(const glm::vec3& position, const std::string& materialFolder, const std::string& modelPath);
     void OnInit() override;
+    void RegisterClientComponents();
+    void RegisterClientSystems();
 
     void OnUpdate(float deltaTime) override;
 

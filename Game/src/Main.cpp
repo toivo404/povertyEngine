@@ -5,7 +5,6 @@
 #include "MeshCache.h"
 #include "Secs.h"
 #include "ShaderLoader.h"
-#include "systems/MaterialSystem.h"
 #include "SecsTest.h"
 struct MyHelloWorldComponent
 {
@@ -20,12 +19,12 @@ struct MyHelloWorldComponent
 
 int main()
 {
-//	GameClientImplementation client = {};
-//	Engine::Init(&client);
 	std::cout << "hello "<< std::endl;
-
-	secs::World world;
-	RunAllSecsTests( world);
+	GameClientImplementation client = {};
+	secs::World testWorld = {};
+	RunAllSecsTests(testWorld);
+	Engine::Init(&client);
+	
 	//// Create a couple of entities
 	//secs::Entity e1 = world.addEntity("EntityOne");
 	//secs::Entity e2 = world.addEntity("EntityTwo");
