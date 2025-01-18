@@ -30,8 +30,6 @@ void World::addComponent(Entity e, int componentID, std::any data) {
     if (!isAlive(e)) {
         throw std::runtime_error("Cannot add component to a removed or nonexistent entity!");
     }
-    std::cout << "Add component on Entity: "<<  e << "component ID: " << componentID << std::endl;
-    
     m_entityComponents[e][componentID] = std::move(data);
 }
 

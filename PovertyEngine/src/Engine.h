@@ -29,6 +29,7 @@ public:
 	static GameClient* client;
 	static char* baseFilePath;
 	static float deltaTime;
+	static double time;
 	static glm::vec3 camPos;
 	static glm::vec3 camLook;
 	static glm::vec3 camUp;

@@ -32,6 +32,8 @@ std::unordered_map<SDL_Keycode, bool> Engine::heldKeys;
 std::unordered_map<SDL_Keycode, bool> Engine::justPressedKeys; 
 std::unordered_map<SDL_Keycode, bool> Engine::justReleasedKeys;
 float Engine::deltaTime;
+double Engine::time;
+
 
 SDL_GLContext Engine::glContext = nullptr;
 SDL_Window* Engine::graphicsApplicationWindow = nullptr;
@@ -81,7 +83,6 @@ void Engine::Init(GameClient* gameClientImplementation)
     imguiHelper.Init(graphicsApplicationWindow, glContext);
 
     RenderSystem::RegisterComponents(&client->world, &client->componentRegistry);
-    TransformSystem::RegisterComponents(&client->world, &client->componentRegistry);
     if(client->componentRegistry.getidToNameSize() == 0 || client->componentRegistry.getTypeToIdSize() == 0)
     {
         std::cerr << "Components not registering" << std::endl;
@@ -94,7 +95,6 @@ void Engine::Init(GameClient* gameClientImplementation)
     }
     
     RenderSystem::CreateSystems(&client->componentRegistry, &systems);
-    systems.push_back(TransformSystem::CreateSystem(&client->componentRegistry));
     client->OnInit();
     std::cout << "Systems:" << systems.size() << std::endl;
     while (!quit)
@@ -169,10 +169,13 @@ void Engine::ProcessEvents()
 
 void Engine::MainLoop()
 {
+    std::cout << "frame" << std::endl;
+    
     static Uint32 lastTime = SDL_GetTicks();
     Uint32 currentTime = SDL_GetTicks();
     deltaTime = (currentTime - lastTime) / 1000.0f;
     lastTime = currentTime;
+    time += deltaTime;
 
     ProcessEvents();
 
@@ -207,7 +210,7 @@ void Engine::MainLoop()
     ImGui::End(); 
 
 
-    RenderSystem::Render();
+    RenderSystem::Render(client->world,  client->componentRegistry);
 
     GLenum error = glGetError();
     if (error != GL_NO_ERROR)

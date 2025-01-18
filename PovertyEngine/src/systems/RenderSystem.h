@@ -32,7 +32,7 @@ struct Light {
 class RenderSystem
 {
 public:
-    static void Render();
+    static void Render(secs::World& world, secs::ComponentRegistry& compReg);
     static void RegisterComponents(secs::World* world, secs::ComponentRegistry* compReg);
     static void CreateSystems(secs::ComponentRegistry* compReg, std::vector<secs::System>* systems);
 };

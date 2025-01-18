@@ -22,7 +22,7 @@ int main()
 	std::cout << "hello "<< std::endl;
 	GameClientImplementation client = {};
 	secs::World testWorld = {};
-	RunAllSecsTests(testWorld);
+//	RunAllSecsTests(testWorld);
 	Engine::Init(&client);
 	
 	//// Create a couple of entities

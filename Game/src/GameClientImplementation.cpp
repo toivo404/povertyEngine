@@ -30,12 +30,15 @@ secs::Entity GameClientImplementation::PlaceAsset(
     static int shaderTypeId = componentRegistry.getID<Shader>();
     static int materialTypeId = componentRegistry.getID<Material>();
     static int meshTypeId = componentRegistry.getID<Mesh>();
-
+ 
     // Create a new entity
     secs::Entity entity = world.createEntity();
 
     // Add components to the entity
-    world.addComponent(entity, transformTypeId, Transform{position, glm::vec3(1.0f), glm::vec3(0.0f)});
+    world.addComponent(entity, transformTypeId, Transform{glm::vec3(0), glm::vec3(1.0f), glm::vec3(0.0f)});
+    const auto& transform = world.getComponent<Transform>(entity, transformTypeId);
+    std::cout << "Transform added: position = (" << transform.position.x << ", " 
+              << transform.position.y << ", " << transform.position.z << ")\n";
     world.addComponent(entity, shaderTypeId, Shader{Engine::GetShader("basic")});
     world.addComponent(entity, materialTypeId, Material{Engine::GetMaterial(materialFolder)});
     world.addComponent(entity, meshTypeId, Mesh{Engine::GetMesh(modelPath)});
@@ -177,10 +180,6 @@ void GameClientImplementation::OnUpdate(float deltaTime)
 {
     if (Engine::GetKeyUp(SDLK_PERIOD))
     {
-        auto e = world.createEntity ();
-        world.addComponent(e, componentRegistry.getID<HelloWorldComponent>() , HelloWorldComponent{42});
-        
-        
         auto asset = PlaceAsset( glm::vec3(placedAssets.size(), 0, 0), "assets/models/monkey/", "assets/models/monkey/monkey.fbx");
         placedAssets.push_back(asset);
         std::cout << "Assets: " << placedAssets.size() << std::endl;

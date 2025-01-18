@@ -269,7 +269,6 @@
     <ClCompile Include="src\Secs.cpp" />
     <ClCompile Include="src\ShaderLoader.cpp" />
     <ClCompile Include="src\systems\RenderSystem.cpp" />
-    <ClCompile Include="src\systems\TransformSystem.cpp" />
     <ClCompile Include="vendor\Glad\glad.c" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
