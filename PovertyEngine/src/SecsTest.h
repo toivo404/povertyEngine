@@ -84,6 +84,8 @@ inline void RunAllSecsTests(secs::World& world) {
     world.addComponent(e2, healthCompType, TestHealth{80, 100});
 
     // Validate Components
+    SECS_TEST_CHECK(!world.hasComponent(e1, healthCompType), "e2 does not have TestVelocity component");
+
     SECS_TEST_CHECK(world.hasComponent(e1, posCompType), "e1 has TestPosition component");
     SECS_TEST_CHECK(world.hasComponent(e1, velCompType), "e1 has TestVelocity component");
 
@@ -121,17 +123,17 @@ inline void RunAllSecsTests(secs::World& world) {
             auto& hp = w.getComponent<TestHealth>(entity, healthCompType);
             std::cout << "HealthLogger sees entity " << entity << " with hp=" << hp.hp << " / " << hp.maxHp << "\n";
         });
+    std::vector<secs::System> systems = {movementSystem, healthLoggerSystem};
 
-    std::vector<secs::System*> systems = {&movementSystem, &healthLoggerSystem};
 
     // Run systems
-    secs::progress(world, systems);
+    world.progress(&systems);
 
     auto& updatedPos = world.getComponent<TestPosition>(e1, posCompType);
     SECS_TEST_CHECK(updatedPos.x == 6.0f && updatedPos.y == 10.5f,
                     "movementSystem updated e1's TestPosition to (6, 10.5)");
 
-    secs::progress(world, systems);
+    world.progress(&systems);
     SECS_TEST_CHECK(updatedPos.x == 7.0f && updatedPos.y == 11.0f,
                     "movementSystem updated e1's TestPosition again to (7, 11)");
 
@@ -141,7 +143,7 @@ inline void RunAllSecsTests(secs::World& world) {
     SECS_TEST_CHECK(!world.isAlive(e1), "Entity e1 is now removed");
 
     std::cout << "Running systems after removing e1...\n";
-    secs::progress(world, systems);
+    world.progress(&systems);
 
     try {
         world.getComponent<TestPosition>(e1, posCompType);
