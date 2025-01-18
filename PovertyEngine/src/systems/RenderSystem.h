@@ -1,29 +1,28 @@
 #pragma once
-
+#include <Core.h>
 #include <flecs.h>
 #include <glad.h>
 #include <glm.hpp>
 #include <gtc/type_ptr.hpp>
 
 
-struct Shader
+struct PE_API Shader
 {
     GLuint program;
 };
 
-struct Mesh {
+struct PE_API Mesh {
     GLuint VAO;
     GLuint VBO, EBO;
     GLsizei indexCount;
-    bool shared;
 };
 
-struct Camera
+struct PE_API Camera
 {
     float fov;
 };
 
-struct Light {
+struct PE_API Light {
     glm::vec3 color = glm::vec3(1.0f, 0.8f, 0.6f); 
 };
 

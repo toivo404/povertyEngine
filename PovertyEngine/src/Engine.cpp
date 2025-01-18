@@ -21,6 +21,7 @@
 #include "systems/SpinSystem.h"
 #include "systems/TransformSystem.h"
 
+GameClient* Engine::client;
 char*   Engine::baseFilePath;
 glm::mat4 Engine::camMatrix;
 glm::vec3 Engine::camPos  = glm::vec3(0.0f, 5.0f, 10.0f); 
@@ -28,6 +29,7 @@ glm::vec3 Engine::camLook = glm::vec3(0.0f, 0.0f, 0.0f);
 glm::vec3 Engine::camUp   = glm::vec3(0.0f, 1.0f, 0.0f);
 glm::vec3 Engine::lightColor = glm::vec3(1.0f, 0.8f, 0.6f); 
 glm::vec3 Engine::lightDir = glm::vec3(-0.5f, -1.0f, -0.5f); 
+
 float Engine::deltaTime;
 
 SDL_GLContext Engine::glContext = nullptr;
@@ -36,14 +38,12 @@ bool Engine::quit = false;
 int windowWidth = 640;
 int windowHeight= 480;
 
-flecs::world ecs;
-Mesh monkeyMesh;
-std::vector<flecs::entity> monkeys;
 bool deltaTimeCalculated;
 ImGUIHelper imguiHelper;
 
-void Engine::Init()
+void Engine::Init(GameClient* gameClientImplementation)
 {
+    client = gameClientImplementation;
     if (SDL_Init(SDL_INIT_VIDEO) < 0) {
         std::cout << "SDL2 failed to init";
         exit(1);
@@ -75,19 +75,19 @@ void Engine::Init()
     EngineInfo::LogInfo();
     ShaderLoader::Init(baseFilePath);
     
-    monkeyMesh = MeshCache::GetMesh("shaders/monkey.fbx");
-    ManipulatorSystem::RegisterSystem(ecs);
-    TransformSystem::RegisterSystem(ecs);
-    SpinSystem::RegisterSystem(ecs);
+    
+ //   ManipulatorSystem::RegisterSystem(client->ecs);
+    TransformSystem::RegisterSystem(client->ecs);
+    SpinSystem::RegisterSystem(client->ecs);
  
-    RenderSystem::SetupSystems(ecs);   
+    RenderSystem::SetupSystems(client->ecs);   
     glm::vec3 origCamTarget = glm::vec3(0.0f, 0.0f, 0.0f);
     glm::vec3 origDirection = glm::normalize(origCamTarget - camPos);
 
     float pitch = glm::degrees(asin(origDirection.y)); 
     float yaw = glm::degrees(atan2(origDirection.z, origDirection.x)); 
 
-    ecs.entity("Main Camera")
+    client->ecs.entity("Main Camera")
        .set<Transform>({
            glm::vec3(0.0f, 5.0f, 10.0f), 
            glm::vec3(1.0f),
@@ -95,7 +95,7 @@ void Engine::Init()
        })
        .set<Camera>({42})
        .set<Manipulator>({2, 50});
-    ecs.entity("Main Light")
+    client->ecs.entity("Main Light")
        .set<Transform>({
            glm::vec3(0.0f, 0.0f, 0.0f), 
            glm::vec3(0,0,0 ), 
@@ -110,6 +110,7 @@ void Engine::Init()
     flecs::entity prevEntity;
     
     imguiHelper.Init(graphicsApplicationWindow, glContext);
+    client->OnInit();
     while (!quit)
     {
         MainLoop();
@@ -123,43 +124,21 @@ bool Engine::IsKeyPressed(SDL_Keycode key)
     return state[SDL_GetScancodeFromKey(key)];
 }
 
-
-::flecs::entity PlaceMonkey(flecs::world& ecs, const Mesh& monkeyMesh, const glm::vec3& position, const glm::vec3& color, const std::string& name = "Monkey")
+GLuint Engine::GetShader(const std::string& str)
 {
-    return ecs.entity(name.c_str())
-              .set<Transform>({
-                  position,
-                  glm::vec3(1.0f),
-                  glm::vec3(0.0f, 45.0f, 0.0f)
-              })
-              .set<Shader>({ShaderLoader::GetShaderProgram("basic")})
-              .set<Material>(MaterialSystem::LoadMaterial("MonkeyMaterial"))
-              .set<Mesh>(monkeyMesh)
-              .set<Spin>({50.0f});
+    return ShaderLoader::GetShaderProgram(str);
 }
 
-glm::vec3 GetRandomColor()
+Material Engine::GetMaterial(const std::string& str)
 {
-    const glm::vec3 baseColor(0.6f, 0.2f, 0.8f);
-    return  baseColor + glm::vec3(
-         static_cast<float>(rand()) / RAND_MAX * 0.2f - 0.1f,
-         static_cast<float>(rand()) / RAND_MAX * 0.2f - 0.1f,
-         static_cast<float>(rand()) / RAND_MAX * 0.2f - 0.1f
-     );
+    return MaterialSystem::LoadMaterial(str, baseFilePath);
 }
 
-void PopulateMonkeys(flecs::world& ecs, const Mesh& monkeyMesh) {
-    const float spacing = 2.5f; 
-    const int count = 20;      
-    for (int i = 0; i < count; ++i) {
-        float x = (i % 5) * spacing - 5.0f;
-        float z = (i / 5) * spacing - 5.0f;
-
-     
-
-        PlaceMonkey(ecs, monkeyMesh, glm::vec3(x, 0.0f, z), GetRandomColor(), "Monkey" + std::to_string(i + 1));
-    }
+Mesh Engine::GetMesh(const std::string& string)
+{
+    return  MeshCache::GetMesh(string);
 }
+
 
 void Engine::ProcessEvents()
 {
@@ -173,31 +152,6 @@ void Engine::ProcessEvents()
         imguiHelper.OnSDLEvent(e);
     }
 }
-void InputMonkeys()
-{
-    if (Engine::IsKeyPressed(SDLK_PERIOD))
-    {
-        auto newMonkey = PlaceMonkey(ecs, monkeyMesh, glm::vec3(monkeys.size(), 0, 0), GetRandomColor(),
-                                     "monkey" + std::to_string(monkeys.size()));
-        monkeys.push_back(newMonkey);
-        std::cout << "Added a monkey! Total monkeys: " << monkeys.size() << std::endl;
-    }
-    if (Engine::IsKeyPressed(SDLK_COMMA))
-    {
-        if (!monkeys.empty())
-        {
-            auto lastMonkey = monkeys.back();
-            lastMonkey.destruct();
-            monkeys.pop_back(); 
-            std::cout << "Removed a monkey! Total monkeys: " << monkeys.size() << std::endl;
-        }
-        else
-        {
-            std::cout << "No monkeys left to remove!" << std::endl;
-        }
-    }
-}
-
 
 void Engine::MainLoop()
 {
@@ -207,9 +161,15 @@ void Engine::MainLoop()
     lastTime = currentTime;
 
     ProcessEvents();
-    InputMonkeys();
-    
-    ecs.progress();
+
+    /*
+    if (updateCallback) {
+        updateCallback();
+    }
+    */
+    client->OnUpdate(deltaTime);
+
+    client->ecs.progress();
 
     glm::mat4 view = glm::lookAt(camPos, camLook, camUp);
 
@@ -233,7 +193,7 @@ void Engine::MainLoop()
     ImGui::End(); 
 
 
-    RenderSystem::Render(ecs);
+    RenderSystem::Render(client->ecs);
 
     GLenum error = glGetError();
     if (error != GL_NO_ERROR)
@@ -246,6 +206,7 @@ void Engine::MainLoop()
 
 void Engine::CleanUp()
 {
+    client->OnShutdown();
     SDL_free(baseFilePath);
     ShaderLoader::CleanUp();
 

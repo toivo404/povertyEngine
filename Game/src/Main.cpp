@@ -1,14 +1,14 @@
 #include <Engine.h>
 #include <iostream>
 
-int add(int a, int b) {
-	return a + b;
-}
+#include "GameClientImplementation.h"
+#include "MeshCache.h"
+#include "ShaderLoader.h"
+#include "systems/MaterialSystem.h"
 
 int main()
 {
-	Engine::Init();
-	int result = add(1, 1);
-	std::cout << "hello world, 1+1 is " << result << std::endl;
+	GameClientImplementation client = {};
+	Engine::Init(&client);
 	return 0;
 }

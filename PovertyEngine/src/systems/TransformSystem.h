@@ -1,10 +1,10 @@
 #pragma once
-
+#include <Core.h>
 #include <glm.hpp>
 #include <flecs.h>
 #include <gtc/matrix_transform.hpp>
 
-struct Transform {
+struct PE_API Transform {
     glm::vec3 position = glm::vec3(0.0f);  
     glm::vec3 scale = glm::vec3(1.0f);     
     glm::vec3 rotation = glm::vec3(0.0f);  

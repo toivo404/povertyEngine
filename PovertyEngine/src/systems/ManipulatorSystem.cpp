@@ -11,8 +11,8 @@ void ManipulatorSystem::RegisterSystem(flecs::world &ecs)
            if (Engine::IsKeyPressed(SDLK_s)) { transform.position.z += manipulator.moveSpeed * Engine::deltaTime; }
            if (Engine::IsKeyPressed(SDLK_a)) { transform.position.x -= manipulator.moveSpeed * Engine::deltaTime; }
            if (Engine::IsKeyPressed(SDLK_d)) { transform.position.x += manipulator.moveSpeed * Engine::deltaTime; }
-           if (Engine::IsKeyPressed(SDLK_PLUS)) { transform.position.y -= manipulator.moveSpeed * Engine::deltaTime; }
-           if (Engine::IsKeyPressed(SDLK_MINUS)) { transform.position.y += manipulator.moveSpeed * Engine::deltaTime; }
+           if (Engine::IsKeyPressed(SDLK_z)) { transform.position.y -= manipulator.moveSpeed * Engine::deltaTime; }
+           if (Engine::IsKeyPressed(SDLK_x)) { transform.position.y += manipulator.moveSpeed * Engine::deltaTime; }
 
            // Rotation with arrow keys
            if (Engine::IsKeyPressed(SDLK_UP))    { transform.rotation.x -= manipulator.rotateSpeed * Engine::deltaTime; }
