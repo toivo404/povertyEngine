@@ -14,7 +14,7 @@ struct Material {
 class MaterialSystem {
 public:
     static Material GetMaterialByID(int id);
-    static Material LoadMaterial(const std::string& materialPath);
+    static Material LoadMaterial(const std::string& materialPath, const char* basePath);
     static void BindTexture(const Material& material);
     static  void CleanUp();
 };

@@ -2,7 +2,9 @@
 #include <unordered_map>
 #include <xstring>
 #include <unordered_map>
+#include "CachedMesh.h"
 #include "systems/RenderSystem.h"
+#include "systems/TransformSystem.h"
 
 class MeshCache
 {
@@ -12,5 +14,5 @@ public:
     static void CleanUp();
 
 private:    
-    static std::unordered_map<std::string, Mesh> cache;
+    static std::unordered_map<std::string, CachedMesh> cache;
 };

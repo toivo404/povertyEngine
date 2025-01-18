@@ -11,7 +11,7 @@ int materialIds;
 static GLuint LoadTextureFromFile(const std::string& texturePath)
 {
     int width, height, channels;
-    stbi_set_flip_vertically_on_load(true);
+    stbi_set_flip_vertically_on_load(false);
     unsigned char* data = stbi_load(texturePath.c_str(), &width, &height, &channels, 0);
     if (!data)
     {
@@ -46,9 +46,8 @@ Material MaterialSystem::GetMaterialByID(int id)
     return materials[id - 1];
 }
 
-Material MaterialSystem::LoadMaterial(const std::string& materialPath)
+Material MaterialSystem::LoadMaterial(const std::string& materialPath, const char* basePath)
 {
-    >"tähän pitää lisää varmaan"
     if (cache.find(materialPath) != cache.end())
     {
         return GetMaterialByID(cache[materialPath]);
@@ -57,7 +56,7 @@ Material MaterialSystem::LoadMaterial(const std::string& materialPath)
     Material material;
     // Load diffuse texture
     std::string diffusePath = materialPath + "mainTex.png";
-    material.diffuseTextureID = LoadTextureFromFile(diffusePath);
+    material.diffuseTextureID = LoadTextureFromFile(std::string(basePath) + diffusePath);
     material.materialId = materialIds;
     if (material.diffuseTextureID == 0)
     {
