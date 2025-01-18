@@ -79,7 +79,7 @@
       <PrecompiledHeader>NotUsing</PrecompiledHeader>
       <WarningLevel>Level3</WarningLevel>
       <PreprocessorDefinitions>PE_PLATFORM_WINDOWS;PE_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>..\PovertyEngine\src;..\PovertyEngine\vendor\spdlog\include;..\vendor\glm;..\PovertyEngine\vendor\Glad;..\PovertyEngine\vendor\SDL2\include;..\vendor\flecs;..\vendor\imgui;..\vendor\stb;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\PovertyEngine\src;..\PovertyEngine\vendor\spdlog\include;..\vendor\glm;..\PovertyEngine\vendor\Glad;..\PovertyEngine\vendor\SDL2\include;..\vendor\imgui;..\vendor\stb;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <DebugInformationFormat>EditAndContinue</DebugInformationFormat>
       <Optimization>Disabled</Optimization>
       <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
@@ -103,7 +103,7 @@ IF EXIST $(SolutionDir)\assets\ (xcopy /Q /E /Y /I $(SolutionDir)\assets ..\bin\
       <PrecompiledHeader>NotUsing</PrecompiledHeader>
       <WarningLevel>Level3</WarningLevel>
       <PreprocessorDefinitions>PE_PLATFORM_WINDOWS;PE_RELEASE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>..\PovertyEngine\src;..\PovertyEngine\vendor\spdlog\include;..\vendor\glm;..\PovertyEngine\vendor\Glad;..\PovertyEngine\vendor\SDL2\include;..\vendor\flecs;..\vendor\imgui;..\vendor\stb;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\PovertyEngine\src;..\PovertyEngine\vendor\spdlog\include;..\vendor\glm;..\PovertyEngine\vendor\Glad;..\PovertyEngine\vendor\SDL2\include;..\vendor\imgui;..\vendor\stb;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <Optimization>Full</Optimization>
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
@@ -131,7 +131,7 @@ IF EXIST $(SolutionDir)\assets\ (xcopy /Q /E /Y /I $(SolutionDir)\assets ..\bin\
       <PrecompiledHeader>NotUsing</PrecompiledHeader>
       <WarningLevel>Level3</WarningLevel>
       <PreprocessorDefinitions>PE_PLATFORM_WINDOWS;PE_DIST;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>..\PovertyEngine\src;..\PovertyEngine\vendor\spdlog\include;..\vendor\glm;..\PovertyEngine\vendor\Glad;..\PovertyEngine\vendor\SDL2\include;..\vendor\flecs;..\vendor\imgui;..\vendor\stb;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\PovertyEngine\src;..\PovertyEngine\vendor\spdlog\include;..\vendor\glm;..\PovertyEngine\vendor\Glad;..\PovertyEngine\vendor\SDL2\include;..\vendor\imgui;..\vendor\stb;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <Optimization>Full</Optimization>
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
@@ -155,7 +155,6 @@ IF EXIST $(SolutionDir)\assets\ (xcopy /Q /E /Y /I $(SolutionDir)\assets ..\bin\
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClInclude Include="..\vendor\flecs\flecs.h" />
     <ClInclude Include="..\vendor\imgui\backends\imgui_impl_opengl3.h" />
     <ClInclude Include="..\vendor\imgui\backends\imgui_impl_opengl3_loader.h" />
     <ClInclude Include="..\vendor\imgui\backends\imgui_impl_sdl2.h" />
@@ -170,7 +169,6 @@ IF EXIST $(SolutionDir)\assets\ (xcopy /Q /E /Y /I $(SolutionDir)\assets ..\bin\
     <ClInclude Include="src\Header.h" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="..\vendor\flecs\flecs.c" />
     <ClCompile Include="..\vendor\imgui\backends\imgui_impl_opengl3.cpp" />
     <ClCompile Include="..\vendor\imgui\backends\imgui_impl_sdl2.cpp" />
     <ClCompile Include="..\vendor\imgui\imgui.cpp" />

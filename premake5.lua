@@ -34,8 +34,8 @@ workspace "PovertyEngine"
             "%{prj.name}/src/**.cpp",
 			"%{prj.name}/src/**.cpp",
 			"%{IncludeDir.GLAD}/glad.c",
-			"vendor/flecs/**.h" ,
-			"vendor/flecs/**.c", 
+	--		"vendor/flecs/**.h" ,
+--			"vendor/flecs/**.c", 
 			"vendor/imgui/**.cpp",
 			"vendor/imgui/**.h",
 			"vendor/stb/stb_image.h"
@@ -57,7 +57,7 @@ workspace "PovertyEngine"
 			"%{IncludeDir.GLAD}/",
 			"%{IncludeDir.GLM}/",
 			"vendor/Assimp/include/",
-			"vendor/flecs/",
+---			"vendor/flecs/",
 			"vendor/imgui/",
 			"vendor/stb/"
 		--	"vendor/imgui/backends"
@@ -118,8 +118,8 @@ workspace "PovertyEngine"
         {
             "%{prj.name}/src/**.h",
             "%{prj.name}/src/**.cpp",
-			"vendor/flecs/**.h",
-			"vendor/flecs/**.c",
+--			"vendor/flecs/**.h",
+--			"vendor/flecs/**.c",
 			"vendor/imgui/**.cpp",
 			"vendor/imgui/**.h",
 			"vendor/stb/stb_image.h"
@@ -132,7 +132,7 @@ workspace "PovertyEngine"
 			"%{IncludeDir.GLM}/",
 			"%{IncludeDir.GLAD}/",
 			"PovertyEngine/vendor/SDL2/include",
-			"vendor/flecs/",
+		--	"vendor/flecs/",
 			"vendor/imgui/",
 			"vendor/stb/"
         }

@@ -10,9 +10,6 @@
     <Filter Include="vendor">
       <UniqueIdentifier>{B3738122-9F15-ACF8-88D0-BF4C74113349}</UniqueIdentifier>
     </Filter>
-    <Filter Include="vendor\flecs">
-      <UniqueIdentifier>{AF5A99F0-9BBD-2895-4443-614B3085F417}</UniqueIdentifier>
-    </Filter>
     <Filter Include="vendor\imgui">
       <UniqueIdentifier>{5D3BD0F0-499E-5F95-F223-984BDE652B18}</UniqueIdentifier>
     </Filter>
@@ -30,9 +27,6 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="..\vendor\flecs\flecs.h">
-      <Filter>vendor\flecs</Filter>
-    </ClInclude>
     <ClInclude Include="..\vendor\imgui\backends\imgui_impl_opengl3.h">
       <Filter>vendor\imgui\backends</Filter>
     </ClInclude>
@@ -78,10 +72,19 @@
     <ClInclude Include="src\EngineInfo.h">
       <Filter>src</Filter>
     </ClInclude>
+    <ClInclude Include="src\GameClient.h">
+      <Filter>src</Filter>
+    </ClInclude>
     <ClInclude Include="src\ImGUIHelper.h">
       <Filter>src</Filter>
     </ClInclude>
     <ClInclude Include="src\MeshCache.h">
+      <Filter>src</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Secs.h">
+      <Filter>src</Filter>
+    </ClInclude>
+    <ClInclude Include="src\SecsTest.h">
       <Filter>src</Filter>
     </ClInclude>
     <ClInclude Include="src\ShaderLoader.h">
@@ -104,9 +107,6 @@
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="..\vendor\flecs\flecs.c">
-      <Filter>vendor\flecs</Filter>
-    </ClCompile>
     <ClCompile Include="..\vendor\imgui\backends\imgui_impl_opengl3.cpp">
       <Filter>vendor\imgui\backends</Filter>
     </ClCompile>
@@ -140,10 +140,16 @@
     <ClCompile Include="src\EngineInfo.cpp">
       <Filter>src</Filter>
     </ClCompile>
+    <ClCompile Include="src\GameClient.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
     <ClCompile Include="src\ImGUIHelper.cpp">
       <Filter>src</Filter>
     </ClCompile>
     <ClCompile Include="src\MeshCache.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Secs.cpp">
       <Filter>src</Filter>
     </ClCompile>
     <ClCompile Include="src\ShaderLoader.cpp">
