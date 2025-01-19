@@ -20,6 +20,10 @@ public:
 	static void MainLoop();
 	static void CleanUp();
 	static bool	IsKeyPressed(SDL_Keycode key);
+	static bool GetMouseButton(int button);
+	static bool GetMouseButtonDown(int button);
+	static bool GetMouseButtonUp(int button);
+	static std::pair<int, int> GetMousePosition();
 	static GLuint GetShader(const std::string& str);
 	static Material GetMaterial(const std::string& str);
 	static Mesh GetMesh(const std::string& string);

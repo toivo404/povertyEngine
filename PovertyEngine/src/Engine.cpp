@@ -31,6 +31,11 @@ std::vector<secs::System> Engine::systems;
 std::unordered_map<SDL_Keycode, bool> Engine::heldKeys;        
 std::unordered_map<SDL_Keycode, bool> Engine::justPressedKeys; 
 std::unordered_map<SDL_Keycode, bool> Engine::justReleasedKeys;
+std::unordered_map<int, bool>         Engine::heldMouseButtons;
+std::unordered_map<int, bool>         Engine::justPressedMouseButtons;
+std::unordered_map<int, bool>         Engine::justReleasedMouseButtons;
+
+
 float Engine::deltaTime;
 double Engine::time;
 
@@ -40,6 +45,8 @@ SDL_Window* Engine::graphicsApplicationWindow = nullptr;
 bool Engine::quit = false;
 int windowWidth = 640;
 int windowHeight= 480;
+int mouseX;
+int mouseY;
 
 bool deltaTimeCalculated;
 ImGUIHelper imguiHelper;
@@ -99,6 +106,25 @@ bool Engine::IsKeyPressed(SDL_Keycode key)
     return state[SDL_GetScancodeFromKey(key)];
 }
 
+
+// Mouse input
+bool Engine::GetMouseButton(int button) {
+    return heldMouseButtons.find(button) != heldMouseButtons.end();
+}
+
+bool Engine::GetMouseButtonDown(int button) {
+    return justPressedMouseButtons.find(button) != justPressedMouseButtons.end();
+}
+
+bool Engine::GetMouseButtonUp(int button) {
+    return justReleasedMouseButtons.find(button) != justReleasedMouseButtons.end();
+}
+
+std::pair<int, int> Engine::GetMousePosition()
+{
+    return {mouseX, mouseY};
+}
+
 GLuint Engine::GetShader(const std::string& str)
 {
     return ShaderLoader::GetShaderProgram(str);
@@ -130,29 +156,56 @@ void Engine::ProcessEvents()
     SDL_Event e;
     while (SDL_PollEvent(&e) != 0)
     {
-        if (e.type == SDL_QUIT) {
+        if (e.type == SDL_QUIT)
+        {
             std::cout << "goodbye" << std::endl;
             quit = true;
         }
 
-        if (e.type == SDL_KEYDOWN && !e.key.repeat) {
+        if (e.type == SDL_KEYDOWN && !e.key.repeat)
+        {
             SDL_Keycode key = e.key.keysym.sym;
 
-            if (heldKeys.find(key) == heldKeys.end()) {
+            if (heldKeys.find(key) == heldKeys.end())
+            {
                 justPressedKeys[key] = true;
                 heldKeys[key] = true;
             }
-        } else if (e.type == SDL_KEYUP) {
+        }
+        else if (e.type == SDL_KEYUP)
+        {
             SDL_Keycode key = e.key.keysym.sym;
 
             // Remove from heldKeys and add to justReleasedKeys
-            if (heldKeys.find(key) != heldKeys.end()) {
+            if (heldKeys.find(key) != heldKeys.end())
+            {
                 justReleasedKeys[key] = true;
                 heldKeys.erase(key);
             }
         }
-        
-        imguiHelper.OnSDLEvent(e);
+        else if (e.type == SDL_MOUSEBUTTONDOWN)
+        {
+            int button = e.button.button; // SDL_BUTTON_LEFT, SDL_BUTTON_RIGHT, etc.
+            justPressedMouseButtons[button] = true;
+            if (heldMouseButtons.find(button) == heldMouseButtons.end())
+            {
+                heldMouseButtons[button] = true;
+            }
+        }
+        else if (e.type == SDL_MOUSEBUTTONUP)
+        {
+            int button = e.button.button;
+            justReleasedMouseButtons[button] = true;
+            if (heldMouseButtons.find(button) != heldMouseButtons.end())
+            {
+                heldMouseButtons.erase(button);
+            }
+        }
+        else if (e.type == SDL_MOUSEMOTION)
+        {
+            mouseX = e.motion.x;
+            mouseY = e.motion.y;
+        }
     }
 }
 
@@ -207,6 +260,8 @@ void Engine::MainLoop()
 
     justPressedKeys.clear();
     justReleasedKeys.clear();
+    justPressedMouseButtons.clear();
+    justReleasedMouseButtons.clear();
     SDL_GL_SwapWindow(graphicsApplicationWindow);
 }
 
