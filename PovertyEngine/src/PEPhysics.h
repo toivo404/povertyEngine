@@ -12,6 +12,13 @@ struct AABB
     glm::vec3 max;
 };
 
+struct PEPhysicsHitInfo
+{
+    secs::Entity entity;
+    glm::vec3 point;
+    float distance;
+};
+
 class PE_API PEPhysics
 {
 public:
@@ -21,5 +28,5 @@ public:
                             glm::vec3& intersectionPoint);
     static bool Raycast(
         const glm::vec3& rayOrigin, const glm::vec3& rayDirection, ::secs::World world,
-        int transformComponent, int aabbComponent, float& distance, glm::vec3& intersectionPoint);
+        int transformComponent, int aabbComponent, PEPhysicsHitInfo& hitInfo);
 };

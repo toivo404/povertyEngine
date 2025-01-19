@@ -58,10 +58,9 @@ bool PEPhysics::RaycastAABB(const glm::vec3& rayOrigin, const glm::vec3& rayDire
     return true;
 }
 
-bool PEPhysics::Raycast(const glm::vec3& rayOrigin, const glm::vec3& rayDirection, secs::World world, int transformComponentId, int aabbComponentId,
-                        float& distance, glm::vec3& intersectionPoint)
+bool PEPhysics::Raycast(const glm::vec3& rayOrigin, const glm::vec3& rayDirection, secs::World world, int transformComponentId, int aabbComponentId, PEPhysicsHitInfo& hitInfo)
 {
-    bool hit = false;
+    bool isHit = false;
     float minDist = std::numeric_limits<float>::max();
     for (secs::Entity entity : world.getAllEntities())
     {
@@ -76,10 +75,11 @@ bool PEPhysics::Raycast(const glm::vec3& rayOrigin, const glm::vec3& rayDirectio
         if (currentHit && dist < minDist)
         {
             minDist = dist;
-            intersectionPoint = point;
-            distance = dist;
-            hit = true;
+            hitInfo.point = point;
+            hitInfo.distance = dist;
+            hitInfo.entity = entity; 
+            isHit = true;
         }
     }
-    return hit;
+    return isHit;
 }
