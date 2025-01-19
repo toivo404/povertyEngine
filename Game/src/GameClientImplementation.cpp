@@ -1,4 +1,6 @@
 #include "GameClientImplementation.h"
+
+#include "backends/imgui_impl_opengl3_loader.h"
 #include "systems/TransformSystem.h"
 
 struct Spin {
@@ -13,11 +15,17 @@ struct Manipulator {
     float rotateSpeed = 50.0f;
 };
 
+struct ClickDeletor
+{
+    
+};
 
 int add(int a, int b) {
     return a + b;
 }
 std::vector<secs::Entity> placedAssets;
+int transformCompTypeId;
+int aaBBCompTypeID;
 
 secs::Entity GameClientImplementation::PlaceAsset(
 
@@ -30,18 +38,19 @@ secs::Entity GameClientImplementation::PlaceAsset(
     static int shaderTypeId = componentRegistry.getID<Shader>();
     static int materialTypeId = componentRegistry.getID<Material>();
     static int meshTypeId = componentRegistry.getID<Mesh>();
- 
+    static int aabbId = componentRegistry.getID<AABB>();
     // Create a new entity
     secs::Entity entity = world.createEntity();
 
     // Add components to the entity
     world.addComponent(entity, transformTypeId, Transform{position, glm::vec3(1.0f), glm::vec3(0.0f)});
     const auto& transform = world.getComponent<Transform>(entity, transformTypeId);
-    std::cout << "Transform added: position = (" << transform.position.x << ", " 
-              << transform.position.y << ", " << transform.position.z << ")\n";
+    std::cout << "Transform added: position = (" << transform.position.x << ", "
+        << transform.position.y << ", " << transform.position.z << ")\n";
     world.addComponent(entity, shaderTypeId, Shader{Engine::GetShader("basic")});
     world.addComponent(entity, materialTypeId, Material{Engine::GetMaterial(materialFolder)});
     world.addComponent(entity, meshTypeId, Mesh{Engine::GetMesh(modelPath)});
+    world.addComponent(entity, aabbId, AABB{Engine::GetAABB(modelPath)});
     world.addComponent(entity, componentRegistry.getID<Spin>(), Spin{50});
     
 
@@ -81,12 +90,13 @@ void GameClientImplementation::OnInit()
     RegisterClientComponents();
     RegisterClientSystems();
 
-    int transformTypeId = componentRegistry.getID<Transform>();
+    transformCompTypeId = componentRegistry.getID<Transform>();
+    aaBBCompTypeID = componentRegistry.getID<AABB>(); 
     int cameraTypeId = componentRegistry.getID<Camera>();
     int manipulatorTypeId = componentRegistry.getID<Manipulator>();
     int lightTypeId = componentRegistry.getID<Light>();
     int spinTypeId = componentRegistry.getID<Spin>();
-    
+
     // Calculate initial values for camera
     glm::vec3 origCamTarget = glm::vec3(0.0f, 0.0f, 0.0f);
     glm::vec3 origDirection = glm::normalize(origCamTarget - Engine::camPos);
@@ -95,17 +105,18 @@ void GameClientImplementation::OnInit()
 
     // Create and set up "Main Camera" entity
     secs::Entity mainCamera = world.createEntity();
-    world.addComponent(mainCamera, transformTypeId, Transform{
+    world.addComponent(mainCamera, transformCompTypeId, Transform{
         glm::vec3(0.0f, 5.0f, 10.0f), // Position
         glm::vec3(1.0f),              // Scale
         glm::vec3(pitch, yaw, 0.0f)   // Rotation
     });
     world.addComponent(mainCamera, cameraTypeId, Camera{42});
     world.addComponent(mainCamera, manipulatorTypeId, Manipulator{2, 50});
-
+    world.addComponent(mainCamera, componentRegistry.getID<ClickDeletor>(), {});
+    
     // Create and set up "Main Light" entity
     secs::Entity mainLight = world.createEntity();
-    world.addComponent(mainLight, transformTypeId, Transform{
+    world.addComponent(mainLight, transformCompTypeId, Transform{
         glm::vec3(0.0f, 0.0f, 0.0f), // Position
         glm::vec3(0, 0, 0),          // Scale
         glm::vec3(15, 0, 0.0f)       // Rotation
@@ -113,6 +124,9 @@ void GameClientImplementation::OnInit()
     world.addComponent(mainLight, lightTypeId, Light{
         glm::vec3(1.0f, 1.0f, 1.0f) // Color
     });
+
+
+    
     world.addComponent(mainLight, spinTypeId, Spin{50});
         
 
@@ -123,6 +137,8 @@ void GameClientImplementation::RegisterClientComponents()
     componentRegistry.registerType<Spin>("Spin");
     componentRegistry.registerType<Manipulator>("Manipulator");
     componentRegistry.registerType<HelloWorldComponent>("HelloWorldComponent");
+    componentRegistry.registerType<ClickDeletor>("ClickDeletor");
+
 
 }
 
@@ -167,6 +183,15 @@ void GameClientImplementation::RegisterClientSystems()
         });
     Engine::AddSystem(manipulatorTransformSystem);
 
+  // int clickDetector = componentRegistry.getID<ClickDeletor>();
+  // int aabbId = componentRegistry.getID<AABB>();
+  //// secs::System mouseClick({clickDetector},
+  ////                         [clickDetector, transformTypeId, aabbId](secs::Entity e, secs::World w)
+  ////                         {
+  ////                           
+  ////                         });
+  // Engine::AddSystem(mouseClick);
+
     int helloWorldCompId = componentRegistry.getID<HelloWorldComponent>();
     secs::System helloWorldSystem({helloWorldCompId, transformTypeId},
                                   [helloWorldCompId, transformTypeId](secs::Entity e, secs::World& w) {
@@ -197,6 +222,18 @@ void GameClientImplementation::OnUpdate(float deltaTime)
         {
             std::cout << "Scene empty" << std::endl;
         }
+    }
+    if(Engine::GetMouseButtonUp(1))
+    {
+        std::cout<<"Click" << std::endl;
+        glm::vec3 origin;
+        glm::vec3 dir;
+        PEPhysicsHitInfo hitInfo;
+        Engine::MousePositionToRay(origin, dir);
+        if (PEPhysics::Raycast(origin, dir, world, transformCompTypeId, aaBBCompTypeID, hitInfo))
+        {
+            world.removeEntity(hitInfo.entity);
+        }    
     }
 }
 
