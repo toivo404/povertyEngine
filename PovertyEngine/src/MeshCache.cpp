@@ -3,10 +3,13 @@
 #include <iostream>
 #include <string>
 #include "AssimpLoader.h"
+#include "PEPhysics.h"
 #include "systems/RenderSystem.h"
 
 std::unordered_map<std::string, CachedMesh> MeshCache::cache;
 
+
+// NOTE: Remember if you need to add or remove vertex attributes you need to adjust the stride in CalculateAABB accordingly
 void MeshCache::SetGLVertexAttributes()
 {
     // Enable and define position attribute (index 0, 3 floats, starts at 0)
@@ -25,40 +28,87 @@ void MeshCache::SetGLVertexAttributes()
     glBindVertexArray(0);
 }
 
+void MeshCache::Load(const std::string& path)
+{
+    AssimpLoader loader;
+    std::vector<float> vertices;
+    std::vector<unsigned int> indices;
+    CachedMesh cachedMesh = {};
+
+    if (!loader.LoadModel(path, vertices, indices, cachedMesh.nodes)) {
+        std::cerr << "Failed to load model from: " << path << std::endl;
+        exit(1);
+    }
+
+    AABB aabb = CalculateAABB(vertices);
+    cachedMesh.aabb = aabb;
+
+    GLuint VAO, VBO, EBO;
+    glGenVertexArrays(1, &VAO);
+    glGenBuffers(1, &VBO);
+    glGenBuffers(1, &EBO);
+
+    glBindVertexArray(VAO);
+    glBindBuffer(GL_ARRAY_BUFFER, VBO);
+    glBufferData(GL_ARRAY_BUFFER, vertices.size() * sizeof(float), vertices.data(), GL_STATIC_DRAW);
+
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
+    glBufferData(GL_ELEMENT_ARRAY_BUFFER, indices.size() * sizeof(unsigned int), indices.data(), GL_STATIC_DRAW);
+
+    SetGLVertexAttributes();
+
+    cachedMesh.mesh = Mesh{VAO, VBO, EBO, static_cast<GLsizei>(indices.size())};
+    cache[path] = cachedMesh;
+}
+
 Mesh MeshCache::GetMesh(const std::string& path)
 {
     auto it = cache.find(path);
     if (it == cache.end())
     {
-        AssimpLoader loader;
-        std::vector<float> vertices;
-        std::vector<unsigned int> indices;
-        CachedMesh cachedMesh = {};
-
-        if (!loader.LoadModel(path, vertices, indices, cachedMesh.nodes)) {
-            std::cerr << "Failed to load model from: " << path << std::endl;
-            exit(1);
-        }
-
-        GLuint VAO, VBO, EBO;
-        glGenVertexArrays(1, &VAO);
-        glGenBuffers(1, &VBO);
-        glGenBuffers(1, &EBO);
-
-        glBindVertexArray(VAO);
-        glBindBuffer(GL_ARRAY_BUFFER, VBO);
-        glBufferData(GL_ARRAY_BUFFER, vertices.size() * sizeof(float), vertices.data(), GL_STATIC_DRAW);
-
-        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
-        glBufferData(GL_ELEMENT_ARRAY_BUFFER, indices.size() * sizeof(unsigned int), indices.data(), GL_STATIC_DRAW);
-
-        SetGLVertexAttributes();
-
-        cachedMesh.mesh = Mesh{VAO, VBO, EBO, static_cast<GLsizei>(indices.size())};
-        cache[path] = cachedMesh;
-        return cachedMesh.mesh;
+        Load(path);
+        return cache[path].mesh;
     }
     return it->second.mesh;
+}
+
+AABB MeshCache::GetAABB(const std::string& path)
+{
+    auto it = cache.find(path);
+    if (it == cache.end())
+    {
+        Load(path);
+        return cache[path].aabb;
+    }
+    return it->second.aabb;
+}
+
+AABB MeshCache::CalculateAABB(const std::vector<float>& vertices) {
+    if (vertices.empty()) {
+        throw std::invalid_argument("Vertex data is empty!");
+    }
+
+    // Initialize min/max with extreme values
+    glm::vec3 min(std::numeric_limits<float>::max());
+    glm::vec3 max(std::numeric_limits<float>::lowest());
+
+    // Extract position data from interleaved vertex data
+    size_t stride = 8; // 8 floats per vertex
+    
+    for (size_t i = 0; i < vertices.size(); i += stride) {
+        glm::vec3 position(vertices[i], vertices[i + 1], vertices[i + 2]);
+
+        // Update AABB bounds
+        min.x = std::min(min.x, position.x);
+        min.y = std::min(min.y, position.y);
+        min.z = std::min(min.z, position.z);
+
+        max.x = std::max(max.x, position.x);
+        max.y = std::max(max.y, position.y);
+        max.z = std::max(max.z, position.z);
+    }
+
+    return {min, max};
 }
 
 
