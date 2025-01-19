@@ -1,7 +1,6 @@
+#include "Engine.h"
 #include <SDL.h>
 #include <glad.h>
-#include "Engine.h"
-#include <common.hpp>
 #include <filesystem>
 #include <iostream>
 #include "AssimpLoader.h"
@@ -17,7 +16,6 @@
 #include "MeshCache.h"
 #include "MaterialCache.h"
 #include "systems/RenderSystem.h"
-#include "systems/TransformSystem.h"
 
 GameClient*                           Engine::client;
 char*                                 Engine::baseFilePath;
@@ -155,6 +153,33 @@ void Engine::MousePositionToRay(glm::vec3& origin, glm::vec3& dir) {
     dir = rayWorld;
 }
 
+bool Engine::IsOnScreen(const glm::vec3& position)
+{
+    glm::vec4 clipSpacePos = projectionMatrix * viewMatrix * glm::vec4(position, 1.0f);
+
+    // Perspective divide to normalize the position
+    if (clipSpacePos.w != 0.0f)
+    {
+        clipSpacePos.x /= clipSpacePos.w;
+        clipSpacePos.y /= clipSpacePos.w;
+        clipSpacePos.z /= clipSpacePos.w;
+    }
+    else
+    {
+        return false; // Avoid division by zero, not on screen
+    }
+
+    // Check if the normalized device coordinates are within [-1, 1]
+    if (clipSpacePos.x >= -1.0f && clipSpacePos.x <= 1.0f &&
+        clipSpacePos.y >= -1.0f && clipSpacePos.y <= 1.0f &&
+        clipSpacePos.z >= -1.0f && clipSpacePos.z <= 1.0f)
+    {
+        return true;
+    }
+
+    return false; // Out of bounds
+}
+
 
 GLuint Engine::GetShader(const std::string& str)
 {
@@ -184,6 +209,13 @@ void Engine::AddSystem(secs::System& system)
 bool Engine::GetKeyUp(SDL_Keycode key)
 {
     return justReleasedKeys.find(key) != justReleasedKeys.end();
+}
+
+const char* currentMessage = nullptr;
+
+void Engine::DisplayMessage(const char* message)
+{
+    currentMessage = message;
 }
 
 
@@ -257,7 +289,13 @@ void Engine::MainLoop()
     time += deltaTime;
 
     ProcessEvents();
+    
+    float color = (sin(time) * 0.5f) + 0.5f;
+    glClearColor(color, 0.1f, 0.1f, 1.0f);
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
+    imguiHelper.OnFrameStart();
+    
     /*
     if (updateCallback) {
         updateCallback();
@@ -277,17 +315,14 @@ void Engine::MainLoop()
 
     camMatrix = projectionMatrix * viewMatrix;
 
-    float time = SDL_GetTicks() / 1000.0f;
-    float color = (sin(time) * 0.5f) + 0.5f;
-    glClearColor(color, 0.1f, 0.1f, 1.0f);
-    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
-    imguiHelper.OnFrameStart();
-
-    ImGui::Begin("Hello, World!"); 
-    ImGui::Text("This is a Hello World window in ImGui!"); 
-    ImGui::End(); 
-
+ 
+    if (currentMessage != nullptr)
+    {
+        ImGui::Begin("hello");
+        ImGui::Text( currentMessage );
+        ImGui::End();    
+    }
+     
 
     RenderSystem::Render(client->world,  client->componentRegistry);
 
