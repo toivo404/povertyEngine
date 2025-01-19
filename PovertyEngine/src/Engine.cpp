@@ -258,15 +258,15 @@ void Engine::MainLoop()
 
     client->world.progress(&systems);
 
-    glm::mat4 view = glm::lookAt(camPos, camLook, camUp);
+    viewMatrix = glm::lookAt(camPos, camLook, camUp);
 
-    glm::mat4 projection = glm::perspective(
+    projectionMatrix = glm::perspective(
         glm::radians(45.0f),
         (float)windowWidth / (float)windowHeight,
         0.1f, 100.0f
     );
 
-    camMatrix = projection * view;
+    camMatrix = projectionMatrix * viewMatrix;
 
     float time = SDL_GetTicks() / 1000.0f;
     float color = (sin(time) * 0.5f) + 0.5f;

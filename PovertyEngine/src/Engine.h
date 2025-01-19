@@ -41,6 +41,8 @@ public:
 	static glm::vec3 lightDir;
 	static glm::vec3 lightColor;
 	static glm::mat4 camMatrix;
+	static glm::mat4 projectionMatrix;
+	static glm::mat4 viewMatrix;
 	
 private:
 	static SDL_GLContext glContext;
@@ -50,4 +52,9 @@ private:
 	static std::unordered_map<SDL_Keycode, bool> heldKeys;
 	static std::unordered_map<SDL_Keycode, bool> justPressedKeys;
 	static std::unordered_map<SDL_Keycode, bool> justReleasedKeys;
+
+	static std::unordered_map<int, bool> heldMouseButtons;
+	static std::unordered_map<int, bool> justPressedMouseButtons;
+	static std::unordered_map<int, bool> justReleasedMouseButtons;
+	
 };
