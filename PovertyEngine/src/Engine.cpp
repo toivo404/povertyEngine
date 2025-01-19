@@ -127,6 +127,34 @@ std::pair<int, int> Engine::GetMousePosition()
     return {mouseX, mouseY};
 }
 
+void Engine::MousePositionToRay(glm::vec3& origin, glm::vec3& dir) {
+
+    // Normalize mouse coordinates to range [-1, 1]
+    float x = (2.0f * mouseX) / windowWidth - 1.0f;
+    float y = 1.0f - (2.0f * mouseY) / windowHeight; // Flip Y for screen space
+    float z = 1.0f; // Default depth (far plane)
+
+    // Create a normalized device coordinate (NDC) vector
+    glm::vec4 rayNDC = glm::vec4(x, y, z, 1.0f);
+
+    // Transform NDC to clip space (inverse of projection matrix)
+    glm::vec4 rayClip = glm::inverse(projectionMatrix) * rayNDC;
+
+    // Transform clip space to view space
+    glm::vec4 rayView = glm::vec4(rayClip.x, rayClip.y, -1.0f, 0.0f); // Z = -1 for direction
+
+    // Transform view space to world space
+    glm::vec3 rayWorld = glm::vec3(glm::inverse(viewMatrix) * rayView);
+    rayWorld = glm::normalize(rayWorld); // Normalize the direction vector
+
+    // Ray origin is the camera position
+    origin = glm::vec3(glm::inverse(viewMatrix)[3]);
+
+    // Ray direction is the normalized world-space direction
+    dir = rayWorld;
+}
+
+
 GLuint Engine::GetShader(const std::string& str)
 {
     return ShaderLoader::GetShaderProgram(str);

@@ -24,6 +24,7 @@ public:
 	static bool GetMouseButtonDown(int button);
 	static bool GetMouseButtonUp(int button);
 	static std::pair<int, int> GetMousePosition();
+	static void MousePositionToRay(glm::vec3& origin,  glm::vec3& dir);
 	static GLuint GetShader(const std::string& str);
 	static Material GetMaterial(const std::string& str);
 	static Mesh GetMesh(const std::string& string);
