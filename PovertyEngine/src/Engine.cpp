@@ -83,17 +83,6 @@ void Engine::Init(GameClient* gameClientImplementation)
     imguiHelper.Init(graphicsApplicationWindow, glContext);
 
     RenderSystem::RegisterComponents(&client->world, &client->componentRegistry);
-    if(client->componentRegistry.getidToNameSize() == 0 || client->componentRegistry.getTypeToIdSize() == 0)
-    {
-        std::cerr << "Components not registering" << std::endl;
-        quit = true;
-    }
-    if (client->componentRegistry.getTypeToIdSize() != client->componentRegistry.getidToNameSize())
-    {
-        std::cerr << "Something bad" << std::endl;
-        quit = true;
-    }
-    
     RenderSystem::CreateSystems(&client->componentRegistry, &systems);
     client->OnInit();
     std::cout << "Systems:" << systems.size() << std::endl;
@@ -169,8 +158,6 @@ void Engine::ProcessEvents()
 
 void Engine::MainLoop()
 {
-    std::cout << "frame" << std::endl;
-    
     static Uint32 lastTime = SDL_GetTicks();
     Uint32 currentTime = SDL_GetTicks();
     deltaTime = (currentTime - lastTime) / 1000.0f;

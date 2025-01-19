@@ -35,7 +35,7 @@ secs::Entity GameClientImplementation::PlaceAsset(
     secs::Entity entity = world.createEntity();
 
     // Add components to the entity
-    world.addComponent(entity, transformTypeId, Transform{glm::vec3(0), glm::vec3(1.0f), glm::vec3(0.0f)});
+    world.addComponent(entity, transformTypeId, Transform{position, glm::vec3(1.0f), glm::vec3(0.0f)});
     const auto& transform = world.getComponent<Transform>(entity, transformTypeId);
     std::cout << "Transform added: position = (" << transform.position.x << ", " 
               << transform.position.y << ", " << transform.position.z << ")\n";

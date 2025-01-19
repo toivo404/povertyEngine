@@ -57,15 +57,6 @@ namespace secs {
             return it->second;
         }
 
-        int getTypeToIdSize()
-        {
-            return typeToID.size();
-        }
-        int getidToNameSize()
-        {
-            return idToName.size();
-        }
-
     private:
         int nextID = 0;
         std::unordered_map<std::type_index, int> typeToID;
@@ -83,22 +74,42 @@ namespace secs {
         bool hasComponent(Entity e, int componentID) const;
 
         // Retrieve the std::any for a given component
-        std::any& getComponentAny(Entity e, int componentID) {
+        std::any* getComponentAny(Entity e, int componentID) {
             auto entIt = m_entityComponents.find(e);
             if (entIt == m_entityComponents.end() || m_removedEntities.count(e)) {
-                throw std::runtime_error("Entity does not exist or is removed");
+                return nullptr; // Entity does not exist or is removed
             }
             auto compIt = entIt->second.find(componentID);
             if (compIt == entIt->second.end()) {
-                throw std::runtime_error("Entity does not have componentID: " + std::to_string(componentID));
+                return nullptr; // Component does not exist
             }
-            return compIt->second;
+            return &compIt->second; // Return pointer to the component
         }
 
-        // Helper: cast the stored std::any to a T&
+        template <typename T>
+        T* tryGetComponent(Entity e, int componentID)
+        {
+            std::any* compAny = getComponentAny(e, componentID);
+            if (compAny)
+            {
+                try
+                {
+                    return &std::any_cast<T&>(*compAny); // Return pointer to the stored component
+                }
+                catch (const std::bad_any_cast&)
+                {
+                    throw std::runtime_error("Type mismatch in tryGetComponent: requested type does not match stored type.");
+                }
+            }
+            return nullptr; // Component does not exist
+        }
+
         template <typename T>
         T& getComponent(Entity e, int componentID) {
-            return std::any_cast<T&>(getComponentAny(e, componentID));
+            const auto comp = getComponentAny(e, componentID);
+            if (comp == nullptr)
+                throw std::runtime_error("Cannot find component with ID " + std::to_string(componentID) + " on entity " + std::to_string(e));
+            return std::any_cast<T&>(*comp);
         }
 
         std::vector<Entity> getAllEntities() const;

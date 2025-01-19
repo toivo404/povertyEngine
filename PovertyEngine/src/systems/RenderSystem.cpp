@@ -38,15 +38,8 @@ void RenderSystem::Render(secs::World& world, secs::ComponentRegistry& compReg)
             const auto& mesh = world.getComponent<Mesh>(e, meshTypeId);
             const auto& material = world.getComponent<Material>(e, materialTypeId);
             const auto& shader = world.getComponent<Shader>(e, shaderTypeId);
-
-            // Recalculate the model matrix
-            glm::mat4 model = glm::mat4(1.0f);
-            model = glm::translate(model, transform.position /* + glm::vec3(0, sin(Engine::time), 0) */);
-            model = glm::rotate(model, glm::radians(transform.rotation.x), glm::vec3(1.0f, 0.0f, 0.0f));
-            model = glm::rotate(model, glm::radians(transform.rotation.y), glm::vec3(0.0f, 1.0f, 0.0f));
-            model = glm::rotate(model, glm::radians(transform.rotation.z), glm::vec3(0.0f, 0.0f, 1.0f));
-            model = glm::scale(model, transform.scale);
-            transform.model = model;
+            
+            transform.UpdateModelMatrix();
 
             // Use the shader program
             glUseProgram(shader.program);
