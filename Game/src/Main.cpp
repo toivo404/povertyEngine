@@ -6,6 +6,7 @@
 #include "Secs.h"
 #include "ShaderLoader.h"
 #include "SecsTest.h"
+#include "..\..\PovertyEngine\src\PEPhysicsTests.cpp"
 struct MyHelloWorldComponent
 {
 	int number = 42;
@@ -22,7 +23,11 @@ int main()
 	std::cout << "hello "<< std::endl;
 	GameClientImplementation client = {};
 	secs::World testWorld = {};
-//	RunAllSecsTests(testWorld);
+#ifdef PE_DEBUG
+	RunAllSecsTests(testWorld);
+	PEPhysicsTests::RunAllTests();
+#endif
+	
 	Engine::Init(&client);
 	
 	//// Create a couple of entities
