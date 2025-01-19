@@ -19,15 +19,17 @@
 #include "systems/RenderSystem.h"
 #include "systems/TransformSystem.h"
 
-GameClient* Engine::client;
-char*   Engine::baseFilePath;
-glm::mat4 Engine::camMatrix;
-glm::vec3 Engine::camPos  = glm::vec3(0.0f, 5.0f, 10.0f); 
-glm::vec3 Engine::camLook = glm::vec3(0.0f, 0.0f, 0.0f);  
-glm::vec3 Engine::camUp   = glm::vec3(0.0f, 1.0f, 0.0f);
-glm::vec3 Engine::lightColor = glm::vec3(1.0f, 0.8f, 0.6f); 
-glm::vec3 Engine::lightDir = glm::vec3(-0.5f, -1.0f, -0.5f); 
-std::vector<secs::System> Engine::systems;
+GameClient*                           Engine::client;
+char*                                 Engine::baseFilePath;
+glm::mat4                             Engine::camMatrix;
+glm::vec3                             Engine::camPos  = glm::vec3(0.0f, 5.0f, 10.0f); 
+glm::vec3                             Engine::camLook = glm::vec3(0.0f, 0.0f, 0.0f);  
+glm::vec3                             Engine::camUp   = glm::vec3(0.0f, 1.0f, 0.0f);
+glm::mat4                             Engine::projectionMatrix;
+glm::mat4                             Engine::viewMatrix;
+glm::vec3                             Engine::lightColor = glm::vec3(1.0f, 0.8f, 0.6f); 
+glm::vec3                             Engine::lightDir = glm::vec3(-0.5f, -1.0f, -0.5f); 
+std::vector<secs::System>             Engine::systems;
 std::unordered_map<SDL_Keycode, bool> Engine::heldKeys;        
 std::unordered_map<SDL_Keycode, bool> Engine::justPressedKeys; 
 std::unordered_map<SDL_Keycode, bool> Engine::justReleasedKeys;

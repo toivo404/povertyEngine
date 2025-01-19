@@ -45,9 +45,7 @@ private:
 	static SDL_GLContext glContext;
 	static SDL_Window* graphicsApplicationWindow;
 	static bool quit;
-	static unsigned int VAO;
-	static unsigned int VBO;
-	static unsigned int EBO;
+
 	static std::unordered_map<SDL_Keycode, bool> heldKeys;
 	static std::unordered_map<SDL_Keycode, bool> justPressedKeys;
 	static std::unordered_map<SDL_Keycode, bool> justReleasedKeys;
