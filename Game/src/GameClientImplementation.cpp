@@ -1,5 +1,6 @@
 #include "GameClientImplementation.h"
 
+#include "imgui.h"
 #include "backends/imgui_impl_opengl3_loader.h"
 #include "systems/TransformSystem.h"
 
@@ -15,10 +16,12 @@ struct Manipulator {
     float rotateSpeed = 50.0f;
 };
 
-struct ClickDeletor
+struct OutOfBoundsDetector
 {
     
 };
+
+
 
 int add(int a, int b) {
     return a + b;
@@ -51,21 +54,29 @@ secs::Entity GameClientImplementation::PlaceAsset(
     world.addComponent(entity, materialTypeId, Material{Engine::GetMaterial(materialFolder)});
     world.addComponent(entity, meshTypeId, Mesh{Engine::GetMesh(modelPath)});
     world.addComponent(entity, aabbId, AABB{Engine::GetAABB(modelPath)});
+    world.addComponent(entity, componentRegistry.getID<OutOfBoundsDetector>(), OutOfBoundsDetector{});
     world.addComponent(entity, componentRegistry.getID<Spin>(), Spin{50});
     
 
     return entity;
 }
 
+float GetRandomValue()
+{
+    return  static_cast<float>(rand()) / RAND_MAX;
+}
+
 glm::vec3 GetRandomColor()
 {
     const glm::vec3 baseColor(0.6f, 0.2f, 0.8f);
     return  baseColor + glm::vec3(
-         static_cast<float>(rand()) / RAND_MAX * 0.2f - 0.1f,
-         static_cast<float>(rand()) / RAND_MAX * 0.2f - 0.1f,
-         static_cast<float>(rand()) / RAND_MAX * 0.2f - 0.1f
+         GetRandomValue() * 0.2f - 0.1f,
+         GetRandomValue() * 0.2f - 0.1f,
+         GetRandomValue() / RAND_MAX * 0.2f - 0.1f
      );
 }
+
+
 
 void GameUpdate()
 {
@@ -96,6 +107,7 @@ void GameClientImplementation::OnInit()
     int manipulatorTypeId = componentRegistry.getID<Manipulator>();
     int lightTypeId = componentRegistry.getID<Light>();
     int spinTypeId = componentRegistry.getID<Spin>();
+   
 
     // Calculate initial values for camera
     glm::vec3 origCamTarget = glm::vec3(0.0f, 0.0f, 0.0f);
@@ -112,7 +124,7 @@ void GameClientImplementation::OnInit()
     });
     world.addComponent(mainCamera, cameraTypeId, Camera{42});
     world.addComponent(mainCamera, manipulatorTypeId, Manipulator{2, 50});
-    world.addComponent(mainCamera, componentRegistry.getID<ClickDeletor>(), {});
+  
     
     // Create and set up "Main Light" entity
     secs::Entity mainLight = world.createEntity();
@@ -132,16 +144,18 @@ void GameClientImplementation::OnInit()
 
 }
 
+int obDetectorId;
+
 void GameClientImplementation::RegisterClientComponents()
 {
     componentRegistry.registerType<Spin>("Spin");
     componentRegistry.registerType<Manipulator>("Manipulator");
     componentRegistry.registerType<HelloWorldComponent>("HelloWorldComponent");
-    componentRegistry.registerType<ClickDeletor>("ClickDeletor");
-
+    obDetectorId = componentRegistry.registerType<OutOfBoundsDetector>("OutOfBoundsDetector");
 
 }
 
+bool isGameOver;
 
 void GameClientImplementation::RegisterClientSystems()
 {
@@ -182,7 +196,8 @@ void GameClientImplementation::RegisterClientSystems()
             if (Engine::IsKeyPressed(SDLK_e))     { transform.rotation.z += manipulator.rotateSpeed * Engine::deltaTime; }
         });
     Engine::AddSystem(manipulatorTransformSystem);
-
+    
+                
   // int clickDetector = componentRegistry.getID<ClickDeletor>();
   // int aabbId = componentRegistry.getID<AABB>();
   //// secs::System mouseClick({clickDetector},
@@ -201,6 +216,8 @@ void GameClientImplementation::RegisterClientSystems()
 
 }
 
+double lastMonkeySpawn;
+int killedMonkeys;
 void GameClientImplementation::OnUpdate(float deltaTime)
 {
     if (Engine::GetKeyUp(SDLK_PERIOD))
@@ -223,6 +240,7 @@ void GameClientImplementation::OnUpdate(float deltaTime)
             std::cout << "Scene empty" << std::endl;
         }
     }
+    
     if(Engine::GetMouseButtonUp(1))
     {
         std::cout<<"Click" << std::endl;
@@ -233,8 +251,34 @@ void GameClientImplementation::OnUpdate(float deltaTime)
         if (PEPhysics::Raycast(origin, dir, world, transformCompTypeId, aaBBCompTypeID, hitInfo))
         {
             world.removeEntity(hitInfo.entity);
+            killedMonkeys++;
         }    
     }
+
+    for (secs::Entity e : world.getAllEntities())
+    {
+        auto trans = world.tryGetComponent<Transform>(e, transformCompTypeId);
+        auto obDetector = world.tryGetComponent<OutOfBoundsDetector>(e, obDetectorId);
+        if (obDetector != nullptr && trans != nullptr && !Engine::IsOnScreen(trans->position))
+        {
+            isGameOver = true;
+            world = secs::World{};
+        }
+    } 
+    
+
+    if (isGameOver)
+    {
+        Engine::DisplayMessage( "You lost the game" );
+    }
+    else if (Engine::time - lastMonkeySpawn > 3)
+    {
+        PlaceAsset(glm::vec3(-2 + (GetRandomValue() * 4), 0, 0), "assets/models/monkey/", "assets/models/monkey/monkey.fbx");
+        lastMonkeySpawn = Engine::time;
+    }
+    
+    
+    
 }
 
 void GameClientImplementation::OnShutdown()

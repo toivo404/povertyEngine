@@ -36,6 +36,8 @@ public:
 	static void AddSystem(secs::System& createSystem);
 	static bool GetKeyUp(SDL_Keycode key);
 
+	static void DisplayMessage(const char* message);
+
 	static GameClient* client;
 	static char* baseFilePath;
 	static float deltaTime;
