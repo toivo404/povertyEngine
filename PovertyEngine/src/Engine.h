@@ -8,6 +8,7 @@
 #include "GameClient.h"
 #include "ImGUIHelper.h"
 #include "MaterialCache.h"
+#include "PEPhysics.h"
 #include "systems/RenderSystem.h"
 
 class PE_API Engine
@@ -19,15 +20,19 @@ public:
 	static void ProcessEvents();
 	static void MainLoop();
 	static void CleanUp();
+	
 	static bool	IsKeyPressed(SDL_Keycode key);
 	static bool GetMouseButton(int button);
 	static bool GetMouseButtonDown(int button);
 	static bool GetMouseButtonUp(int button);
 	static std::pair<int, int> GetMousePosition();
 	static void MousePositionToRay(glm::vec3& origin,  glm::vec3& dir);
+	static bool IsOnScreen(const glm::vec3& position);
+	
 	static GLuint GetShader(const std::string& str);
 	static Material GetMaterial(const std::string& str);
 	static Mesh GetMesh(const std::string& string);
+	static AABB GetAABB(const std::string& string);
 	static void AddSystem(secs::System& createSystem);
 	static bool GetKeyUp(SDL_Keycode key);
 

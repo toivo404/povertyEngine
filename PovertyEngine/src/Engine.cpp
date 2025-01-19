@@ -91,6 +91,7 @@ void Engine::Init(GameClient* gameClientImplementation)
     glDepthFunc(GL_LESS);
     imguiHelper.Init(graphicsApplicationWindow, glContext);
 
+    client->componentRegistry.registerType<AABB>("AABB");
     RenderSystem::RegisterComponents(&client->world, &client->componentRegistry);
     RenderSystem::CreateSystems(&client->componentRegistry, &systems);
     client->OnInit();
@@ -170,6 +171,11 @@ Mesh Engine::GetMesh(const std::string& string)
     return  MeshCache::GetMesh(string);
 }
 
+AABB Engine::GetAABB(const std::string& string)
+{
+    return  MeshCache::GetAABB(string);
+}
+
 void Engine::AddSystem(secs::System& system)
 {
     systems.push_back(system); 
@@ -236,6 +242,9 @@ void Engine::ProcessEvents()
             mouseX = e.motion.x;
             mouseY = e.motion.y;
         }
+
+
+    imguiHelper.OnSDLEvent(e);
     }
 }
 
