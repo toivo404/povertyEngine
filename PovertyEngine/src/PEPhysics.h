@@ -1,15 +1,22 @@
 #pragma once
 #include <vector>
 #include <glm.hpp>
-
 #include "Secs.h"
 #include "systems/TransformSystem.h"
 
 
-struct AABB
+struct PE_API AABB
 {
     glm::vec3 min;
     glm::vec3 max;
+
+    void AABBView(glm::vec3& cameraPosition, glm::vec3& cameraTarget);
+
+    void Encapsulate(glm::vec3 vec);
+
+    void InvertedInfinity();
+
+    void DebugDraw(glm::vec3 color, const Transform& transform);
 };
 
 struct PEPhysicsHitInfo
