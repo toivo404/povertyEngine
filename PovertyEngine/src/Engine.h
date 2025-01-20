@@ -34,6 +34,7 @@ public:
 	static Mesh GetMesh(const std::string& string);
 	static AABB GetAABB(const std::string& string);
 	static void AddSystem(secs::System& createSystem);
+	static bool GetKey(SDL_Keycode key);
 	static bool GetKeyUp(SDL_Keycode key);
 
 	static void DisplayMessage(const char* message);

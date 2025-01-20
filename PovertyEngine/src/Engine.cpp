@@ -216,6 +216,10 @@ void Engine::AddSystem(secs::System& system)
 {
     systems.push_back(system); 
 }
+bool Engine::GetKey(SDL_Keycode key)
+{
+    return heldKeys.find(key) != heldKeys.end();
+}
 
 bool Engine::GetKeyUp(SDL_Keycode key)
 {
