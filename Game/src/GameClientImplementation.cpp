@@ -21,6 +21,10 @@ struct OutOfBoundsDetector
     
 };
 
+struct DrawAABB{
+    
+    
+};
 
 struct KeepStuffInSight
 {
@@ -31,7 +35,6 @@ int add(int a, int b) {
 }
 std::vector<secs::Entity> placedAssets;
 int transformCompTypeId;
-int aaBBCompTypeID;
 
 secs::Entity GameClientImplementation::PlaceAsset(
 
@@ -45,6 +48,7 @@ secs::Entity GameClientImplementation::PlaceAsset(
     static int materialTypeId = componentRegistry.getID<Material>();
     static int meshTypeId = componentRegistry.getID<Mesh>();
     static int aabbId = componentRegistry.getID<AABB>();
+    
     // Create a new entity
     secs::Entity entity = world.createEntity();
 
@@ -58,8 +62,8 @@ secs::Entity GameClientImplementation::PlaceAsset(
     world.addComponent(entity, meshTypeId, Mesh{Engine::GetMesh(modelPath)});
     world.addComponent(entity, aabbId, AABB{Engine::GetAABB(modelPath)});
     world.addComponent(entity, componentRegistry.getID<OutOfBoundsDetector>(), OutOfBoundsDetector{});
-    world.addComponent(entity, componentRegistry.getID<Spin>(), Spin{50});
-    
+    //world.addComponent(entity, componentRegistry.getID<Spin>(), Spin{50});
+   // world.addComponent(entity, componentRegistry.getID<DrawAABB>(), DrawAABB{} );
 
     return entity;
 }
@@ -98,6 +102,7 @@ void PopulateMonkeys(secs::World& world, secs::ComponentRegistry& registry) {
 }
 */
 
+secs::Entity mainCamera;
 
 void GameClientImplementation::OnInit()
 {
@@ -105,7 +110,7 @@ void GameClientImplementation::OnInit()
     RegisterClientSystems();
 
     transformCompTypeId = componentRegistry.getID<Transform>();
-    aaBBCompTypeID = componentRegistry.getID<AABB>(); 
+     
     int cameraTypeId = componentRegistry.getID<Camera>();
     int manipulatorTypeId = componentRegistry.getID<Manipulator>();
     int lightTypeId = componentRegistry.getID<Light>();
@@ -119,15 +124,17 @@ void GameClientImplementation::OnInit()
     float yaw = glm::degrees(atan2(origDirection.z, origDirection.x));
 
     // Create and set up "Main Camera" entity
-    secs::Entity mainCamera = world.createEntity();
+    mainCamera = world.createEntity();
     world.addComponent(mainCamera, transformCompTypeId, Transform{
-        glm::vec3(0.0f, 5.0f, 10.0f), // Position
-        glm::vec3(1.0f),              // Scale
-        glm::vec3(pitch, yaw, 0.0f)   // Rotation
-    });
+                           glm::vec3(0.0f, 5.0f, 10.0f), // Position
+                           glm::vec3(1.0f),              // Scale
+                           glm::vec3(pitch, yaw, 0.0f)   // Rotation
+                       });
     world.addComponent(mainCamera, cameraTypeId, Camera{42});
+    int keepStuffInSight = componentRegistry.getID<KeepStuffInSight>();
     world.addComponent(mainCamera, manipulatorTypeId, Manipulator{2, 50});
-  
+    //  world.addComponent(mainCamera, spinTypeId, Spin{1});
+    world.addComponent(mainCamera, keepStuffInSight, KeepStuffInSight{} );
     
     // Create and set up "Main Light" entity
     secs::Entity mainLight = world.createEntity();
@@ -155,10 +162,11 @@ void GameClientImplementation::RegisterClientComponents()
     componentRegistry.registerType<Manipulator>("Manipulator");
     componentRegistry.registerType<HelloWorldComponent>("HelloWorldComponent");
     obDetectorId = componentRegistry.registerType<OutOfBoundsDetector>("OutOfBoundsDetector");
-
+    componentRegistry.registerType<DrawAABB>("DrawAABB");
+    componentRegistry.registerType<KeepStuffInSight>("KeepStuffInSight");
 }
 
-bool isGameOver;
+bool isGameOver = true;
 
 void GameClientImplementation::RegisterClientSystems()
 {
@@ -166,15 +174,14 @@ void GameClientImplementation::RegisterClientSystems()
     int spinTypeId = componentRegistry.getID<Spin>();
     int transformTypeId = componentRegistry.getID<Transform>();
     int manipulatorTypeId = componentRegistry.getID<Manipulator>();
+    
 
     secs::System spinTransformSystem({spinTypeId, transformTypeId},
             [spinTypeId, transformTypeId](secs::Entity e, secs::World& w) {
                 auto& spin = w.getComponent<Spin>(e, spinTypeId);
                 auto& transform = w.getComponent<Transform>(e, transformTypeId);
-
-                transform.rotation.y += spin.rotateSpeed * Engine::deltaTime;
+                transform.RotateAroundAxis(glm::vec3(0,1,0), spin.rotateSpeed * Engine::deltaTime);
                 transform.position.y += Engine::deltaTime;
-                transform.rotation.y = glm::mod(transform.rotation.y, 360.0f);
             });
     Engine::AddSystem(spinTransformSystem);
 
@@ -191,15 +198,23 @@ void GameClientImplementation::RegisterClientSystems()
             if (Engine::IsKeyPressed(SDLK_z)) { transform.position.y -= manipulator.moveSpeed * Engine::deltaTime; }
             if (Engine::IsKeyPressed(SDLK_x)) { transform.position.y += manipulator.moveSpeed * Engine::deltaTime; }
 
-            if (Engine::IsKeyPressed(SDLK_UP))    { transform.rotation.x -= manipulator.rotateSpeed * Engine::deltaTime; }
-            if (Engine::IsKeyPressed(SDLK_DOWN))  { transform.rotation.x += manipulator.rotateSpeed * Engine::deltaTime; }
-            if (Engine::IsKeyPressed(SDLK_LEFT))  { transform.rotation.y -= manipulator.rotateSpeed * Engine::deltaTime; }
-            if (Engine::IsKeyPressed(SDLK_RIGHT)) { transform.rotation.y += manipulator.rotateSpeed * Engine::deltaTime; }
-            if (Engine::IsKeyPressed(SDLK_q))     { transform.rotation.z -= manipulator.rotateSpeed * Engine::deltaTime; }
-            if (Engine::IsKeyPressed(SDLK_e))     { transform.rotation.z += manipulator.rotateSpeed * Engine::deltaTime; }
+            if (Engine::IsKeyPressed(SDLK_UP))    { transform.not_rotation.x -= manipulator.rotateSpeed * Engine::deltaTime; }
+            if (Engine::IsKeyPressed(SDLK_DOWN))  { transform.not_rotation.x += manipulator.rotateSpeed * Engine::deltaTime; }
+            if (Engine::IsKeyPressed(SDLK_LEFT))  { transform.not_rotation.y -= manipulator.rotateSpeed * Engine::deltaTime; }
+            if (Engine::IsKeyPressed(SDLK_RIGHT)) { transform.not_rotation.y += manipulator.rotateSpeed * Engine::deltaTime; }
+            if (Engine::IsKeyPressed(SDLK_q))     { transform.not_rotation.z -= manipulator.rotateSpeed * Engine::deltaTime; }
+            if (Engine::IsKeyPressed(SDLK_e))     { transform.not_rotation.z += manipulator.rotateSpeed * Engine::deltaTime; }
         });
     Engine::AddSystem(manipulatorTransformSystem);
+    int drawAABBId = componentRegistry.getID<DrawAABB>();
+    int aaBBCompTypeID = componentRegistry.getID<AABB>();
+    secs::System drawAABBSystem ( {aaBBCompTypeID, transformTypeId, drawAABBId }, [aaBBCompTypeID, transformTypeId]
+        (secs::Entity e, secs::World w)
+    {
+        w.getComponent<AABB>(e, aaBBCompTypeID).DebugDraw(glm::vec3(1,0,0), w.getComponent<Transform>(e, transformTypeId) );
+    });
     
+    Engine::AddSystem(drawAABBSystem);
                 
   // int clickDetector = componentRegistry.getID<ClickDeletor>();
   // int aabbId = componentRegistry.getID<AABB>();
@@ -270,14 +285,21 @@ void GameClientImplementation::RegisterClientSystems()
     Engine::AddSystem(keepSightSystem);
 }
 
+
+
 double lastMonkeySpawn;
 int killedMonkeys;
+
 void GameClientImplementation::DrawCross()
 {
     Engine::DebugDrawLine(glm::vec3(0.0,1,0), glm::vec3(0.0,-1,0), glm::vec3(0.0,0,0), 0.1f);
     Engine::DebugDrawLine(glm::vec3(-1,0,0), glm::vec3(1,0,0), glm::vec3(0.0,0,0), 0.1f);
     Engine::DebugDrawLine(glm::vec3(0,0,1), glm::vec3(0,0,-1), glm::vec3(0.0,0,0), 0.1f);
 }
+
+
+
+/*
 void GameClientImplementation::MoveCameraToViewAll()
 {
     auto cameraTransform = world.getComponent<Transform>(mainCamera,transformCompTypeId);
@@ -294,9 +316,9 @@ void GameClientImplementation::MoveCameraToViewAll()
 
 void GameClientImplementation::OnUpdate(float deltaTime)
 {
-    if (Engine::GetKeyUp(SDLK_PERIOD))
     DrawCross();
 
+    
     if (Engine::GetKey(SDLK_PERIOD))
     {
         const auto square = static_cast<size_t>(sqrt(placedAssets.size()));
@@ -308,7 +330,7 @@ void GameClientImplementation::OnUpdate(float deltaTime)
         placedAssets.push_back(asset);
         std::cout << "Assets: " << placedAssets.size() << std::endl;
     }
-    if (Engine::GetKeyUp(SDLK_COMMA))
+    if (Engine::GetKey(SDLK_COMMA))
     {
         if (!placedAssets.empty())
         {
@@ -322,6 +344,11 @@ void GameClientImplementation::OnUpdate(float deltaTime)
             std::cout << "Scene empty" << std::endl;
         }
     }
+    if(Engine::GetKeyUp(SDLK_BACKSPACE))
+    {
+        lastMonkeySpawn = -9999;
+        isGameOver = false;
+    }
     
     if(Engine::GetMouseButtonUp(1))
     {
@@ -329,6 +356,7 @@ void GameClientImplementation::OnUpdate(float deltaTime)
         glm::vec3 origin;
         glm::vec3 dir;
         PEPhysicsHitInfo hitInfo;
+        int aaBBCompTypeID = componentRegistry.getID<AABB>();
         Engine::MousePositionToRay(origin, dir);
         if (PEPhysics::Raycast(origin, dir, world, transformCompTypeId, aaBBCompTypeID, hitInfo))
         {
@@ -355,21 +383,8 @@ void GameClientImplementation::OnUpdate(float deltaTime)
             PlaceAsset(glm::vec3(-2 + (GetRandomValue() * 4), 0, 0), "assets/models/monkey/", "assets/models/monkey/monkey.fbx");
             lastMonkeySpawn = Engine::time;
         }
-    } 
     
-
-    if (isGameOver)
-    {
-        Engine::DisplayMessage( "You lost the game" );
     }
-    else if (Engine::time - lastMonkeySpawn > 3)
-    {
-        PlaceAsset(glm::vec3(-2 + (GetRandomValue() * 4), 0, 0), "assets/models/monkey/", "assets/models/monkey/monkey.fbx");
-        lastMonkeySpawn = Engine::time;
-    }
-    
-    
-    
 }
 
 void GameClientImplementation::OnShutdown()
