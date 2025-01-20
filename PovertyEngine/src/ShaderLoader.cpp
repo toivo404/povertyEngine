@@ -13,6 +13,7 @@ std::unordered_map<std::string, GLuint> ShaderLoader::shaders;
 void ShaderLoader::Init(char* basePath ) {
     std::cout<<"ShaderLoader::Init" << std::endl;
     shaders["basic"] = CompileShaderProgram("assets/shaders/diffuse.vert", "assets/shaders/diffuse.frag", basePath);
+    shaders["debugline"] = CompileShaderProgram("assets/shaders/debugline.vert", "assets/shaders/debugline.frag", basePath);
 }
 
 std::string LoadShaderSource(const std::string& filePath, char* basePath ) {
