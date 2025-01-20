@@ -1,6 +1,7 @@
 #include "MeshCache.h"
 
 #include <iostream>
+#include <optional>
 #include <string>
 #include "AssimpLoader.h"
 #include "PEPhysics.h"
@@ -28,6 +29,8 @@ void MeshCache::SetGLVertexAttributes()
     glBindVertexArray(0);
 }
 
+
+
 void MeshCache::Load(const std::string& path)
 {
     AssimpLoader loader;
@@ -40,7 +43,7 @@ void MeshCache::Load(const std::string& path)
         exit(1);
     }
 
-    AABB aabb = CalculateAABB(vertices);
+    AABB aabb = MeshCache::CalculateAABB(vertices);
     cachedMesh.aabb = aabb;
 
     GLuint VAO, VBO, EBO;
@@ -89,26 +92,22 @@ AABB MeshCache::CalculateAABB(const std::vector<float>& vertices) {
     }
 
     // Initialize min/max with extreme values
-    glm::vec3 min(std::numeric_limits<float>::max());
-    glm::vec3 max(std::numeric_limits<float>::lowest());
+
 
     // Extract position data from interleaved vertex data
     size_t stride = 8; // 8 floats per vertex
+    AABB aabb;
+    aabb.min = glm::vec3(vertices[0],vertices[1],vertices[2]);
+    aabb.max = glm::vec3(vertices[0],vertices[1],vertices[2]);
     
-    for (size_t i = 0; i < vertices.size(); i += stride) {
+    for (size_t i = stride; i < vertices.size(); i += stride) {
         glm::vec3 position(vertices[i], vertices[i + 1], vertices[i + 2]);
 
         // Update AABB bounds
-        min.x = std::min(min.x, position.x);
-        min.y = std::min(min.y, position.y);
-        min.z = std::min(min.z, position.z);
-
-        max.x = std::max(max.x, position.x);
-        max.y = std::max(max.y, position.y);
-        max.z = std::max(max.z, position.z);
+        aabb.Encapsulate(position);
     }
 
-    return {min, max};
+    return aabb;
 }
 
 
