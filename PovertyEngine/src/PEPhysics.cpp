@@ -7,29 +7,21 @@
 #include "Secs.h"
 
 
-void AABB::AABBView(glm::vec3& cameraPosition, glm::vec3& cameraTarget)
+void AABB::AABBView(glm::vec3& cameraPosition, glm::vec3& cameraTarget, const glm::vec3& offsetDirection, float zoomMultiplier)
 {
     // Calculate the center of the AABB
     glm::vec3 center = (min + max) * 0.5f;
 
-    // Calculate the size of the AABB
-    glm::vec3 size = max - min;
-    float radius = glm::length(size) * 0.5f; // Approximate radius of a bounding sphere
+    // Calculate the half size of the AABB
+    glm::vec3 halfSize = (max - min) * 0.5f;
 
-    // Set the desired angle (45 degrees downwards)
-    float elevationAngle = glm::radians(45.0f); // Downward angle in radians
-    float azimuthAngle = glm::radians(45.0f);   // Side angle (optional)
+    // Normalize the offset direction to ensure consistent scaling
+    glm::vec3 normalizedOffset = glm::normalize(offsetDirection);
 
-    // Calculate camera position in spherical coordinates
-    float distance = radius / std::sin(elevationAngle); // Ensure AABB fits in view
-    float x = distance * std::cos(elevationAngle) * std::cos(azimuthAngle);
-    float z = distance * std::cos(elevationAngle) * std::sin(azimuthAngle);
-    float y = distance * std::sin(elevationAngle);
+    // Calculate the camera position
+    cameraPosition = center + (normalizedOffset * halfSize * zoomMultiplier);
 
-    // Set camera position
-    cameraPosition = center + glm::vec3(x, y, z);
-
-    // Set camera target to look at the center of the AABB
+    // Set the camera target to look at the center of the AABB
     cameraTarget = center;
 }
 
@@ -41,14 +33,6 @@ void AABB::Encapsulate(glm::vec3 vec)
     max.x = std::max(max.x, vec.x);
     max.y = std::max(max.y, vec.y);
     max.z = std::max(max.z, vec.z);
-}
-
-void AABB::InvertedInfinity()
-{
-    constexpr glm::vec3 max_v(std::numeric_limits<float>::lowest());
-    constexpr glm::vec3 min_v(std::numeric_limits<float>::max());
-    min = max_v;
-    max = min_v;
 }
 
 void AABB::DebugDraw(glm::vec3 color, const Transform& transform)
