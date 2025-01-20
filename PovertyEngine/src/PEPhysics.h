@@ -10,12 +10,10 @@ struct PE_API AABB
     glm::vec3 min;
     glm::vec3 max;
 
-    void AABBView(glm::vec3& cameraPosition, glm::vec3& cameraTarget);
+    void AABBView(glm::vec3& cameraPosition, glm::vec3& cameraTarget, const glm::vec3& offsetDirection, float zoomMultiplier = 1.0f);
 
     void Encapsulate(glm::vec3 vec);
-
-    void InvertedInfinity();
-
+    
     void DebugDraw(glm::vec3 color, const Transform& transform);
 };
 
