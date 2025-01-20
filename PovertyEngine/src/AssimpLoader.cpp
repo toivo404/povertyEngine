@@ -92,13 +92,8 @@ Transform AssimpLoader::ExtractTransform(const aiMatrix4x4& transform) {
     t.scale = glm::vec3(scale.x, scale.y, scale.z);
 
     // Convert Assimp quaternion to Euler angles (pitch, yaw, roll)
-    glm::quat glmRotation(rotation.w, rotation.x, rotation.y, rotation.z);
-    t.rotation = glm::eulerAngles(glmRotation);
+    t.not_rotation = glm::quat (rotation.w, rotation.x, rotation.y, rotation.z);
 
-    // Create the model matrix
-    t.model = glm::translate(glm::mat4(1.0f), t.position) *
-              glm::mat4_cast(glmRotation) *
-              glm::scale(glm::mat4(1.0f), t.scale);
-
+    t.UpdateModelMatrix();
     return t;
 }

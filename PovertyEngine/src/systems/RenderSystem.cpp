@@ -87,12 +87,7 @@ void RenderSystem::CreateSystems(secs::ComponentRegistry* compReg, std::vector<s
         {
             const auto& light = w.getComponent<Light>(e, lightTypeId);
             const auto& transform = w.getComponent<Transform>(e, transformTypeId);
-
-            Engine::lightDir = glm::normalize(glm::vec3(
-                cos(glm::radians(transform.rotation.y)) * cos(glm::radians(transform.rotation.x)),
-                sin(glm::radians(transform.rotation.x)),
-                sin(glm::radians(transform.rotation.y)) * cos(glm::radians(transform.rotation.x))
-            ));
+            Engine::lightDir = transform.GetDirection();
         });
     systems->push_back(lightSystem);
 
@@ -102,16 +97,9 @@ void RenderSystem::CreateSystems(secs::ComponentRegistry* compReg, std::vector<s
             {cameraTypeId, transformTypeId},
             [cameraTypeId, transformTypeId](secs::Entity e, secs::World& w)
             {
-                const auto& transform = w.getComponent<Transform>(e, transformTypeId);
-                Engine::camPos = transform.position;
-
-                glm::vec3 forward = glm::normalize(glm::vec3(
-                    cos(glm::radians(transform.rotation.y)) * cos(glm::radians(transform.rotation.x)),
-                    sin(glm::radians(transform.rotation.x)),
-                    sin(glm::radians(transform.rotation.y)) * cos(glm::radians(transform.rotation.x))
-                ));
-
-                Engine::camLook = Engine::camPos + forward;
+       //         const auto& transform = w.getComponent<Transform>(e, transformTypeId);
+       //         Engine::camPos = transform.position;
+       //         Engine::camLook = Engine::camPos + transform.GetDirection();
             });
     systems->push_back(camSystem);
 }
