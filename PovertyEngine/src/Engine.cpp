@@ -10,6 +10,8 @@
 #include <gtc/type_ptr.hpp>
 #include <Secs.h>
 #include <cstdlib>
+
+#include "DebugLineRenderer.h"
 #include "EngineInfo.h"
 #include "imgui.h"
 #include "ImGUIHelper.h"
@@ -50,6 +52,8 @@ int mouseY;
 
 bool deltaTimeCalculated;
 ImGUIHelper imguiHelper;
+DebugLineRenderer* debugLineRenderer;
+GLuint debugLineShader;
 
 void Engine::Init(GameClient* gameClientImplementation)
 {
@@ -84,6 +88,9 @@ void Engine::Init(GameClient* gameClientImplementation)
 
     EngineInfo::LogInfo();
     ShaderLoader::Init(baseFilePath);
+    auto dr = DebugLineRenderer{};
+    debugLineRenderer = &dr;
+    debugLineShader = ShaderLoader::GetShaderProgram("debugline");
 
     glEnable(GL_DEPTH_TEST);
     glDepthFunc(GL_LESS);
@@ -107,6 +114,10 @@ bool Engine::IsKeyPressed(SDL_Keycode key)
     return state[SDL_GetScancodeFromKey(key)];
 }
 
+void Engine::DebugDrawLine(const glm::vec3& start, const glm::vec3& end, const glm::vec3& color, float lineWidth)
+{
+    debugLineRenderer->DrawLine(start, end, color, lineWidth);
+}
 
 // Mouse input
 bool Engine::GetMouseButton(int button) {
@@ -325,6 +336,7 @@ void Engine::MainLoop()
      
 
     RenderSystem::Render(client->world,  client->componentRegistry);
+    debugLineRenderer->Render(viewMatrix, projectionMatrix, debugLineShader);
 
     GLenum error = glGetError();
     if (error != GL_NO_ERROR)

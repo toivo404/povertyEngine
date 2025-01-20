@@ -37,6 +37,7 @@ public:
 	static bool GetKeyUp(SDL_Keycode key);
 
 	static void DisplayMessage(const char* message);
+	static void DebugDrawLine(const glm::vec3& start, const glm::vec3& end, const glm::vec3& color, float lineWidth);
 
 	static GameClient* client;
 	static char* baseFilePath;
