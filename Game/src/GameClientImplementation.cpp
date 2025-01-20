@@ -22,7 +22,10 @@ struct OutOfBoundsDetector
 };
 
 
-
+struct KeepStuffInSight
+{
+    
+};
 int add(int a, int b) {
     return a + b;
 }
@@ -214,6 +217,57 @@ void GameClientImplementation::RegisterClientSystems()
                                   });
     Engine::AddSystem(helloWorldSystem);
 
+    int keepCompId = componentRegistry.getID<KeepStuffInSight>();
+    secs::System keepSightSystem
+    ({keepCompId, transformTypeId},
+     [keepCompId, transformTypeId, aaBBCompTypeID](secs::Entity e, secs::World& w)
+     {
+         auto& cameraTransform = w.getComponent<Transform>(e, transformTypeId);
+
+         bool first = true;
+         AABB worldAABB;
+         for (secs::Entity e2 : w.getAllEntities())
+         {
+             auto entityAABB = w.tryGetComponent<AABB>(e2, aaBBCompTypeID);
+             auto entityTrans = w.tryGetComponent<Transform>(e2, transformTypeId);
+             if (entityAABB == nullptr || entityTrans == nullptr)
+             {
+                 continue;
+             }
+
+             if (first)
+             {
+                 worldAABB = {entityTrans->Apply(entityAABB->min), entityTrans->Apply(entityAABB->max)};
+                 first = false;
+             }
+             else
+             {
+                 worldAABB.Encapsulate(entityTrans->Apply(entityAABB->min));
+                 worldAABB.Encapsulate(entityTrans->Apply(entityAABB->max));
+             }
+         }
+
+         // DEBUG REMOVE
+
+         if (first)
+         {
+             // No valid AABB found
+             return;
+         }
+
+         glm::vec3 pos;
+         glm::vec3 target;
+         worldAABB.AABBView(pos, target, glm::vec3(1.5, 4.5, 2), 5.5f);
+
+
+       //  Engine::DebugDrawLine(pos, target, glm::vec3(0, 0, 1), 0.1f);
+         // Update camera transform
+         Engine::camLook = target;
+         Engine::camPos = pos;
+
+         //cameraTransform.UpdateModelMatrix();
+     });
+    Engine::AddSystem(keepSightSystem);
 }
 
 double lastMonkeySpawn;
@@ -224,13 +278,33 @@ void GameClientImplementation::DrawCross()
     Engine::DebugDrawLine(glm::vec3(-1,0,0), glm::vec3(1,0,0), glm::vec3(0.0,0,0), 0.1f);
     Engine::DebugDrawLine(glm::vec3(0,0,1), glm::vec3(0,0,-1), glm::vec3(0.0,0,0), 0.1f);
 }
+void GameClientImplementation::MoveCameraToViewAll()
+{
+    auto cameraTransform = world.getComponent<Transform>(mainCamera,transformCompTypeId);
+    AABB aabb;
+    CalculateWorldAABB(aabb);
+    glm::vec3 pos;
+    glm::vec3 target;
+    aabb.AABBView(pos, target);
+    cameraTransform.position = pos;
+    cameraTransform.LookAt(target);
+    cameraTransform.UpdateModelMatrix();
+}
+*/
+
 void GameClientImplementation::OnUpdate(float deltaTime)
 {
     if (Engine::GetKeyUp(SDLK_PERIOD))
     DrawCross();
 
+    if (Engine::GetKey(SDLK_PERIOD))
     {
-        auto asset = PlaceAsset( glm::vec3(placedAssets.size(), 0, 0), "assets/models/monkey/", "assets/models/monkey/monkey.fbx");
+        const auto square = static_cast<size_t>(sqrt(placedAssets.size()));
+        auto spawnPos = glm::vec3(0);
+        if (square != 0)
+            spawnPos = glm::vec3(placedAssets.size() % square, 0.0f, placedAssets.size() / square);
+        spawnPos *= 3;
+        const auto asset = PlaceAsset(spawnPos, "assets/models/monkey/", "assets/models/monkey/monkey.fbx");
         placedAssets.push_back(asset);
         std::cout << "Assets: " << placedAssets.size() << std::endl;
     }
@@ -263,14 +337,23 @@ void GameClientImplementation::OnUpdate(float deltaTime)
         }    
     }
 
-    for (secs::Entity e : world.getAllEntities())
+    if(!isGameOver)
     {
-        auto trans = world.tryGetComponent<Transform>(e, transformCompTypeId);
-        auto obDetector = world.tryGetComponent<OutOfBoundsDetector>(e, obDetectorId);
-        if (obDetector != nullptr && trans != nullptr && !Engine::IsOnScreen(trans->position))
+        for ( secs::Entity e : world.getAllEntities())
         {
-            isGameOver = true;
-            world = secs::World{};
+            auto trans = world.tryGetComponent<Transform>(e, transformCompTypeId);
+            auto obDetector = world.tryGetComponent<OutOfBoundsDetector>(e, obDetectorId);
+            if (obDetector != nullptr && trans != nullptr && !Engine::IsOnScreen(trans->position))
+            {
+                isGameOver = true;
+                Engine::DisplayMessage( "You lost the game" );
+                world = secs::World{};
+            }
+        }
+        if (Engine::time - lastMonkeySpawn > 3)
+        {
+            PlaceAsset(glm::vec3(-2 + (GetRandomValue() * 4), 0, 0), "assets/models/monkey/", "assets/models/monkey/monkey.fbx");
+            lastMonkeySpawn = Engine::time;
         }
     } 
     
