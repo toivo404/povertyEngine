@@ -218,9 +218,17 @@ void GameClientImplementation::RegisterClientSystems()
 
 double lastMonkeySpawn;
 int killedMonkeys;
+void GameClientImplementation::DrawCross()
+{
+    Engine::DebugDrawLine(glm::vec3(0.0,1,0), glm::vec3(0.0,-1,0), glm::vec3(0.0,0,0), 0.1f);
+    Engine::DebugDrawLine(glm::vec3(-1,0,0), glm::vec3(1,0,0), glm::vec3(0.0,0,0), 0.1f);
+    Engine::DebugDrawLine(glm::vec3(0,0,1), glm::vec3(0,0,-1), glm::vec3(0.0,0,0), 0.1f);
+}
 void GameClientImplementation::OnUpdate(float deltaTime)
 {
     if (Engine::GetKeyUp(SDLK_PERIOD))
+    DrawCross();
+
     {
         auto asset = PlaceAsset( glm::vec3(placedAssets.size(), 0, 0), "assets/models/monkey/", "assets/models/monkey/monkey.fbx");
         placedAssets.push_back(asset);
