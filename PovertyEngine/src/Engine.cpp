@@ -343,7 +343,7 @@ void Engine::MainLoop()
     projectionMatrix = glm::perspective(
         glm::radians(45.0f),
         (float)windowWidth / (float)windowHeight,
-        0.1f, 100.0f
+        0.1f, 1000.0f
     );
 
     camMatrix = projectionMatrix * viewMatrix;
@@ -355,7 +355,6 @@ void Engine::MainLoop()
         ImGui::Text( currentMessage );
         ImGui::End();    
     }
-     
 
 
     const int renderedCount = RenderSystem::Render(client->world,  client->componentRegistry);
