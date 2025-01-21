@@ -295,6 +295,24 @@ void Engine::ProcessEvents()
     }
 }
 
+float CalculateFPS(float& deltaTime) {
+    static float frameCount = 0;
+    static float fps = 0.0f;
+    static float timeAccumulated = 0.0f;
+
+    frameCount++;
+    timeAccumulated += deltaTime;
+
+    // Update FPS every second
+    if (timeAccumulated >= 1.0f) {
+        fps = frameCount / timeAccumulated; // Calculate FPS
+        frameCount = 0;                     // Reset frame count
+        timeAccumulated = 0.0f;             // Reset time accumulator
+    }
+
+    return fps;
+}
+
 void Engine::MainLoop()
 {
     static Uint32 lastTime = SDL_GetTicks();
@@ -339,8 +357,13 @@ void Engine::MainLoop()
     }
      
 
-    RenderSystem::Render(client->world,  client->componentRegistry);
+
+    const int renderedCount = RenderSystem::Render(client->world,  client->componentRegistry);
     debugLineRenderer->Render(viewMatrix, projectionMatrix, debugLineShader);
+
+    ImGui::Begin("stats");
+    ImGui::Text(Combine("deltaTime: ", deltaTime, "\n", "time: ", time, "\n", "fps: ", CalculateFPS(deltaTime), "\n", "renderedObjects: ", renderedCount).c_str());
+    ImGui::End();
 
     GLenum error = glGetError();
     if (error != GL_NO_ERROR)

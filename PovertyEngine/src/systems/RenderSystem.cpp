@@ -15,8 +15,9 @@ void RenderSystem::RegisterComponents(secs::World* world, secs::ComponentRegistr
 }
 
 
-void RenderSystem::Render(secs::World& world, secs::ComponentRegistry& compReg)
+int RenderSystem::Render(secs::World& world, secs::ComponentRegistry& compReg)
 {
+    int renderedObjects = 0;
     // Get component type IDs
      // Get component type IDs
     int meshTypeId = compReg.getID<Mesh>();
@@ -66,11 +67,12 @@ void RenderSystem::Render(secs::World& world, secs::ComponentRegistry& compReg)
 
             // Draw the mesh
             glDrawElements(GL_TRIANGLES, mesh.indexCount, GL_UNSIGNED_INT, nullptr);
-
+            renderedObjects++;
             // Unbind the VAO
             glBindVertexArray(0);
         }
     }
+    return renderedObjects;
 }
 
 
