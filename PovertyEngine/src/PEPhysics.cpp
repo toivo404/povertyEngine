@@ -12,16 +12,24 @@ void AABB::AABBView(glm::vec3& cameraPosition, glm::vec3& cameraTarget, const gl
     // Calculate the center of the AABB
     glm::vec3 center = (min + max) * 0.5f;
 
-    // Calculate the half size of the AABB
-    glm::vec3 halfSize = (max - min) * 0.5f;
+    // Calculate the size of the AABB
+    glm::vec3 size = max - min;
+    float radius = glm::length(size) * 0.5f; // Approximate radius of a bounding sphere
 
-    // Normalize the offset direction to ensure consistent scaling
-    glm::vec3 normalizedOffset = glm::normalize(offsetDirection);
+    // Set the desired angle (45 degrees downwards)
+    float elevationAngle = glm::radians(45.0f); // Downward angle in radians
+    float azimuthAngle = glm::radians(45.0f);   // Side angle (optional)
 
-    // Calculate the camera position
-    cameraPosition = center + (normalizedOffset * halfSize * zoomMultiplier);
+    // Calculate camera position in spherical coordinates
+    float distance = radius / std::sin(elevationAngle); // Ensure AABB fits in view
+    float x = distance * std::cos(elevationAngle) * std::cos(azimuthAngle);
+    float z = distance * std::cos(elevationAngle) * std::sin(azimuthAngle);
+    float y = distance * std::sin(elevationAngle);
 
-    // Set the camera target to look at the center of the AABB
+    // Set camera position
+    cameraPosition = center + glm::vec3(x, y, z);
+
+    // Set camera target to look at the center of the AABB
     cameraTarget = center;
 }
 

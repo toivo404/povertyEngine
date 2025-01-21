@@ -272,7 +272,7 @@ void GameClientImplementation::RegisterClientSystems()
 
          glm::vec3 pos;
          glm::vec3 target;
-         worldAABB.AABBView(pos, target, glm::vec3(1.5, 4.5, 2), 5.5f);
+         worldAABB.AABBView(pos, target, glm::vec3(1.5, 4.5, 1), 5.5f);
 
 
        //  Engine::DebugDrawLine(pos, target, glm::vec3(0, 0, 1), 0.1f);
@@ -313,30 +313,59 @@ void GameClientImplementation::MoveCameraToViewAll()
     cameraTransform.UpdateModelMatrix();
 }
 */
-
+void RemoveLastPlaced(secs::World& w)
+{
+    auto lastMonkey = placedAssets.back();
+    w.removeEntity(lastMonkey);
+    placedAssets.pop_back();
+}
 void GameClientImplementation::OnUpdate(float deltaTime)
 {
     DrawCross();
 
-    
+
     if (Engine::GetKey(SDLK_PERIOD))
     {
-        const auto square = static_cast<size_t>(sqrt(placedAssets.size()));
-        auto spawnPos = glm::vec3(0);
-        if (square != 0)
-            spawnPos = glm::vec3(placedAssets.size() % square, 0.0f, placedAssets.size() / square);
-        spawnPos *= 3;
-        const auto asset = PlaceAsset(spawnPos, "assets/models/monkey/", "assets/models/monkey/monkey.fbx");
-        placedAssets.push_back(asset);
-        std::cout << "Assets: " << placedAssets.size() << std::endl;
+        const int amount = std::max(static_cast<int>(placedAssets.size()), 1 );
+        const size_t placedCount = amount;
+        const auto square = static_cast<size_t>(sqrt(placedCount));
+        
+        for (int i = 0; i < square; ++i)
+        {
+            const auto asset = PlaceAsset(glm::vec3(0), "assets/models/monkey/", "assets/models/monkey/monkey.fbx");
+            placedAssets.push_back(asset);
+        }
+        int size = placedAssets.size();
+        for (int i = 0; i < size; ++i)
+        {
+            Transform& t = world.getComponent<Transform>(placedAssets[i], transformCompTypeId);
+            size_t row = i / square; // Determine the row
+            size_t col = i % square; // Determine the column
+            auto pos = glm::vec3(col * 3.0f, 0.0f, row * 3.0f); // Scale to adjust spacing
+            // Use spawnPos for placing the asset
+            t.position = pos;
+        }
+        
+        std::cout << "Assets: " << placedAssets.size() * 2 << std::endl;
     }
     if (Engine::GetKey(SDLK_COMMA))
     {
         if (!placedAssets.empty())
         {
-            auto lastMonkey = placedAssets.back();
-            world.removeEntity(lastMonkey);
-            placedAssets.pop_back();
+            if (placedAssets.size() == 1)
+            {
+                RemoveLastPlaced(world);
+            }
+            else
+            {
+                const int amount = static_cast<int>(placedAssets.size()) / 2;
+                for (int i = 0; i < amount ; ++i)
+                {
+                    RemoveLastPlaced(world);
+                }
+            }
+            
+            
             std::cout << "Assets " << placedAssets.size() << std::endl;
         }
         else
