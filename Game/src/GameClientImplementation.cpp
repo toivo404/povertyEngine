@@ -113,6 +113,7 @@ void GameClientImplementation::OnInit()
     
     // Create and set up "Main Light" entity
     secs::EntityBuilder(world)
+        .createEntity()
         .set(Transform{
             glm::vec3(0.0f, 0.0f, 0.0f), // Position
             glm::vec3(0, 0, 0), // Scale
