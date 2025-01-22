@@ -128,28 +128,33 @@ bool PEPhysics::RaycastAABB(const glm::vec3& rayOrigin, const glm::vec3& rayDire
     return true;
 }
 
-bool PEPhysics::Raycast(const glm::vec3& rayOrigin, const glm::vec3& rayDirection, secs::World world, int transformComponentId, int aabbComponentId, PEPhysicsHitInfo& hitInfo)
+bool PEPhysics::Raycast(const glm::vec3& rayOrigin, const glm::vec3& rayDirection, secs::World& world, PEPhysicsHitInfo& hitInfo)
 {
     bool isHit = false;
     float minDist = std::numeric_limits<float>::max();
-    for (secs::Entity entity : world.getAllEntities())
+    secs::queryChunks<Transform, AABB>(world, [&](
+        const std::vector<secs::Entity>& ents,
+        const Transform* transform,
+        const AABB* aabb,
+        const size_t count
+        )
     {
-        const auto aabb = world.tryGetComponent<AABB>(entity, aabbComponentId);
-        const auto transform = world.tryGetComponent<Transform>(entity, transformComponentId);
-
-        if (aabb == nullptr || transform == nullptr) continue;
-        
-        float dist;
-        glm::vec3 point;
-        const bool currentHit = RaycastAABB(rayOrigin, rayDirection, *aabb, *transform, dist, point);
-        if (currentHit && dist < minDist)
+        for (size_t i = 0; i < count; ++i)
         {
-            minDist = dist;
-            hitInfo.point = point;
-            hitInfo.distance = dist;
-            hitInfo.entity = entity; 
-            isHit = true;
+            float dist;
+            glm::vec3 point;
+            const bool currentHit = RaycastAABB(rayOrigin, rayDirection, aabb[i], transform[i], dist, point);
+            if (currentHit && dist < minDist)
+            {
+                minDist = dist;
+                hitInfo.point = point;
+                hitInfo.distance = dist;
+                hitInfo.entity = ents[i];
+                isHit = true;
+            }
         }
-    }
+    });
+  
     return isHit;
+    
 }

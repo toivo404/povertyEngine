@@ -32,8 +32,8 @@ struct Light {
 class RenderSystem
 {
 public:
-    static int Render(secs::World& world, secs::ComponentRegistry& compReg);
-    static void RegisterComponents(secs::World* world, secs::ComponentRegistry* compReg);
-    static void CreateSystems(secs::ComponentRegistry* compReg, std::vector<secs::System>* systems);
+    static int Render(secs::World& world);
+    static void RegisterComponents(secs::World* world);
+    static void CreateSystems(std::vector<secs::System>* systems);
 };
 

@@ -11,6 +11,8 @@ public:
     void RegisterClientSystems();
 
     void DrawCross();
+    void KeepStuffInSight();
+
     void OnUpdate(float deltaTime) override;
 
     void OnShutdown() override;

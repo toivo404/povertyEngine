@@ -96,9 +96,9 @@ void Engine::Init(GameClient* gameClientImplementation)
     glDepthFunc(GL_LESS);
     imguiHelper.Init(graphicsApplicationWindow, glContext);
 
-    client->componentRegistry.registerType<AABB>("AABB");
-    RenderSystem::RegisterComponents(&client->world, &client->componentRegistry);
-    RenderSystem::CreateSystems(&client->componentRegistry, &systems);
+    secs::ComponentRegistry::registerType<AABB>("AABB");
+    RenderSystem::RegisterComponents(&client->world);
+    RenderSystem::CreateSystems( &systems);
     client->OnInit();
     std::cout << "Systems:" << systems.size() << std::endl;
     while (!quit)
@@ -336,7 +336,8 @@ void Engine::MainLoop()
     */
     client->OnUpdate(deltaTime);
 
-    client->world.progress(&systems);
+    for (auto system : systems)
+        system.execute(client->world);
 
     viewMatrix = glm::lookAt(camPos, camLook, camUp);
 
@@ -357,7 +358,7 @@ void Engine::MainLoop()
     }
 
 
-    const int renderedCount = RenderSystem::Render(client->world,  client->componentRegistry);
+    const int renderedCount = RenderSystem::Render(client->world);
     debugLineRenderer->Render(viewMatrix, projectionMatrix, debugLineShader);
 
     ImGui::Begin("stats");

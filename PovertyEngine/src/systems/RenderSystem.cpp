@@ -4,105 +4,101 @@
 #include "Engine.h"
 #include "MaterialCache.h"
 
-void RenderSystem::RegisterComponents(secs::World* world, secs::ComponentRegistry* compReg)
+void RenderSystem::RegisterComponents(secs::World* world)
 {
-    compReg->registerType<Transform>("Transform");
-    compReg->registerType<Material>("Material");
-    compReg->registerType<Shader>("Shader");
-    compReg->registerType<Light>("Light");
-    compReg->registerType<Camera>("Camera");
-    compReg->registerType<Mesh>("Mesh");
+    secs::ComponentRegistry::registerType<Transform>("Transform");
+    secs::ComponentRegistry::registerType<Material>("Material");
+    secs::ComponentRegistry::registerType<Shader>("Shader");
+    secs::ComponentRegistry::registerType<Light>("Light");
+    secs::ComponentRegistry::registerType<Camera>("Camera");
+    secs::ComponentRegistry::registerType<Mesh>("Mesh");
 }
 
 
-int RenderSystem::Render(secs::World& world, secs::ComponentRegistry& compReg)
+int RenderSystem::Render(secs::World& world)
 {
     int renderedObjects = 0;
-    // Get component type IDs
-     // Get component type IDs
-    int meshTypeId = compReg.getID<Mesh>();
-    int transformTypeId = compReg.getID<Transform>();
-    int materialTypeId = compReg.getID<Material>();
-    int shaderTypeId = compReg.getID<Shader>();
 
-    // Iterate over all entities
-    for (secs::Entity e : world.getAllEntities())
-    {
-        // Check if the entity has the required components
-        if (world.hasComponent(e, meshTypeId) &&
-            world.hasComponent(e, transformTypeId) &&
-            world.hasComponent(e, materialTypeId) &&
-            world.hasComponent(e, shaderTypeId))
+    // Use queryChunks to efficiently process entities with the required components
+    secs::queryChunks<Transform, Mesh, Material, Shader>(
+        world,
+        [&](const std::vector<secs::Entity>& ents,
+            Transform* transforms,
+            Mesh* meshes,
+            Material* materials,
+            Shader* shaders,
+            size_t count)
         {
-            // Get the components
-            auto& transform = world.getComponent<Transform>(e, transformTypeId);
-            const auto& mesh = world.getComponent<Mesh>(e, meshTypeId);
-            const auto& material = world.getComponent<Material>(e, materialTypeId);
-            const auto& shader = world.getComponent<Shader>(e, shaderTypeId);
-            
-            transform.UpdateModelMatrix();
+            for (size_t i = 0; i < count; ++i)
+            {
+                // Update the transform's model matrix
+                transforms[i].UpdateModelMatrix();
 
-            // Use the shader program
-            glUseProgram(shader.program);
+                // Use the shader program
+                glUseProgram(shaders[i].program);
 
-            // Set global uniforms
-            GLint camMatrixLoc = glGetUniformLocation(shader.program, "camMatrix");
-            glUniformMatrix4fv(camMatrixLoc, 1, GL_FALSE, glm::value_ptr(Engine::camMatrix));
+                // Set global uniforms
+                GLint camMatrixLoc = glGetUniformLocation(shaders[i].program, "camMatrix");
+                glUniformMatrix4fv(camMatrixLoc, 1, GL_FALSE, glm::value_ptr(Engine::camMatrix));
 
-            GLint lightColorLoc = glGetUniformLocation(shader.program, "lightColor");
-            glUniform3fv(lightColorLoc, 1, glm::value_ptr(Engine::lightColor));
+                GLint lightColorLoc = glGetUniformLocation(shaders[i].program, "lightColor");
+                glUniform3fv(lightColorLoc, 1, glm::value_ptr(Engine::lightColor));
 
-            GLint lightDirLoc = glGetUniformLocation(shader.program, "lightDir");
-            glUniform3fv(lightDirLoc, 1, glm::value_ptr(Engine::lightDir));
+                GLint lightDirLoc = glGetUniformLocation(shaders[i].program, "lightDir");
+                glUniform3fv(lightDirLoc, 1, glm::value_ptr(Engine::lightDir));
 
-            GLint viewPosLoc = glGetUniformLocation(shader.program, "viewPos");
-            glUniform3fv(viewPosLoc, 1, glm::value_ptr(Engine::camPos));
+                GLint viewPosLoc = glGetUniformLocation(shaders[i].program, "viewPos");
+                glUniform3fv(viewPosLoc, 1, glm::value_ptr(Engine::camPos));
 
-            // Bind the VAO
-            glBindVertexArray(mesh.VAO);
+                // Bind the VAO
+                glBindVertexArray(meshes[i].VAO);
 
-            // Set the model matrix for the current entity
-            GLint modelLoc = glGetUniformLocation(shader.program, "model");
-            glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(transform.model));
+                // Set the model matrix for the current entity
+                GLint modelLoc = glGetUniformLocation(shaders[i].program, "model");
+                glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(transforms[i].model));
 
-            // Draw the mesh
-            glDrawElements(GL_TRIANGLES, mesh.indexCount, GL_UNSIGNED_INT, nullptr);
-            renderedObjects++;
-            // Unbind the VAO
-            glBindVertexArray(0);
-        }
-    }
+                // Draw the mesh
+                glDrawElements(GL_TRIANGLES, meshes[i].indexCount, GL_UNSIGNED_INT, nullptr);
+                renderedObjects++;
+
+                // Unbind the VAO
+                glBindVertexArray(0);
+            }
+        });
+
     return renderedObjects;
 }
 
 
 
-void RenderSystem::CreateSystems(secs::ComponentRegistry* compReg, std::vector<secs::System>* systems)
+void RenderSystem::CreateSystems( std::vector<secs::System>* systems)
 {
-    int transformTypeId = compReg->getID<Transform>();
-    int lightTypeId = compReg->getID<Light>();
-    int cameraTypeId = compReg->getID<Camera>();
+    int lightTypeId = secs::ComponentRegistry::registerType<Light>("Light");
+    int transformTypeId = secs::ComponentRegistry::registerType<Transform>("Transform");
 
-    auto lightSystem = secs::System(
+    const auto lightSystem = secs::System(
         {lightTypeId, transformTypeId},
-        [lightTypeId, transformTypeId](secs::Entity e, secs::World& w)
+        [](secs::Entity e, secs::World& w)
         {
-            const auto& light = w.getComponent<Light>(e, lightTypeId);
-            const auto& transform = w.getComponent<Transform>(e, transformTypeId);
-            Engine::lightDir = transform.GetDirection();
-        });
-    systems->push_back(lightSystem);
-
-
-    auto camSystem =
-        secs::System(
-            {cameraTypeId, transformTypeId},
-            [cameraTypeId, transformTypeId](secs::Entity e, secs::World& w)
+            const auto* transform = w.getComponent<Transform>(e);
+            if (transform)
             {
-       //         const auto& transform = w.getComponent<Transform>(e, transformTypeId);
-       //         Engine::camPos = transform.position;
-       //         Engine::camLook = Engine::camPos + transform.GetDirection();
-            });
+                Engine::lightDir = transform->GetDirection();
+                std::cout << "LightSystem: Updated light direction for Entity " << e.id << "\n";
+            }
+        });
+    
+    systems->push_back(lightSystem);
+    int camTypeId = secs::ComponentRegistry::registerType<Camera>("Camera");
+    
+    const auto camSystem = secs::System(
+        {camTypeId, transformTypeId},
+        [](secs::Entity e, secs::World& w)
+        {
+            const auto* transform = w.getComponent<Transform>(e);
+            Engine::camPos = transform->position;
+            Engine::camLook = transform->GetDirection();
+        });
     systems->push_back(camSystem);
 }
 

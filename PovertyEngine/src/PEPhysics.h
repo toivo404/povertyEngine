@@ -3,7 +3,7 @@
 #include <glm.hpp>
 #include "Secs.h"
 #include "systems/TransformSystem.h"
-
+#include <core.h>
 
 struct PE_API AABB
 {
@@ -32,6 +32,5 @@ public:
                             const AABB& aabb, const Transform& transform, float& tMin,
                             glm::vec3& intersectionPoint);
     static bool Raycast(
-        const glm::vec3& rayOrigin, const glm::vec3& rayDirection, ::secs::World world,
-        int transformComponent, int aabbComponent, PEPhysicsHitInfo& hitInfo);
+        const glm::vec3& rayOrigin, const glm::vec3& rayDirection, ::secs::World& world, PEPhysicsHitInfo& hitInfo);
 };

@@ -9,7 +9,6 @@ public:
     virtual void OnShutdown() = 0;
     
     secs::World world;
-    secs::ComponentRegistry componentRegistry;
 };
 
 #endif // GAME_CLIENT_H
