@@ -1,4 +1,7 @@
 #pragma once
+
+#include "core.h"  // Where you define PE_BUILD_DLL and PE_API
+
 #include <iostream>
 #include <unordered_map>
 #include <map>
@@ -10,6 +13,7 @@
 #include <cassert>
 #include <functional>
 #include <cstring>
+
 /*
     =================================================
     SECS: SUPER ENTITY COMPONENT SYSTEM
@@ -26,7 +30,7 @@ namespace secs
     - Stores the size of each component type for chunk/SoA allocations.
     - ECS code uses only integer IDs to identify components.
 */
-class ComponentRegistry {
+class PE_API ComponentRegistry {
 public:
     // Register a new component type T with an internal integer ID.
     template<typename T>
@@ -93,7 +97,7 @@ private:
     ===================
     Just an ID. Add a version if you want.
 */
-struct Entity {
+struct PE_API Entity {
     uint32_t id;
 };
 
@@ -104,7 +108,7 @@ struct Entity {
     We create a canonical string from a list of component IDs
     so we can identify & cache Archetypes in a map.
 */
-inline std::string buildSignature(const std::vector<int>& compIDs)
+inline PE_API std::string buildSignature(const std::vector<int>& compIDs)
 {
     // Sort them for stable ordering
     std::vector<int> sorted = compIDs;
@@ -125,7 +129,7 @@ inline std::string buildSignature(const std::vector<int>& compIDs)
     Groups entities that have the same set of components (same signature).
     Stores data in a SoA layout for each component ID.
 */
-class Archetype
+class PE_API Archetype
 {
 public:
     // Construct from a set of component IDs
@@ -255,7 +259,7 @@ private:
     - Tracks which archetype each entity belongs to.
     - Creates/destroys entities and moves them between archetypes as comps are added/removed.
 */
-class World
+class PE_API World
 {
 public:
     World() = default;
@@ -271,7 +275,7 @@ public:
     // Create entity with a set of component IDs
     Entity createEntity(const std::vector<int>& compIDs)
     {
-        Entity e{nextEntityID++};
+        Entity e{ nextEntityID++ };
         Archetype* arch = getOrCreateArchetype(compIDs);
         arch->addEntity(e);
         entityArchetypeMap[e.id] = arch;
@@ -438,7 +442,6 @@ private:
         entityArchetypeMap[e.id] = newArch;
     }
 
-
     uint32_t nextEntityID = 0;
     std::unordered_map<std::string, std::unique_ptr<Archetype>> archetypes;
     std::unordered_map<uint32_t, Archetype*> entityArchetypeMap;
@@ -452,7 +455,7 @@ private:
     - On execute, it finds all archetypes containing them
       and processes each matching entity with a user callback.
 */
-class System
+class PE_API System
 {
 public:
     using Callback = std::function<void(Entity, World&)>;
@@ -490,7 +493,6 @@ private:
     std::vector<int> requiredComponents;
     Callback callback;
 };
-
 
 // ============ Detail namespace for type expansion trick ============
 namespace detail
@@ -534,13 +536,12 @@ namespace detail
     }
 } // namespace detail
 
-class EntityBuilder {
+class PE_API EntityBuilder {
 public:
     explicit EntityBuilder(World& world)
         : world(world), entityCreated(false) {}
 
     // Create a new entity
-    template <typename... Components>
     EntityBuilder& createEntity() {
         entity = world.createEntity({});
         entityCreated = true;
@@ -571,6 +572,7 @@ private:
     bool entityCreated;
 };
     
+// A helper function if you want chunk-based queries
 template<typename... Components, typename ChunkCallback>
 void queryChunks(World& world, ChunkCallback callback)
 {
@@ -583,13 +585,6 @@ void queryChunks(World& world, ChunkCallback callback)
     {
         // Check if archetype has *all* required components
         bool hasAll = true;
-
-        std::cout << "Archetype contains components: ";
-        for (int id : archePtr->getComponentIDs()) { // Assuming `getComponentTypes` exists
-            std::cout << id << " ";
-        }
-        std::cout << "\n";
-        
         for (int cid : requiredIDs) {
             if (!archePtr->hasComponent(cid)) {
                 hasAll = false;
@@ -598,57 +593,30 @@ void queryChunks(World& world, ChunkCallback callback)
         }
         if (!hasAll) continue;
 
-        // Archetype matches, so we gather pointers to each component array
-
-        // 3) We'll store pointers to each SoA array in the same order as requiredIDs
-        //    E.g. for AABB, Transform => aabbPtr, transformPtr
-        //    We do a small helper function or lambda that returns a typed pointer from raw bytes.
-
-        auto gatherArrays = [&](int compID) -> void* {
-            // 1) Find the SoA buffer for this component
-            auto it = archePtr->compMap.find(compID);
-            if (it == archePtr->compMap.end()) {
-                return nullptr; // Archetype doesn't have compID
-            }
-
-            // 2) Grab the corresponding ComponentData
-            Archetype::ComponentData& cData = archePtr->components[it->second];
-            // 3) Return the base pointer of cData.data (the entire array)
-            return cData.data.empty() ? nullptr : cData.data.data();
-        };
-
-        // We'll store each array pointer in a local vector of void* so we can pass them in correct order
+        // Gather pointers to each component array
         std::vector<void*> arrays;
         arrays.reserve(requiredIDs.size());
-        for (int cid : requiredIDs)
-        {
-            std::cout << "  Contains Component ID " << cid << ": "
-                << (archePtr->hasComponent(cid) ? "Yes" : "No") << "\n";
-            // The base pointer for this component's SoA data
-            void* basePtr = gatherArrays(cid);
-            arrays.push_back(basePtr);
+        for (int cid : requiredIDs) {
+            auto it = archePtr->compMap.find(cid);
+            if (it == archePtr->compMap.end()) {
+                arrays.push_back(nullptr);
+            }
+            else {
+                auto& cData = archePtr->components[it->second];
+                arrays.push_back(cData.data.empty() ? nullptr : cData.data.data());
+            }
         }
 
-        // 4) We have the entire block of entities from the archetype
+        // Get the entity list
         auto& entities = archePtr->getEntities();
         size_t entityCount = entities.size();
         if (entityCount == 0) {
-            continue; // No data to process
+            continue;
         }
-        
-        // 5) Now we call the user-provided callback, passing:
-        //    - The entity array
-        //    - A pointer to each SoA block for each type
-        //    The user can iterate them in a single pass or do SSE/AVX for the entire chunk.
 
-        // But we need to cast back to the correct type. We can do that with a helper function 
-        // that calls the callback with the right typed pointers in the correct order.
-
-        // We'll define a small helper to "expand" the arrays vector into typed pointers:
-        // We'll do a compile-time "index trick" with std::index_sequence
-        // for a truly type-safe approach.
-        
+        // Invoke the user callback with typed pointers
         detail::invokeChunkCallback<Components...>(callback, entities, arrays, entityCount);
     }
 }
+
 } // end namespace secs
