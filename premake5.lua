@@ -38,7 +38,9 @@ workspace "PovertyEngine"
 --			"vendor/flecs/**.c", 
 			"vendor/imgui/**.cpp",
 			"vendor/imgui/**.h",
-			"vendor/stb/stb_image.h"
+			"vendor/stb/stb_image.h",
+			"vendor/lohmann/json.hpp"
+
 			--"vendor/imgui/backends/**.c",
 			--"vendor/imgui/backends/**.h"
         }
@@ -57,9 +59,10 @@ workspace "PovertyEngine"
 			"%{IncludeDir.GLAD}/",
 			"%{IncludeDir.GLM}/",
 			"vendor/Assimp/include/",
+			"vendor/lohmann/",
 ---			"vendor/flecs/",
 			"vendor/imgui/",
-			"vendor/stb/"
+			"vendor/stb/",
 		--	"vendor/imgui/backends"
         }
 
@@ -122,7 +125,9 @@ workspace "PovertyEngine"
 --			"vendor/flecs/**.c",
 			"vendor/imgui/**.cpp",
 			"vendor/imgui/**.h",
-			"vendor/stb/stb_image.h"
+			"vendor/stb/stb_image.h",
+			"vendor/lohmann/json.hpp"
+
         }
 
         includedirs
@@ -134,7 +139,9 @@ workspace "PovertyEngine"
 			"PovertyEngine/vendor/SDL2/include",
 		--	"vendor/flecs/",
 			"vendor/imgui/",
-			"vendor/stb/"
+			"vendor/stb/",
+			"vendor/lohmann/"
+
         }
 		
 		libdirs{

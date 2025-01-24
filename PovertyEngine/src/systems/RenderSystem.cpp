@@ -84,7 +84,6 @@ void RenderSystem::CreateSystems( std::vector<secs::System>* systems)
             if (transform)
             {
                 Engine::lightDir = transform->GetDirection();
-                std::cout << "LightSystem: Updated light direction for Entity " << e.id << "\n";
             }
         });
     

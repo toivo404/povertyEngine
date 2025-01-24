@@ -1,7 +1,6 @@
 #pragma once
 #include <glad.h>
 #include <string>
-
 struct Material {
     int materialId;
     GLuint diffuseTextureID;
@@ -9,6 +8,12 @@ struct Material {
     GLuint specularTextureID;
     GLuint normalTextureID;
     */
+    
+};
+
+struct MaterialFile
+{
+    std::string texturePath;
 };
 
 class MaterialSystem {

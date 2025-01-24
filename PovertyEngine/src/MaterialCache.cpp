@@ -3,7 +3,10 @@
 #include <unordered_map>
 
 #define STB_IMAGE_IMPLEMENTATION
+#include <fstream>
 #include <stb_image.h>
+
+#include "json.hpp"
 std::unordered_map<std::string, int> cache;
 std::vector<Material> materials;
 int materialIds;
@@ -46,6 +49,34 @@ Material MaterialSystem::GetMaterialByID(int id)
     return materials[id - 1];
 }
 
+MaterialFile LoadMaterialFile(const std::string filePath)
+{
+    // Open the file
+    std::ifstream file(filePath);
+    if (!file.is_open()) {
+        std::cerr << "Failed to open file: " << filePath << std::endl;
+    }
+
+    try {
+        // Parse the JSON file
+        nlohmann::json jsonData;
+        file >> jsonData;
+
+        // Check and retrieve the "texture" field
+        if (jsonData.contains("texture") && jsonData["texture"].is_string()) {
+            std::string texture = jsonData["texture"];
+            return MaterialFile{texture};
+        } else {
+            std::cerr << "The 'texture' field is missing or not a string!" << std::endl;
+        }
+    } catch (const std::exception& e) {
+        std::cerr << filePath << std::endl;
+        std::cerr << "Error parsing JSON: " << e.what() << std::endl;
+    }
+    return MaterialFile{};
+
+}
+
 Material MaterialSystem::LoadMaterial(const std::string& materialPath, const char* basePath)
 {
     if (cache.find(materialPath) != cache.end())
@@ -53,10 +84,10 @@ Material MaterialSystem::LoadMaterial(const std::string& materialPath, const cha
         return GetMaterialByID(cache[materialPath]);
     }
     materialIds++;
-    Material material;
     // Load diffuse texture
-    std::string diffusePath = materialPath + "mainTex.png";
-    material.diffuseTextureID = LoadTextureFromFile(std::string(basePath) + diffusePath);
+    Material material; 
+    auto matFile = LoadMaterialFile( std::string(basePath) + materialPath);
+    material.diffuseTextureID = LoadTextureFromFile(std::string(basePath) + matFile.texturePath);
     material.materialId = materialIds;
     if (material.diffuseTextureID == 0)
     {
@@ -68,6 +99,8 @@ Material MaterialSystem::LoadMaterial(const std::string& materialPath, const cha
     materials.push_back(material); 
     return material;
 }
+
+ 
 
 void MaterialSystem::BindTexture(const Material& material)
 {

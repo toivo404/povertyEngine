@@ -36,7 +36,7 @@ int transformCompTypeId;
 secs::Entity GameClientImplementation::PlaceAsset(
 
     const glm::vec3& position,
-    const std::string& materialFolder,
+    const std::string& materialFile,
     const std::string& modelPath)
 {
     // Create a new entity
@@ -44,11 +44,13 @@ secs::Entity GameClientImplementation::PlaceAsset(
            .createEntity()
            .set(Transform{position, glm::vec3(1.0f), glm::vec3(0.0f)})
            .set(Shader{Engine::GetShader("basic")})
-           .set(Material{Engine::GetMaterial(materialFolder)})
+           .set(Material{Engine::GetMaterial(materialFile)})
            .set(Mesh{Engine::GetMesh(modelPath)})
            .set(AABB{Engine::GetAABB(modelPath)})
            .set(OutOfBoundsDetector{})
            .build();
+
+
 }
 
 float GetRandomValue()
@@ -92,6 +94,7 @@ void GameClientImplementation::OnInit()
     RegisterClientComponents();
     RegisterClientSystems();
 
+
     // Calculate initial values for camera
     glm::vec3 origCamTarget = glm::vec3(0.0f, 0.0f, 0.0f);
     glm::vec3 origDirection = glm::normalize(origCamTarget - Engine::camPos);
@@ -122,6 +125,9 @@ void GameClientImplementation::OnInit()
         .set(Light{glm::vec3(1)})
         .set(Spin{50})
         .build();
+
+
+    PlaceAsset(glm::vec3(0), "assets/models/ground_plane/mat.povertyMat", "assets/models/ground_plane/ground_plane.fbx");
 
 }
 
@@ -302,7 +308,7 @@ void GameClientImplementation::OnUpdate(float deltaTime)
 
     KeepStuffInSight();
 
-    if (Engine::GetKey(SDLK_PERIOD))
+    if (Engine::GetKeyUp(SDLK_PERIOD))
     {
         const int amount = std::max(static_cast<int>(placedAssets.size()), 1 );
         const size_t placedCount = amount;
@@ -310,7 +316,7 @@ void GameClientImplementation::OnUpdate(float deltaTime)
         
         for (int i = 0; i < square; ++i)
         {
-            const auto asset = PlaceAsset(glm::vec3(0), "assets/models/monkey/", "assets/models/monkey/monkey.fbx");
+            const auto asset = PlaceAsset(glm::vec3(0), "assets/models/monkey/mat.povertyMat", "assets/models/monkey/monkey.fbx");
             placedAssets.push_back(asset);
         }
         int size = placedAssets.size();
@@ -326,7 +332,7 @@ void GameClientImplementation::OnUpdate(float deltaTime)
         
         std::cout << "Assets: " << placedAssets.size() * 2 << std::endl;
     }
-    if (Engine::GetKey(SDLK_COMMA))
+    if (Engine::GetKeyUp(SDLK_COMMA))
     {
         if (!placedAssets.empty())
         {

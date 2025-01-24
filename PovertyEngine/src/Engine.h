@@ -30,7 +30,7 @@ public:
 	static bool IsOnScreen(const glm::vec3& position);
 	
 	static GLuint GetShader(const std::string& str);
-	static Material GetMaterial(const std::string& str);
+	static Material GetMaterial(const std::string& materialFilePath);
 	static Mesh GetMesh(const std::string& string);
 	static AABB GetAABB(const std::string& string);
 	static void AddSystem(secs::System& createSystem);

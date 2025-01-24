@@ -197,9 +197,9 @@ GLuint Engine::GetShader(const std::string& str)
     return ShaderLoader::GetShaderProgram(str);
 }
 
-Material Engine::GetMaterial(const std::string& str)
+Material Engine::GetMaterial(const std::string& materialFilePath)
 {
-    return MaterialSystem::LoadMaterial(str, baseFilePath);
+    return MaterialSystem::LoadMaterial(materialFilePath, baseFilePath);
 }
 
 Mesh Engine::GetMesh(const std::string& string)
