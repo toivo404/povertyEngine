@@ -66,6 +66,9 @@
     <ClInclude Include="src\Core.h">
       <Filter>src</Filter>
     </ClInclude>
+    <ClInclude Include="src\DebugLineRenderer.h">
+      <Filter>src</Filter>
+    </ClInclude>
     <ClInclude Include="src\Engine.h">
       <Filter>src</Filter>
     </ClInclude>
@@ -78,28 +81,25 @@
     <ClInclude Include="src\ImGUIHelper.h">
       <Filter>src</Filter>
     </ClInclude>
+    <ClInclude Include="src\MaterialCache.h">
+      <Filter>src</Filter>
+    </ClInclude>
     <ClInclude Include="src\MeshCache.h">
+      <Filter>src</Filter>
+    </ClInclude>
+    <ClInclude Include="src\PEPhysics.h">
+      <Filter>src</Filter>
+    </ClInclude>
+    <ClInclude Include="src\PEPhysicsTests.h">
       <Filter>src</Filter>
     </ClInclude>
     <ClInclude Include="src\Secs.h">
       <Filter>src</Filter>
     </ClInclude>
-    <ClInclude Include="src\SecsTest.h">
-      <Filter>src</Filter>
-    </ClInclude>
     <ClInclude Include="src\ShaderLoader.h">
       <Filter>src</Filter>
     </ClInclude>
-    <ClInclude Include="src\systems\ManipulatorSystem.h">
-      <Filter>src\systems</Filter>
-    </ClInclude>
-    <ClInclude Include="src\systems\MaterialSystem.h">
-      <Filter>src\systems</Filter>
-    </ClInclude>
     <ClInclude Include="src\systems\RenderSystem.h">
-      <Filter>src\systems</Filter>
-    </ClInclude>
-    <ClInclude Include="src\systems\SpinSystem.h">
       <Filter>src\systems</Filter>
     </ClInclude>
     <ClInclude Include="src\systems\TransformSystem.h">
@@ -146,28 +146,22 @@
     <ClCompile Include="src\ImGUIHelper.cpp">
       <Filter>src</Filter>
     </ClCompile>
+    <ClCompile Include="src\MaterialCache.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
     <ClCompile Include="src\MeshCache.cpp">
       <Filter>src</Filter>
     </ClCompile>
-    <ClCompile Include="src\Secs.cpp">
+    <ClCompile Include="src\PEPhysics.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="src\PEPhysicsTests.cpp">
       <Filter>src</Filter>
     </ClCompile>
     <ClCompile Include="src\ShaderLoader.cpp">
       <Filter>src</Filter>
     </ClCompile>
-    <ClCompile Include="src\systems\ManipulatorSystem.cpp">
-      <Filter>src\systems</Filter>
-    </ClCompile>
-    <ClCompile Include="src\systems\MaterialSystem.cpp">
-      <Filter>src\systems</Filter>
-    </ClCompile>
     <ClCompile Include="src\systems\RenderSystem.cpp">
-      <Filter>src\systems</Filter>
-    </ClCompile>
-    <ClCompile Include="src\systems\SpinSystem.cpp">
-      <Filter>src\systems</Filter>
-    </ClCompile>
-    <ClCompile Include="src\systems\TransformSystem.cpp">
       <Filter>src\systems</Filter>
     </ClCompile>
     <ClCompile Include="vendor\Glad\glad.c">
