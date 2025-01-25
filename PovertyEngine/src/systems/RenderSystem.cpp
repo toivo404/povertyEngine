@@ -9,8 +9,6 @@ void RenderSystem::RegisterComponents(secs::World* world)
     secs::ComponentRegistry::registerType<Transform>("Transform");
     secs::ComponentRegistry::registerType<Material>("Material");
     secs::ComponentRegistry::registerType<Shader>("Shader");
-    secs::ComponentRegistry::registerType<Light>("Light");
-    secs::ComponentRegistry::registerType<Camera>("Camera");
     secs::ComponentRegistry::registerType<Mesh>("Mesh");
 }
 
@@ -79,37 +77,6 @@ int RenderSystem::Render(secs::World& world)
     return renderedObjects;
 }
 
-
-
-void RenderSystem::CreateSystems( std::vector<secs::System>* systems)
-{
-    int lightTypeId = secs::ComponentRegistry::registerType<Light>("Light");
-    int transformTypeId = secs::ComponentRegistry::registerType<Transform>("Transform");
-
-    const auto lightSystem = secs::System(
-        {lightTypeId, transformTypeId},
-        [](secs::Entity e, secs::World& w)
-        {
-            const auto* transform = w.getComponent<Transform>(e);
-            if (transform)
-            {
-                Engine::lightDir = transform->GetDirection();
-            }
-        });
-    
-    systems->push_back(lightSystem);
-    int camTypeId = secs::ComponentRegistry::registerType<Camera>("Camera");
-    
-    const auto camSystem = secs::System(
-        {camTypeId, transformTypeId},
-        [](secs::Entity e, secs::World& w)
-        {
-            const auto* transform = w.getComponent<Transform>(e);
-            Engine::camPos = transform->position;
-            Engine::camLook = transform->GetDirection();
-        });
-    systems->push_back(camSystem);
-}
 
 
 

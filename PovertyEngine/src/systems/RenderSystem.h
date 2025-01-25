@@ -19,21 +19,11 @@ struct Mesh {
     GLsizei indexCount;
 };
 
-struct Camera
-{
-    float fov;
-};
-
-struct Light {
-    glm::vec3 color = glm::vec3(1.0f, 0.8f, 0.6f); 
-};
-
 
 class RenderSystem
 {
 public:
     static int Render(secs::World& world);
     static void RegisterComponents(secs::World* world);
-    static void CreateSystems(std::vector<secs::System>* systems);
 };
 

@@ -1,10 +1,9 @@
 #pragma once
 #include <cmath>
-#include <core.h>
 
 namespace MathUtils
 {
-    PE_API inline float MoveTowards(float current, float target, float maxDelta)
+    inline float MoveTowards(float current, float target, float maxDelta)
     {
         float difference = target - current;
 
