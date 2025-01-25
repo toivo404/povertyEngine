@@ -5,11 +5,12 @@
 #define STB_IMAGE_IMPLEMENTATION
 #include <fstream>
 #include <stb_image.h>
-
+#include <MaterialCache.h>
 #include "json.hpp"
-std::unordered_map<std::string, int> cache;
-std::vector<Material> materials;
-int materialIds;
+int MaterialSystem::materialIds; 
+std::unordered_map<std::string, MaterialFile> cache;
+std::vector<MaterialFile> materials;
+
 // Helper function to load a single texture
 static GLuint LoadTextureFromFile(const std::string& texturePath)
 {
@@ -46,7 +47,8 @@ Material MaterialSystem::GetMaterialByID(int id)
         std::cerr << "Bad material ID " << id << std::endl;
         return {};
     }
-    return materials[id - 1];
+    auto found = materials[id - 1];
+    return found.loadedMaterial;
 }
 
 MaterialFile LoadMaterialFile(const std::string filePath)
@@ -81,9 +83,9 @@ Material MaterialSystem::LoadMaterial(const std::string& materialPath, const cha
 {
     if (cache.find(materialPath) != cache.end())
     {
-        return GetMaterialByID(cache[materialPath]);
+        return cache[materialPath].loadedMaterial;
     }
-    materialIds++;
+    MaterialSystem::materialIds++;
     // Load diffuse texture
     Material material; 
     auto matFile = LoadMaterialFile( std::string(basePath) + materialPath);
@@ -94,9 +96,9 @@ Material MaterialSystem::LoadMaterial(const std::string& materialPath, const cha
         std::cerr << "Diffuse texture failed to load for material: " << materialPath << std::endl;
         return material;
     }
-
-    cache[materialPath] = materialIds;
-    materials.push_back(material); 
+    matFile.loadedMaterial = material;
+    cache[materialPath] = matFile;
+    materials.push_back(matFile); 
     return material;
 }
 
@@ -116,7 +118,7 @@ void MaterialSystem::CleanUp()
 {
     for (auto material : materials)
     {
-        glDeleteTextures(1, &material.diffuseTextureID);
+        glDeleteTextures(1, &material.loadedMaterial.diffuseTextureID);
     }
     materials.clear();
     cache.clear(); 
