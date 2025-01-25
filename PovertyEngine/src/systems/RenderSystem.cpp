@@ -50,6 +50,16 @@ int RenderSystem::Render(secs::World& world)
                 GLint viewPosLoc = glGetUniformLocation(shaders[i].program, "viewPos");
                 glUniform3fv(viewPosLoc, 1, glm::value_ptr(Engine::camPos));
 
+                // 2. Get the uniform location for your sampler2D
+                GLuint texLoc = glGetUniformLocation(shaders[i].program, "diffuseTexture");
+
+                // 3. Activate texture unit 0, then bind your actual texture ID to that unit
+                glActiveTexture(GL_TEXTURE0);
+                glBindTexture(GL_TEXTURE_2D, materials[i].diffuseTextureID);
+                // 4. Tell the sampler in the shader that "diffuseTexture" corresponds to texture unit 0
+                glUniform1i(texLoc, 0);
+
+                
                 // Bind the VAO
                 glBindVertexArray(meshes[i].VAO);
 
