@@ -26,6 +26,12 @@ struct DrawAABB{
     
 };
 
+struct Car
+{
+    float speed = 0;
+};
+
+
 
 int add(int a, int b) {
     return a + b;
@@ -53,6 +59,19 @@ secs::Entity GameClientImplementation::PlaceAsset(
 
 }
 
+secs::Entity PlaceCar(secs::World* world, glm::vec3 position )
+{
+    // Create a new entity
+    return secs::EntityBuilder(*world)
+           .createEntity()
+           .set(Transform{position, glm::vec3(1.0f), glm::vec3(0.0f)})
+           .set(Shader{Engine::GetShader("basic")})
+           .set(Mesh{Engine::GetMesh("assets/models/testcar/car.fbx")})
+           .set(AABB{Engine::GetAABB("assets/models/testcar/car.fbx")})
+           .set(Car{})
+           .build();
+}
+
 float GetRandomValue()
 {
     return  static_cast<float>(rand()) / RAND_MAX;
@@ -67,6 +86,8 @@ glm::vec3 GetRandomColor()
          GetRandomValue() / RAND_MAX * 0.2f - 0.1f
      );
 }
+
+
 
 
 
@@ -87,46 +108,41 @@ void PopulateMonkeys(secs::World& world, secs::ComponentRegistry& registry) {
 }
 */
 
-//secs::Entity mainCamera;
+secs::Entity mainCamera;
+secs::Entity pcCar;
 
 void GameClientImplementation::OnInit()
 {
     RegisterClientComponents();
     RegisterClientSystems();
 
-
-    // Calculate initial values for camera
-    glm::vec3 origCamTarget = glm::vec3(0.0f, 0.0f, 0.0f);
-    glm::vec3 origDirection = glm::normalize(origCamTarget - Engine::camPos);
-    float pitch = glm::degrees(asin(origDirection.y));
-    float yaw = glm::degrees(atan2(origDirection.z, origDirection.x));
-
-    /*
+    pcCar = PlaceCar(&world, glm::vec3(0.0f, 0.0f, 0.0f));
+    
     // Create and set up "Main Camera" entity
     mainCamera = secs::EntityBuilder(world)
+                 .createEntity()
                  .set(Transform{
                      glm::vec3(0.0f, 5.0f, 10.0f), // Position
                      glm::vec3(1.0f), // Scale
-                     glm::vec3(pitch, yaw, 0.0f) // Rotation
+                     glm::vec3(0, 0, 0.0f) // Rotation
                  })
+         //        .set(Spin{50})
                  .set(Camera{42})
-                 .set(Manipulator{2, 50})
+                 .set(Manipulator{10,  20})
                  .build();
-    */
     
     // Create and set up "Main Light" entity
-    secs::EntityBuilder(world)
-        .createEntity()
-        .set(Transform{
-            glm::vec3(0.0f, 0.0f, 0.0f), // Position
-            glm::vec3(0, 0, 0), // Scale
-            glm::vec3(15, 0, 0.0f) // Rotation
-        })
-        .set(Light{glm::vec3(1)})
-        .set(Spin{50})
-        .build();
-
-
+  //  secs::EntityBuilder(world)
+  //      .createEntity()
+  //      .set(Transform{
+  //          glm::vec3(0.0f, 0.0f, 0.0f), // Position
+  //          glm::vec3(0, 0, 0), // Scale
+  //          glm::vec3(0, 0, 180.0f) // Rotation
+  //      })
+  //      .set(Light{glm::vec3(1)})
+  //      .build();
+    Engine::lightDir = glm::vec3(0,-1,0);
+    
     PlaceAsset(glm::vec3(0), "assets/models/ground_plane/mat.povertyMat", "assets/models/ground_plane/ground_plane.fbx");
 
 }
@@ -140,6 +156,10 @@ void GameClientImplementation::RegisterClientComponents()
     secs::ComponentRegistry::registerType<HelloWorldComponent>("HelloWorldComponent");
     secs::ComponentRegistry::registerType<OutOfBoundsDetector>("OutOfBoundsDetector");
     secs::ComponentRegistry::registerType<DrawAABB>("DrawAABB");
+    secs::ComponentRegistry::registerType<Car>("Car");
+    secs::ComponentRegistry::registerType<Light>("Light");
+    secs::ComponentRegistry::registerType<Camera>("Camera");
+    
 }
 
 bool isGameOver = true;
@@ -164,6 +184,17 @@ void GameClientImplementation::RegisterClientSystems()
         }
     );
     Engine::AddSystem(spinTransformSystem);
+    auto carTypeId = secs::ComponentRegistry::getID<Car>();
+    secs::System carSystem(
+        {carTypeId, transformTypeId},
+        [carTypeId, transformTypeId](secs::Entity e, secs::World& w)
+        {
+            auto car = w.getComponent<Car>(e);
+            auto trans = w.getComponent<Transform>(e);
+            trans->position += trans->GetDirection() * car->speed;
+        }
+    );
+    Engine::AddSystem(carSystem);
 
     // ManipulatorTransformSystem
     secs::System manipulatorTransformSystem(
@@ -258,7 +289,7 @@ void RemoveLastPlaced(secs::World& w)
     placedAssets.pop_back();
 }
 
-
+/*
 void GameClientImplementation::KeepStuffInSight()
 {
     secs::queryChunks<Transform, AABB>(
@@ -300,13 +331,35 @@ void GameClientImplementation::KeepStuffInSight()
             Engine::camLook = target;
             Engine::camPos = pos;
         });
-}   
+}
+*/
+
+
+void GameClientImplementation::PlayerControls()
+{
+    auto* camTrans = world.getComponent<Transform>(mainCamera);
+    auto* pcCarTrans = world.getComponent<Transform>(pcCar);
+    auto* car = world.getComponent<Car>(pcCar);
+    
+    camTrans->position = pcCarTrans->position + glm::vec3(0, 20, 0);
+    // camTrans->not_rotation  = pcCarTrans->not_rotation;
+    // camTrans->AddRotation(glm::vec3(90, 0, 0));
+// 
+ //   camTrans->LookAt(pcCarTrans->position);
+    if (Engine::GetKey(SDLK_w))
+    {
+        car->speed += Engine::deltaTime; 
+    }
+    
+
+}
 
 void GameClientImplementation::OnUpdate(float deltaTime)
 {
     DrawCross();
 
-    KeepStuffInSight();
+    //KeepStuffInSight();
+    PlayerControls();
 
     if (Engine::GetKeyUp(SDLK_PERIOD))
     {

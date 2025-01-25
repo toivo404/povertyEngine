@@ -13,6 +13,7 @@ public:
     void DrawCross();
     void KeepStuffInSight();
 
+    void PlayerControls();
     void OnUpdate(float deltaTime) override;
 
     void OnShutdown() override;

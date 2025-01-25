@@ -83,6 +83,11 @@ void Engine::Init(GameClient* gameClientImplementation)
         std::cerr << "Failed to initialize GLAD" << std::endl;
         exit(1);
     }
+
+    // Enable VSync
+    if (SDL_GL_SetSwapInterval(1) != 0) {
+        SDL_Log("Warning: Unable to set VSync! SDL Error: %s", SDL_GetError());
+    }
     
     glViewport(0, 0, windowWidth, windowHeight);
 

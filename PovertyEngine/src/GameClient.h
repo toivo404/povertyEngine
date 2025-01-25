@@ -2,7 +2,7 @@
 #define GAME_CLIENT_H  // Define GAME_CLIENT_H
 #include "GameClient.h"
 #include "secs.h"
-class GameClient {
+class PE_API GameClient {
 public:
     virtual void OnInit() = 0;
     virtual void OnUpdate(float deltaTime) = 0;
