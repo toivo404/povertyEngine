@@ -17,4 +17,5 @@ public:
     void OnUpdate(float deltaTime) override;
 
     void OnShutdown() override;
+    secs::Entity cameraLookPosEntity;
 };

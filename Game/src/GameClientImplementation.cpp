@@ -1,8 +1,11 @@
 #include "GameClientImplementation.h"
 
+#include <algorithm>
+
 #include "imgui.h"
 #include "backends/imgui_impl_opengl3_loader.h"
 #include "systems/TransformSystem.h"
+#include "MathUtils.h"
 
 struct Spin {
     float rotateSpeed = 50.0f; // Rotation speed in degrees per second
@@ -29,6 +32,7 @@ struct DrawAABB{
 struct Car
 {
     float speed = 0;
+    bool accelerating = false;
 };
 
 
@@ -38,6 +42,7 @@ int add(int a, int b) {
 }
 std::vector<secs::Entity> placedAssets;
 int transformCompTypeId;
+
 
 secs::Entity GameClientImplementation::PlaceAsset(
 
@@ -108,7 +113,6 @@ void PopulateMonkeys(secs::World& world, secs::ComponentRegistry& registry) {
 }
 */
 
-secs::Entity mainCamera;
 secs::Entity pcCar;
 
 void GameClientImplementation::OnInit()
@@ -117,20 +121,13 @@ void GameClientImplementation::OnInit()
     RegisterClientSystems();
 
     pcCar = PlaceCar(&world, glm::vec3(0.0f, 0.0f, 0.0f));
-    
-    // Create and set up "Main Camera" entity
-    mainCamera = secs::EntityBuilder(world)
-                 .createEntity()
-                 .set(Transform{
-                     glm::vec3(0.0f, 5.0f, 10.0f), // Position
-                     glm::vec3(1.0f), // Scale
-                     glm::vec3(0, 0, 0.0f) // Rotation
-                 })
-         //        .set(Spin{50})
-                 .set(Camera{42})
-                 .set(Manipulator{10,  20})
-                 .build();
-    
+
+    cameraLookPosEntity = secs::EntityBuilder(world)
+        .createEntity()
+        .set(Transform{Engine::camLook})
+        .set(Manipulator{2.0f, 30.0f})
+        .build();
+
     // Create and set up "Main Light" entity
   //  secs::EntityBuilder(world)
   //      .createEntity()
@@ -157,8 +154,6 @@ void GameClientImplementation::RegisterClientComponents()
     secs::ComponentRegistry::registerType<OutOfBoundsDetector>("OutOfBoundsDetector");
     secs::ComponentRegistry::registerType<DrawAABB>("DrawAABB");
     secs::ComponentRegistry::registerType<Car>("Car");
-    secs::ComponentRegistry::registerType<Light>("Light");
-    secs::ComponentRegistry::registerType<Camera>("Camera");
     
 }
 
@@ -192,6 +187,14 @@ void GameClientImplementation::RegisterClientSystems()
             auto car = w.getComponent<Car>(e);
             auto trans = w.getComponent<Transform>(e);
             trans->position += trans->GetDirection() * car->speed;
+            if (car->accelerating)
+            {
+                car->accelerating = false;
+            }
+            else
+            {
+                car->speed = MathUtils::MoveTowards(car->speed, 0, Engine::deltaTime);
+            }
         }
     );
     Engine::AddSystem(carSystem);
@@ -256,8 +259,6 @@ void GameClientImplementation::RegisterClientSystems()
 
 
 
-double lastMonkeySpawn;
-int killedMonkeys;
 
 void GameClientImplementation::DrawCross()
 {
@@ -337,25 +338,44 @@ void GameClientImplementation::KeepStuffInSight()
 
 void GameClientImplementation::PlayerControls()
 {
-    auto* camTrans = world.getComponent<Transform>(mainCamera);
+   
     auto* pcCarTrans = world.getComponent<Transform>(pcCar);
     auto* car = world.getComponent<Car>(pcCar);
-    
-    camTrans->position = pcCarTrans->position + glm::vec3(0, 20, 0);
+
+    auto pos = world.getComponent<Transform>(cameraLookPosEntity)->position;
+    Engine::camPos = pcCarTrans->position + glm::vec3(0,15,20) + pos;
+    Engine::DebugStat(">(cameraLookPosEntity)->position", PositionString(pos)); 
     // camTrans->not_rotation  = pcCarTrans->not_rotation;
     // camTrans->AddRotation(glm::vec3(90, 0, 0));
 // 
  //   camTrans->LookAt(pcCarTrans->position);
-    if (Engine::GetKey(SDLK_w))
+    //Engine::camLook = Engine::camPos + glm::vec3(1, -1, 0);
+    
+    //Engine::camLook = world.getComponent<Transform>(cameraLookPosEntity)->position;
+    Engine::camLook = pcCarTrans->position;
+    
+    if (isGameOver)
+        return;
+
+    if (Engine::GetKey(SDLK_UP))
     {
-        car->speed += Engine::deltaTime; 
+        car->speed += Engine::deltaTime;
+        car->accelerating = true;
     }
+    if (Engine::GetKey(SDLK_DOWN))
+    {
+        car->speed -= Engine::deltaTime;
+        car->accelerating = true;
+    }
+    
     
 
 }
 
+
 void GameClientImplementation::OnUpdate(float deltaTime)
 {
+    Engine::DebugStat("isGameOver", std::to_string(isGameOver));
     DrawCross();
 
     //KeepStuffInSight();
@@ -412,52 +432,24 @@ void GameClientImplementation::OnUpdate(float deltaTime)
     }
     if(Engine::GetKeyUp(SDLK_BACKSPACE))
     {
-        lastMonkeySpawn = -9999;
-        isGameOver = false;
+        isGameOver = !isGameOver;
     }
     
-    if(Engine::GetMouseButtonUp(1))
-    {
-        std::cout<<"Click" << std::endl;
-        glm::vec3 origin;
-        glm::vec3 dir;
-        PEPhysicsHitInfo hitInfo;
-        Engine::MousePositionToRay(origin, dir);
-        
-        if (PEPhysics::Raycast(origin, dir, world, hitInfo))
-        {
-            world.destroyEntity(hitInfo.entity);
-            killedMonkeys++;
-        }    
-    }
+  // if(Engine::GetMouseButtonUp(1))
+  // {
+  //     std::cout<<"Click" << std::endl;
+  //     glm::vec3 origin;
+  //     glm::vec3 dir;
+  //     PEPhysicsHitInfo hitInfo;
+  //     Engine::MousePositionToRay(origin, dir);
+  //     
+  //     if (PEPhysics::Raycast(origin, dir, world, hitInfo))
+  //     {
+  //         world.destroyEntity(hitInfo.entity);
+  //     }    
+  // }
 
-    if (!isGameOver)
-    {
-        secs::queryChunks<Transform, OutOfBoundsDetector>(
-            world, // Pass the world instance
-            [&](const std::vector<secs::Entity>& entities,
-                const Transform* transforms,
-                const OutOfBoundsDetector* obDetectors,
-                size_t count)
-            {
-                for (size_t i = 0; i < count; ++i)
-                {
-                    if (!Engine::IsOnScreen(transforms[i].position))
-                    {
-                        isGameOver = true;
-                        Engine::DisplayMessage("You lost the game");
-                        //world = secs::World{}; // Reset the world
-                        break; // Exit the loop early since the game is over
-                    }
-                }
-            });
-        if (Engine::time - lastMonkeySpawn > 3)
-        {
-            PlaceAsset(glm::vec3(-2 + (GetRandomValue() * 4), 0, 0), "assets/models/monkey/", "assets/models/monkey/monkey.fbx");
-            lastMonkeySpawn = Engine::time;
-        }
-    
-    }
+   
 }
 
 void GameClientImplementation::OnShutdown()
