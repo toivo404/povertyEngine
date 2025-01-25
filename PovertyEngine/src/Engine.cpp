@@ -10,6 +10,7 @@
 #include <gtc/type_ptr.hpp>
 #include <Secs.h>
 #include <cstdlib>
+#include <utility>
 
 #include "DebugLineRenderer.h"
 #include "EngineInfo.h"
@@ -36,6 +37,7 @@ std::unordered_map<SDL_Keycode, bool> Engine::justReleasedKeys;
 std::unordered_map<int, bool>         Engine::heldMouseButtons;
 std::unordered_map<int, bool>         Engine::justPressedMouseButtons;
 std::unordered_map<int, bool>         Engine::justReleasedMouseButtons;
+std::unordered_map<std::string, std::string> Engine::debugDictionary;
 
 
 float Engine::deltaTime;
@@ -103,7 +105,6 @@ void Engine::Init(GameClient* gameClientImplementation)
 
     secs::ComponentRegistry::registerType<AABB>("AABB");
     RenderSystem::RegisterComponents(&client->world);
-    RenderSystem::CreateSystems( &systems);
     client->OnInit();
     std::cout << "Systems:" << systems.size() << std::endl;
     while (!quit)
@@ -122,6 +123,11 @@ bool Engine::IsKeyPressed(SDL_Keycode key)
 void Engine::DebugDrawLine(const glm::vec3& start, const glm::vec3& end, const glm::vec3& color, float lineWidth)
 {
     debugLineRenderer->DrawLine(start, end, color, lineWidth);
+}
+
+void Engine::DebugStat(const std::string& key, std::string val)
+{
+    debugDictionary[key] = std::move(val);
 }
 
 // Mouse input
@@ -352,23 +358,26 @@ void Engine::MainLoop()
     );
 
     camMatrix = projectionMatrix * viewMatrix;
-
- 
-    if (currentMessage != nullptr)
-    {
-        ImGui::Begin("hello");
-        ImGui::Text( currentMessage );
-        ImGui::End();    
-    }
-
+    
 
     const int renderedCount = RenderSystem::Render(client->world);
     debugLineRenderer->Render(viewMatrix, projectionMatrix, debugLineShader);
 
-    ImGui::Begin("stats");
-    ImGui::Text(Combine("deltaTime: ", deltaTime, "\n", "time: ", time, "\n", "fps: ", CalculateFPS(deltaTime), "\n", "renderedObjects: ", renderedCount).c_str());
-    ImGui::End();
+    debugDictionary["deltaTime"] = std::to_string(deltaTime),
+    debugDictionary["time"] = std::to_string(time);
+    debugDictionary["fps"] = std::to_string(CalculateFPS(deltaTime));
+    debugDictionary["renderedObjects"] = std::to_string(renderedCount);
+    debugDictionary["cameraPos"] = PositionString(camPos);
+    debugDictionary["camLook"] = PositionString(camLook);
 
+    ImGui::Begin("stats");
+    std::ostringstream oss;
+    for (auto element : debugDictionary)
+    {
+        oss << element.first << ": " << element.second << "\n";
+    }
+    ImGui::Text("%s", oss.str().c_str());
+    ImGui::End();
     GLenum error = glGetError();
     if (error != GL_NO_ERROR)
         std::cerr << "OpenGL error: " << error << std::endl;

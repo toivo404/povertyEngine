@@ -39,6 +39,7 @@ public:
 
 	static void DisplayMessage(const char* message);
 	static void DebugDrawLine(const glm::vec3& start, const glm::vec3& end, const glm::vec3& color, float lineWidth);
+	static void DebugStat(const std::string& key, std::string val);
 
 	static GameClient* client;
 	static char* baseFilePath;
@@ -65,5 +66,8 @@ private:
 	static std::unordered_map<int, bool> heldMouseButtons;
 	static std::unordered_map<int, bool> justPressedMouseButtons;
 	static std::unordered_map<int, bool> justReleasedMouseButtons;
+	
+	static std::unordered_map<std::string, std::string> debugDictionary;
+
 	
 };
