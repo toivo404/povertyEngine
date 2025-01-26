@@ -4,6 +4,8 @@
 #include <fwd.hpp>
 #include <memory>
 #include <vec3.hpp>
+
+#include "CachedMesh.h"
 #include "Core.h"
 #include "GameClient.h"
 #include "ImGUIHelper.h"
@@ -31,7 +33,7 @@ public:
 	
 	static GLuint GetShader(const std::string& str);
 	static Material GetMaterial(const std::string& materialFilePath);
-	static Mesh GetMesh(const std::string& string);
+	static CachedMesh* GetMesh(const std::string& string);
 	static AABB GetAABB(const std::string& string);
 	static void AddSystem(secs::System& createSystem);
 	static bool GetKey(SDL_Keycode key);
@@ -40,6 +42,7 @@ public:
 	static void DisplayMessage(const char* message);
 	static void DebugDrawLine(const glm::vec3& start, const glm::vec3& end, const glm::vec3& color, float lineWidth);
 	static void DebugStat(const std::string& key, std::string val);
+
 
 	static GameClient* client;
 	static char* baseFilePath;
@@ -69,5 +72,6 @@ private:
 	
 	static std::unordered_map<std::string, std::string> debugDictionary;
 
+	static void OnModelDebugGUI();
 	
 };

@@ -10,7 +10,7 @@ public:
     void RegisterClientComponents();
     void RegisterClientSystems();
 
-    void DrawCross();
+    void DrawCross(glm::vec3 pos);
     void KeepStuffInSight();
 
     void PlayerControls();
@@ -18,4 +18,5 @@ public:
 
     void OnShutdown() override;
     secs::Entity cameraLookPosEntity;
+    secs::Entity groundEntity;
 };

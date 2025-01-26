@@ -12,9 +12,9 @@ class MeshCache
 public:
     static void SetGLVertexAttributes();
     static void Load(const std::string& path);
-    static Mesh GetMesh(const std::string& path);
+    static CachedMesh* GetMesh(const std::string& path);
     static AABB GetAABB(const std::string& path);
-    static AABB CalculateAABB(const std::vector<float>& vertices);
+    static void MakeCalculations(const std::vector<float>& vertices,CachedMesh& cachedMesh);
     static void CleanUp();
 
 private:    
