@@ -20,11 +20,13 @@
         },
         {
             "modelFile": "assets/models/RAKENNUSYKSI/RAKENNUSYKSI.obj",
-            "textureFile": "assets/materials/ritari_palette/colorpalette.povertyMat"
+            "textureFile": "assets/materials/ritari_palette/colorpalette.povertyMat",
+			"name": "RAKENNUSYKSI"
         },
         {
             "modelFile": "assets/models/TUOMIOKIRKKO/TUOMIOKIRKKO.obj",
-            "textureFile": "assets/materials/ritari_palette/colorpalette.povertyMat"
+            "textureFile": "assets/materials/ritari_palette/colorpalette.povertyMat",
+			"name": "TUOMIOKIRKKO"
         },
         {
             "modelFile": "assets/models/RAUTATIEASEMA/RAUTATIEASEMA.obj",

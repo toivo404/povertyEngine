@@ -19,6 +19,7 @@ public:
     void PlayerControls();
     std::string LoadModels();
     void CycleModels();
+    secs::Entity PlacePrefab(std::string basic_string, Transform trans);
     void StartGame();
     void OnUpdate(float deltaTime) override;
 

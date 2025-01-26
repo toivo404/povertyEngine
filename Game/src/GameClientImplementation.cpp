@@ -252,8 +252,9 @@ void GameClientImplementation::RegisterClientSystems()
                         bool hit = PEPhysics::CheckAABBOverlap(aabbs[i], transforms[i], *carAabb, *carTrans);
                         if (hit)
                         {
+                             
+                            carTrans->position -= carTrans->GetDirection() * glm::sign(car->speed);
                             car->speed = 0;
-                            carTrans->position-= carTrans->GetDirection();
 #if PE_DEBUG
                             std::cout << "car hit " << ents[i].id << std::endl;
 #endif
@@ -451,7 +452,7 @@ void GameClientImplementation::KeepStuffInSight()
 
 glm::vec3 GameClientImplementation::GetCameraOffset()
 {
-    return  glm::vec3(0, 60, 5) ;
+    return  glm::vec3(0, 120, 5) ;
 }
 
 void GameClientImplementation::PlayerControls()
@@ -459,7 +460,7 @@ void GameClientImplementation::PlayerControls()
     auto* pcCarTrans = world.getComponent<Transform>(pcCar);
     auto* car = world.getComponent<Car>(pcCar);
     //auto pos = world.getComponent<Transform>(cameraLookPosEntity)->position
-
+    Engine::DebugStat("pc pos", PositionString(pcCarTrans->position));
 
     // camTrans->not_rotation  = pcCarTrans->not_rotation;
     // camTrans->AddRotation(glm::vec3(90, 0, 0));
@@ -562,33 +563,69 @@ void GameClientImplementation::CycleModels()
     currentModelIndex++;
 }
 
+secs::Entity GameClientImplementation::PlacePrefab(std::string basic_string, Transform trans)
+{
+    bool found = false;
+    for (auto item : models)
+    {
+        if (basic_string == item.name)
+        {
+            return secs::EntityBuilder(world)
+                .createEntity()
+                .set(trans)
+                .set(Shader{Engine::GetShader("basic")})
+                .set(Material{Engine::GetMaterial(item.textureFile)})
+                .set(Mesh{Engine::GetMesh(item.modelFile)})
+                .set(AABB{Engine::GetAABB(item.modelFile)})
+                .set(Name{item.name})
+                .build();
+        }
+    }
+    std::cerr << "Prefab not found (" << basic_string << ")" << std::endl;
+    throw std::runtime_error("Prefab not found (" + basic_string + ")");;
+}
+
+
 void GameClientImplementation::StartGame()
 {
-    glm::vec3 spawnPos(10.0f, 0.0f, 0.0f);
+    glm::vec3 spawnPos(30.0f, 0.0f, 0.0f);
     pcCar = PlaceCar(&world, spawnPos);
     world.addComponent<Name>(pcCar, Name{"PlayerCar"});
     Engine::camPos = spawnPos + GetCameraOffset();
-    auto levelProps = parseLevelFile("assets/sectors/monkey.sector");
     LoadModels();
-    for (auto item : models)
+    const std::string& rakennusKolme = "RAKENNUSKOLME";
+
+    auto pcabb  = world.getComponent<AABB>(pcCar);
+    auto pcTrans  = world.getComponent<Transform>(pcCar);
+    pcTrans->UpdateModelMatrix();
+    glm::vec2 offset {170, 75 };
+    
+    for (float i = -10.0; i < 10; ++i)
     {
-        for (auto prop : levelProps)
+        float rowOffset = static_cast<int>(i) % 2 == 0 ? offset.y * 0.5f : 0;
+        for (float j = -10.0; j < 10; ++j)
         {
-            if (prop.first == item.name)
+            auto placed = PlacePrefab(rakennusKolme, Transform{glm::vec3(i * offset.x, 0, j * offset.y + rowOffset)});
+            auto buildingabb = world.getComponent<AABB>(placed);
+            auto buildingTrans = world.getComponent<Transform>(placed);
+            buildingTrans->UpdateModelMatrix();
+            if (PEPhysics::CheckAABBOverlap(*pcabb, *pcTrans, *buildingabb, *buildingTrans))
             {
-                secs::EntityBuilder(world)
-                    .createEntity()
-                    .set(prop.second)
-                    .set(Shader{Engine::GetShader("basic")})
-                    .set(Material{Engine::GetMaterial(item.textureFile)})
-                    .set(Mesh{Engine::GetMesh(item.modelFile)})
-                    .set(AABB{Engine::GetAABB(item.modelFile)})
-                    .set(Name{item.name})
-                    .build();
+                std::cout << "overlaps i" << i << "j" << j  << std::endl;
+             //   world.destroyEntity(placed);
             }
         }
-    } 
-    
+    }
+    //PlacePrefab(rakennusKolme, Transform{glm::vec3(-100,0,0)} );
+//    auto levelProps = parseLevelFile("assets/sectors/monkey.sector");
+//    for (auto prop : levelProps)
+//    {
+//        auto& basic_string = prop.first;
+//        auto& trans = prop.second;
+//
+//        PlacePrefab(basic_string, trans);
+//    } 
+//    
         
     isGameOver = !isGameOver;
 }
