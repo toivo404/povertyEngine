@@ -152,3 +152,134 @@ bool PEPhysics::Raycast(const glm::vec3& rayOrigin, const glm::vec3& rayDirectio
     return isHit;
     
 }
+
+
+
+namespace
+{
+    // -----------------------------------------------------------------------------
+    // Möller–Trumbore algorithm to intersect a ray with a single triangle.
+    // Returns true if the ray intersects and sets outT to the parametric distance
+    // along the ray. outU and outV are the barycentric coordinates (optional).
+    // -----------------------------------------------------------------------------
+    bool MollerTrumboreIntersection(const glm::vec3& origin,
+                                    const glm::vec3& direction,
+                                    const glm::vec3& v0,
+                                    const glm::vec3& v1,
+                                    const glm::vec3& v2,
+                                    float& outT,
+                                    float& outU,
+                                    float& outV)
+    {
+        const float EPSILON = 1e-6f;
+
+        glm::vec3 edge1 = v1 - v0;
+        glm::vec3 edge2 = v2 - v0;
+
+        // pvec is perpendicular to edge2 and direction
+        glm::vec3 pvec = glm::cross(direction, edge2);
+        float det = glm::dot(edge1, pvec);
+
+        // If det is near zero, the ray lies in the plane of the triangle or is parallel
+        if (fabs(det) < EPSILON)
+            return false;
+
+        float invDet = 1.0f / det;
+
+        // Distance from v0 to ray origin
+        glm::vec3 tvec = origin - v0;
+        float u = glm::dot(tvec, pvec) * invDet;
+        if (u < 0.0f || u > 1.0f)
+            return false;
+
+        // qvec is perpendicular to edge1 and tvec
+        glm::vec3 qvec = glm::cross(tvec, edge1);
+        float v = glm::dot(direction, qvec) * invDet;
+        if (v < 0.0f || (u + v) > 1.0f)
+            return false;
+
+        float t = glm::dot(edge2, qvec) * invDet;
+        if (t < 0.0f)
+            return false;
+
+        outT = t;
+        outU = u;
+        outV = v;
+        return true;
+    }
+}
+
+// -----------------------------------------------------------------------------
+// -----------------------------------------------------------------------------
+bool PEPhysics::RaycastMesh(const glm::vec3& rayOrigin,
+                            const glm::vec3& rayDirection,
+                            const std::vector<glm::vec3>& vertices,
+                            const std::vector<unsigned int>& indices,
+                            const Transform& transform,
+                            float& tMin,
+                            glm::vec3& intersectionPoint,
+                            bool debug)
+{
+    // Early out: sanity checks
+    if (vertices.empty() || indices.size() < 3)
+    {
+        return false;
+    }
+
+    // Transform ray to local space
+    glm::mat4 invModel = glm::inverse(transform.model);
+    glm::vec3 localRayOrigin = glm::vec3(invModel * glm::vec4(rayOrigin, 1.0f));
+    // For consistent 'distance', we typically keep direction normalized
+    glm::vec3 localRayDirection = glm::normalize(glm::vec3(invModel * glm::vec4(rayDirection, 0.0f)));
+
+    bool hit = false;
+    float closestT = std::numeric_limits<float>::max();
+
+    // We’ll store a temporary intersection point in local space for comparison
+    glm::vec3 bestLocalIntersection(0.0f);
+
+    // Loop through all triangles using the index buffer
+    // (Make sure indices.size() is a multiple of 3)
+    for (size_t i = 0; i < indices.size(); i += 3)
+    {
+        unsigned int i0 = indices[i];
+        unsigned int i1 = indices[i + 1];
+        unsigned int i2 = indices[i + 2];
+
+        if (i2 >= vertices.size() )
+        {
+            
+            break;   
+        }
+        // Gather the triangle’s vertices
+        const glm::vec3& v0 = vertices[i0];
+        const glm::vec3& v1 = vertices[i1];
+        const glm::vec3& v2 = vertices[i2];
+        
+        
+        float t, u, v;
+        if (MollerTrumboreIntersection(localRayOrigin, localRayDirection, v0, v1, v2, t, u, v))
+        {
+            if (t < closestT)
+            {
+                closestT = t;
+                bestLocalIntersection = localRayOrigin + localRayDirection * t;
+                hit = true;
+                if (debug)
+                {
+                    Engine::DebugDrawLine(  ,v1, glm::vec3(1.0f,1.0f,0.0f));
+                }
+            }
+        }
+    }
+
+    if (hit)
+    {
+        // Transform best local intersection to world space
+        intersectionPoint = glm::vec3(transform.model * glm::vec4(bestLocalIntersection, 1.0f));
+        tMin = closestT; // parametric distance along the *local* ray
+        return true;
+    }
+
+    return false;
+}

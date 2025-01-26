@@ -33,4 +33,13 @@ public:
                             glm::vec3& intersectionPoint);
     static bool Raycast(
         const glm::vec3& rayOrigin, const glm::vec3& rayDirection, ::secs::World& world, PEPhysicsHitInfo& hitInfo);
+    
+    static bool RaycastMesh(const glm::vec3& rayOrigin,
+                            const glm::vec3& rayDirection,
+                            const std::vector<glm::vec3>& vertices,
+                            const std::vector<unsigned int>& indices,
+                            const Transform& transform,
+                            float& tMin,
+                            glm::vec3& intersectionPoint,
+                            bool debug = false);
 };
