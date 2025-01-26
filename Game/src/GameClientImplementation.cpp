@@ -23,7 +23,12 @@ struct Manipulator
     float moveSpeed = 2.0f;
     float rotateSpeed = 50.0f;
 };
-
+// ---------------- NEW COMPONENT --------------------
+struct ModelViewer
+{
+    float rotateSpeed = 50.0f; 
+    float scaleSpeed  = 1.0f;
+};
 
 struct OutOfBoundsDetector
 {
@@ -164,7 +169,7 @@ void GameClientImplementation::RegisterClientComponents()
     secs::ComponentRegistry::registerType<OutOfBoundsDetector>("OutOfBoundsDetector");
     secs::ComponentRegistry::registerType<Car>("Car");
     secs::ComponentRegistry::registerType<GroundMesh>("GroundMesh");
-
+    secs::ComponentRegistry::registerType<ModelViewer>("ModelViewer");
 }
 
 bool isGameOver = true;
@@ -259,27 +264,27 @@ void GameClientImplementation::RegisterClientSystems()
             // Rotation controls
             if (Engine::IsKeyPressed(SDLK_UP))
             {
-                transform->not_rotation.x -= manipulator->rotateSpeed * Engine::deltaTime;
+                transform->RotateAroundAxis(glm::vec3(-1, 0, 0), Engine::deltaTime);
             }
             if (Engine::IsKeyPressed(SDLK_DOWN))
             {
-                transform->not_rotation.x += manipulator->rotateSpeed * Engine::deltaTime;
+                transform->RotateAroundAxis(glm::vec3(1, 0, 0), Engine::deltaTime);
             }
             if (Engine::IsKeyPressed(SDLK_LEFT))
             {
-                transform->not_rotation.y -= manipulator->rotateSpeed * Engine::deltaTime;
+                transform->RotateAroundAxis(glm::vec3(0, -1, 0), Engine::deltaTime);
             }
             if (Engine::IsKeyPressed(SDLK_RIGHT))
             {
-                transform->not_rotation.y += manipulator->rotateSpeed * Engine::deltaTime;
+                transform->RotateAroundAxis(glm::vec3(0, 1, 0), Engine::deltaTime);
             }
             if (Engine::IsKeyPressed(SDLK_q))
             {
-                transform->not_rotation.z -= manipulator->rotateSpeed * Engine::deltaTime;
+                transform->RotateAroundAxis(glm::vec3(0, 0, -1), Engine::deltaTime);
             }
             if (Engine::IsKeyPressed(SDLK_e))
             {
-                transform->not_rotation.z += manipulator->rotateSpeed * Engine::deltaTime;
+                transform->RotateAroundAxis(glm::vec3(0, 0, 1), Engine::deltaTime);
             }
         }
     );
@@ -294,6 +299,50 @@ void GameClientImplementation::RegisterClientSystems()
     ////                         });
     // Engine::AddSystem(mouseClick);
 
+    // ---------------- NEW: Model Viewer System ----------------
+    int modelViewerTypeId = secs::ComponentRegistry::getID<ModelViewer>();
+    secs::System modelViewerSystem(
+        {modelViewerTypeId, transformTypeId},
+        [modelViewerTypeId, transformTypeId](secs::Entity e, secs::World& w)
+        {
+            auto* viewer    = w.getComponent<ModelViewer>(e);
+            auto* transform = w.getComponent<Transform>(e);
+
+            // Rotate around Y with Left/Right
+            if (Engine::IsKeyPressed(SDLK_LEFT))
+            {
+                transform->RotateAroundAxis(glm::vec3(0, 1, 0), Engine::deltaTime*100);
+            }
+            if (Engine::IsKeyPressed(SDLK_RIGHT))
+            {
+                transform->RotateAroundAxis(glm::vec3(0, -1, 0), Engine::deltaTime*100);
+            }
+            // Rotate around X with Up/Down
+            if (Engine::IsKeyPressed(SDLK_UP))
+            {
+                transform->RotateAroundAxis(glm::vec3(1, 0, 0), Engine::deltaTime*100);
+            }
+            if (Engine::IsKeyPressed(SDLK_DOWN))
+            {
+                transform->RotateAroundAxis(glm::vec3(-1, 0, 0), Engine::deltaTime*100);
+            }
+
+            // Scale up/down with Numpad +/-
+            if (Engine::IsKeyPressed(SDLK_KP_PLUS))
+            {
+                // Uniform scale
+                transform->scale += glm::vec3(viewer->scaleSpeed) * Engine::deltaTime;
+            }
+            if (Engine::IsKeyPressed(SDLK_KP_MINUS))
+            {
+                transform->scale -= glm::vec3(viewer->scaleSpeed) * Engine::deltaTime;
+                // OPTIONAL: clamp scale so we don’t go negative
+                transform->scale = glm::max(transform->scale, glm::vec3(0.01f));
+            }
+        }
+    );
+    
+    Engine::AddSystem(modelViewerSystem);
     int helloWorldCompId = secs::ComponentRegistry::getID<HelloWorldComponent>();
     secs::System helloWorldSystem({helloWorldCompId, transformTypeId},
                                   [helloWorldCompId, transformTypeId](secs::Entity e, secs::World& w)
@@ -455,15 +504,22 @@ void GameClientImplementation::PlayerControls()
 }
 
 int currentModelIndex = -1;
+secs::Entity prev;
 
 void GameClientImplementation::CycleModels()
 {
+    if (currentModelIndex != -1)
+        world.destroyEntity(prev);
     auto msg = ModelFileLoader::Load( std::string(Engine::baseFilePath)+"assets/models.json", models);
     Engine::DebugStat("msg",msg);
     Engine::DebugStat("model no ", std::to_string(currentModelIndex) + " / " + std::to_string(models.size())) ;
-
+    
     auto model = models[currentModelIndex % models.size()];
-    PlaceAsset(glm::vec3(0),  model.textureFile, model.modelFile);
+    auto placedModel = PlaceAsset(glm::vec3(0),  model.textureFile, model.modelFile);
+    world.addComponent(placedModel, ModelViewer{ 10, 1});
+    Engine::camPos = 2.0f * world.getComponent<AABB>(placedModel)->max;
+    prev = placedModel;
+    currentModelIndex++;
 }
 
 void GameClientImplementation::OnUpdate(float deltaTime)
