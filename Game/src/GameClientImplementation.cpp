@@ -1,9 +1,6 @@
 #include "GameClientImplementation.h"
-
 #include <algorithm>
-
 #include "imgui.h"
-#include "backends/imgui_impl_opengl3_loader.h"
 #include "systems/TransformSystem.h"
 #include "MathUtils.h"
 #include "ModelFileLoader.h"
@@ -195,16 +192,17 @@ void GameClientImplementation::RegisterClientSystems()
     );
     Engine::AddSystem(spinTransformSystem);
     auto carTypeId = secs::ComponentRegistry::getID<Car>();
+    auto aaBbTypeId = secs::ComponentRegistry::getID<AABB>();
     secs::System carSystem(
-        {carTypeId, transformTypeId},
-        [&](secs::Entity e, secs::World& w)
+        {carTypeId, transformTypeId, aaBbTypeId},
+        [&](secs::Entity carEntity, secs::World& w)
         {
-            auto car = w.getComponent<Car>(e);
-            auto trans = w.getComponent<Transform>(e);
+            auto car = w.getComponent<Car>(carEntity);
+            auto carTrans = w.getComponent<Transform>(carEntity);
 
             // 1) Move the car in its forward direction by current speed
             //    We'll treat speed as units per second. 
-            trans->position += trans->GetDirection() * car->speed * Engine::deltaTime;
+            carTrans->position += carTrans->GetDirection() * car->speed * Engine::deltaTime;
 
             // 2) Apply turning *based on speed*
             //    - The faster you go, the more sensitive (or the other way around if you prefer).
@@ -216,7 +214,7 @@ void GameClientImplementation::RegisterClientSystems()
                 * Engine::deltaTime; // scale by deltatime
             if (fabs(car->turnInput) > 0.001f && fabs(car->speed) > 0.01f)
             {
-                trans->RotateAroundAxis(glm::vec3(0, 1, 0), turnAngle);
+                carTrans->RotateAroundAxis(glm::vec3(0, 1, 0), turnAngle);
             }
 
             // 3) If not accelerating, apply friction
@@ -228,8 +226,24 @@ void GameClientImplementation::RegisterClientSystems()
             car->turnInput = glm::mix(car->turnInput, 0.0f, 3 * Engine::deltaTime);
             // Reset accelerating flag for next frame
             car->accelerating = false;
+            auto* carAabb = w.getComponent<AABB>(carEntity);
 
-          
+            secs::queryChunks<Transform, AABB>(
+                world, // Pass the World instance as the first parameter
+                [carEntity, car, carAabb, carTrans](const std::vector<secs::Entity>& ents,
+                    const Transform* transforms,
+                    const AABB* aabbs,
+                    const size_t count)
+                {
+                    for (size_t i = 0; i < count; i++)
+                    {
+                        if (ents[i].id == carEntity.id)
+                            continue;
+                        bool hit = PEPhysics::CheckAABBOverlap(aabbs[i], transforms[i], *carAabb, *carTrans);
+                        if (hit)
+                            car->speed = glm::sign(car->speed * -1) * car->speed * 0.2f;  
+                    }
+                });
         }
     );
     Engine::AddSystem(carSystem);
@@ -371,9 +385,12 @@ void RemoveLastPlaced(secs::World& w)
     placedAssets.pop_back();
 }
 
-/*
+bool keepStuffInSight;
+
 void GameClientImplementation::KeepStuffInSight()
 {
+    if (!keepStuffInSight)
+        return;
     secs::queryChunks<Transform, AABB>(
         world, // Pass the World instance as the first parameter
         [&](const std::vector<secs::Entity>& ents,
@@ -414,14 +431,18 @@ void GameClientImplementation::KeepStuffInSight()
             Engine::camPos = pos;
         });
 }
-*/
 
+
+glm::vec3 GameClientImplementation::GetCameraOffset()
+{
+    return  glm::vec3(0, 60, 5) ;
+}
 
 void GameClientImplementation::PlayerControls()
 {
     auto* pcCarTrans = world.getComponent<Transform>(pcCar);
     auto* car = world.getComponent<Car>(pcCar);
-    auto pos = world.getComponent<Transform>(cameraLookPosEntity)->position;
+    //auto pos = world.getComponent<Transform>(cameraLookPosEntity)->position;
 
 
     // camTrans->not_rotation  = pcCarTrans->not_rotation;
@@ -434,10 +455,13 @@ void GameClientImplementation::PlayerControls()
 
     if (isGameOver)
         return;
-    Engine::camLook = pcCarTrans->position;
-    Engine::camPos = pcCarTrans->position + glm::vec3(0, 15, 20) + pos;
+    if (!keepStuffInSight)
+    {
+        Engine::camLook = pcCarTrans->position;
+        Engine::camPos = glm::mix(Engine::camPos ,pcCarTrans->position + GetCameraOffset(), fabs(car->speed)*Engine::deltaTime);
+    }
 
-    Engine::DebugStat(">(cameraLookPosEntity)->position", PositionString(pos));
+
     Engine::DebugStat("turnInput", std::to_string(  car->turnInput ) );
     Engine::DebugStat("turnSpeed", std::to_string( car->turnSpeed ));
     // reference values
@@ -449,7 +473,8 @@ void GameClientImplementation::PlayerControls()
     float speedIncrement = 10.0f * Engine::deltaTime;
     if (logSpeed > 1)
         speedIncrement /= logSpeed;
-        
+
+    keepStuffInSight = Engine::GetKey(SDLK_l);
 
     if (Engine::GetKey(SDLK_UP))
     {
@@ -511,15 +536,19 @@ void GameClientImplementation::CycleModels()
     auto model = models[currentModelIndex % models.size()];
     auto placedModel = PlaceAsset(glm::vec3(0),  model.textureFile, model.modelFile);
     world.addComponent(placedModel, ModelViewer{ 10, 1});
-    Engine::camPos = 2.0f * world.getComponent<AABB>(placedModel)->max;
+    auto aabb = world.getComponent<AABB>(placedModel);
+    Engine::camPos = 2.0f * aabb->max;
+    Engine::DebugStat("viewed model min", PositionString(aabb->min));
+    Engine::DebugStat("viewed model max", PositionString(aabb->max));
     prev = placedModel;
     currentModelIndex++;
 }
 
 void GameClientImplementation::StartGame()
 {
-    pcCar = PlaceCar(&world, glm::vec3(10.0f, 0.0f, 0.0f));
-
+    glm::vec3 spawnPos(10.0f, 0.0f, 0.0f);
+    pcCar = PlaceCar(&world, spawnPos);
+    Engine::camPos = spawnPos + GetCameraOffset();
     auto levelProps = parseLevelFile("assets/sectors/monkey.sector");
     LoadModels();
     for (auto item : models)
@@ -548,7 +577,7 @@ void GameClientImplementation::OnUpdate(float deltaTime)
 {
     Engine::DebugStat("isGameOver", std::to_string(isGameOver));
 
-    //KeepStuffInSight();
+    KeepStuffInSight();
     PlayerControls();
 
     if (isGameOver && Engine::GetKeyUp(SDLK_SPACE))

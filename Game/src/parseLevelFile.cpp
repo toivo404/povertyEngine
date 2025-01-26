@@ -3,8 +3,27 @@
 #include <fstream>
 #include <iostream>
 
-std::vector<std::pair<std::string, Transform>> parseLevelFile(const std::string& filePath)
-{
+// Function to convert Blender axes to OpenGL axes
+glm::vec3 convertBlenderToOpenGLPosition(const glm::vec3& blenderPosition) {
+    return glm::vec3(blenderPosition.x, blenderPosition.z, -blenderPosition.y);
+}
+
+glm::quat convertBlenderToOpenGLRotation(const glm::quat& blenderRotation) {
+    // Convert Blender quaternion to OpenGL by swapping axes
+    // Blender's Y-axis becomes OpenGL's negative Z-axis
+    glm::mat4 rotationMatrix = glm::toMat4(blenderRotation);
+
+    glm::mat4 conversionMatrix = glm::mat4(1.0f);
+    conversionMatrix[1][1] = 0.0f;  // Blender Y (OpenGL Z)
+    conversionMatrix[1][2] = 1.0f;  // Blender Z -> OpenGL Y
+    conversionMatrix[2][1] = -1.0f; // Blender Y -> OpenGL -Z
+    conversionMatrix[2][2] = 0.0f;
+
+    rotationMatrix = conversionMatrix * rotationMatrix;
+    return glm::quat_cast(rotationMatrix);
+}
+// Function to parse the file and return a list of pairs of name and Transform
+std::vector<std::pair<std::string, Transform>> parseLevelFile(const std::string& filePath) {
     std::vector<std::pair<std::string, Transform>> result;
     std::ifstream file(filePath);
 
@@ -31,15 +50,15 @@ std::vector<std::pair<std::string, Transform>> parseLevelFile(const std::string&
             float scaleY = std::stof(matches[9].str());
             float scaleZ = std::stof(matches[10].str());
 
-            // Convert Euler angles (rotX, rotY, rotZ) to a quaternion
-            glm::quat rotation = glm::quat(glm::vec3(rotX, rotY, rotZ));
-
             // Create Transform object
             Transform transform;
-            transform.position = glm::vec3(posX, posY, posZ);
+            transform.position = convertBlenderToOpenGLPosition(glm::vec3(posX, posY, posZ));
             transform.scale = glm::vec3(scaleX, scaleY, scaleZ);
-            transform.not_rotation = rotation;
 
+            // Convert Euler angles (rotX, rotY, rotZ) to a quaternion
+            glm::quat blenderRotation = glm::quat(glm::vec3(rotX, rotY, rotZ));
+            transform.not_rotation = convertBlenderToOpenGLRotation(blenderRotation);
+            transform.RotateAroundAxis(glm::vec3(1,0,0),-180);
             // Add to the result list
             result.emplace_back(name, transform);
         }

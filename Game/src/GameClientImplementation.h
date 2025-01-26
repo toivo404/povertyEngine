@@ -12,8 +12,9 @@ public:
     void RegisterClientComponents();
     void RegisterClientSystems();
 
-    void DrawCross(glm::vec3 pos);
+    static void DrawCross(glm::vec3 pos);
     void KeepStuffInSight();
+    static glm::vec3 GetCameraOffset();
 
     void PlayerControls();
     std::string LoadModels();

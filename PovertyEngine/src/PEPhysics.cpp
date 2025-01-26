@@ -122,6 +122,47 @@ bool PEPhysics::RaycastAABB(const glm::vec3& rayOrigin, const glm::vec3& rayDire
     return true;
 }
 
+static AABB TransformAABBToWorld(const AABB& aabb, const Transform& transform)
+{
+    glm::vec3 worldMin(std::numeric_limits<float>::max());
+    glm::vec3 worldMax(std::numeric_limits<float>::lowest());
+
+    constexpr glm::vec3 cornerOffsets[8] = {
+        {0.f, 0.f, 0.f}, {0.f, 0.f, 1.f}, {0.f, 1.f, 0.f}, {0.f, 1.f, 1.f},
+        {1.f, 0.f, 0.f}, {1.f, 0.f, 1.f}, {1.f, 1.f, 0.f}, {1.f, 1.f, 1.f}
+    };
+
+    for (const auto& offset : cornerOffsets)
+    {
+        glm::vec3 localCorner = {
+            offset.x > 0 ? aabb.max.x : aabb.min.x,
+            offset.y > 0 ? aabb.max.y : aabb.min.y,
+            offset.z > 0 ? aabb.max.z : aabb.min.z
+        };
+
+        glm::vec3 worldCorner = glm::vec3(transform.model * glm::vec4(localCorner, 1.0f));
+        worldMin = glm::min(worldMin, worldCorner);
+        worldMax = glm::max(worldMax, worldCorner);
+    }
+
+    return AABB{worldMin, worldMax};
+}
+
+bool PEPhysics::CheckAABBOverlap(const AABB& aabb1, const Transform& transform1,
+                                 const AABB& aabb2, const Transform& transform2)
+{
+    // Transform both AABBs to world space using the helper function
+    AABB worldAABB1 = TransformAABBToWorld(aabb1, transform1);
+    AABB worldAABB2 = TransformAABBToWorld(aabb2, transform2);
+
+    // Check for overlap in world space
+    if (worldAABB1.max.x < worldAABB2.min.x || worldAABB1.min.x > worldAABB2.max.x) return false;
+    if (worldAABB1.max.y < worldAABB2.min.y || worldAABB1.min.y > worldAABB2.max.y) return false;
+    if (worldAABB1.max.z < worldAABB2.min.z || worldAABB1.min.z > worldAABB2.max.z) return false;
+
+    return true;
+}
+
 bool PEPhysics::Raycast(const glm::vec3& rayOrigin, const glm::vec3& rayDirection, secs::World& world, PEPhysicsHitInfo& hitInfo)
 {
     bool isHit = false;

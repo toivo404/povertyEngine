@@ -31,6 +31,8 @@ public:
     static bool RaycastAABB(const glm::vec3& rayOrigin, const glm::vec3& rayDirection,
                             const AABB& aabb, const Transform& transform, float& tMin,
                             glm::vec3& intersectionPoint);
+    static bool CheckAABBOverlap(const AABB& aabb1, const Transform& transform1,
+                                 const AABB& aabb2, const Transform& transform2);
     static bool Raycast(
         const glm::vec3& rayOrigin, const glm::vec3& rayDirection, ::secs::World& world, PEPhysicsHitInfo& hitInfo);
     
