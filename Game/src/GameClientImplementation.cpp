@@ -86,11 +86,11 @@ secs::Entity PlaceCar(secs::World* world, glm::vec3 position)
     // Create a new entity
     return secs::EntityBuilder(*world)
            .createEntity()
-           .set(Transform{position, glm::vec3(1.0f), glm::vec3(0.0f)})
+           .set(Transform{position, glm::vec3(3.0f), glm::vec3(0.0f) })
            .set(Shader{Engine::GetShader("basic")})
-           .set(Mesh{Engine::GetMesh("assets/models/testcar/car.fbx")})
-           .set(AABB{Engine::GetAABB("assets/models/testcar/car.fbx")})
-           .set(Material{Engine::GetMaterial("assets/materials/ritari_palette/colorpalette.povertyMat")})
+           .set(Mesh{Engine::GetMesh("assets\\models\\KUPLA\\KUPLA.obj")})
+           .set(AABB{Engine::GetAABB("assets\\models\\KUPLA\\KUPLA.obj")})
+           .set(Material{Engine::GetMaterial("assets/materials/ritari_palette/KUPLAMATER.povertyMat")})
            .set(Car{})
            .build();
 }
@@ -155,8 +155,13 @@ void GameClientImplementation::OnInit()
     //      .build();
     Engine::lightDir = glm::vec3(0, -1, 0);
 
- 
-   
+    secs::EntityBuilder(world).
+        createEntity()
+        .set(Transform{})
+        .set(Engine::GetMesh("assets\\models\\ground\\ground.obj"))
+        .set(Engine::GetMaterial("assets\\models\\ground\\mat.povertyMat"))
+        .set(Shader{Engine::GetShader("basic")})
+        .build();
     
 }
 
@@ -247,7 +252,8 @@ void GameClientImplementation::RegisterClientSystems()
                         bool hit = PEPhysics::CheckAABBOverlap(aabbs[i], transforms[i], *carAabb, *carTrans);
                         if (hit)
                         {
-                            car->speed = glm::sign(car->speed * -1) * car->speed * 0.2f;
+                            car->speed = 0;
+                            carTrans->position-= carTrans->GetDirection();
 #if PE_DEBUG
                             std::cout << "car hit " << ents[i].id << std::endl;
 #endif
@@ -452,7 +458,7 @@ void GameClientImplementation::PlayerControls()
 {
     auto* pcCarTrans = world.getComponent<Transform>(pcCar);
     auto* car = world.getComponent<Car>(pcCar);
-    //auto pos = world.getComponent<Transform>(cameraLookPosEntity)->position;
+    //auto pos = world.getComponent<Transform>(cameraLookPosEntity)->position
 
 
     // camTrans->not_rotation  = pcCarTrans->not_rotation;
@@ -468,7 +474,9 @@ void GameClientImplementation::PlayerControls()
     if (!keepStuffInSight)
     {
         Engine::camLook = pcCarTrans->position;
-        Engine::camPos = glm::mix(Engine::camPos ,pcCarTrans->position + GetCameraOffset(), fabs(car->speed)*Engine::deltaTime);
+        // dont lerp your engine cant handle it
+      //  Engine::camPos = glm::mix(Engine::camPos ,pcCarTrans->position + GetCameraOffset(), fabs(car->speed)*Engine::deltaTime);
+        Engine::camPos = pcCarTrans->position + GetCameraOffset();
     }
 
 
