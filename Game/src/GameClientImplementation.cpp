@@ -32,7 +32,10 @@ struct OutOfBoundsDetector
 {
 };
 
-
+struct Name
+{
+    std::string name; 
+};
 struct Car
 {
     float speed = 0;
@@ -168,6 +171,8 @@ void GameClientImplementation::RegisterClientComponents()
     secs::ComponentRegistry::registerType<Car>("Car");
     secs::ComponentRegistry::registerType<GroundMesh>("GroundMesh");
     secs::ComponentRegistry::registerType<ModelViewer>("ModelViewer");
+    secs::ComponentRegistry::registerType<Name>("Name");
+
 }
 
 bool isGameOver = true;
@@ -241,7 +246,12 @@ void GameClientImplementation::RegisterClientSystems()
                             continue;
                         bool hit = PEPhysics::CheckAABBOverlap(aabbs[i], transforms[i], *carAabb, *carTrans);
                         if (hit)
-                            car->speed = glm::sign(car->speed * -1) * car->speed * 0.2f;  
+                        {
+                            car->speed = glm::sign(car->speed * -1) * car->speed * 0.2f;
+#if PE_DEBUG
+                            std::cout << "car hit " << ents[i].id << std::endl;
+#endif
+                        }
                     }
                 });
         }
@@ -548,6 +558,7 @@ void GameClientImplementation::StartGame()
 {
     glm::vec3 spawnPos(10.0f, 0.0f, 0.0f);
     pcCar = PlaceCar(&world, spawnPos);
+    world.addComponent<Name>(pcCar, Name{"PlayerCar"});
     Engine::camPos = spawnPos + GetCameraOffset();
     auto levelProps = parseLevelFile("assets/sectors/monkey.sector");
     LoadModels();
@@ -564,6 +575,7 @@ void GameClientImplementation::StartGame()
                     .set(Material{Engine::GetMaterial(item.textureFile)})
                     .set(Mesh{Engine::GetMesh(item.modelFile)})
                     .set(AABB{Engine::GetAABB(item.modelFile)})
+                    .set(Name{item.name})
                     .build();
             }
         }
