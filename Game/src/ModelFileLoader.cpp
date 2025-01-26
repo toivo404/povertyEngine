@@ -50,6 +50,10 @@ std::string ModelFileLoader::Load(const std::string& filePath, std::vector<Model
                 continue;
             }
 
+            if (modelJson.contains("name") && modelJson["name"].is_string()) {
+                model.name = modelJson["name"];
+            }
+
             models.push_back(model);
         }
 

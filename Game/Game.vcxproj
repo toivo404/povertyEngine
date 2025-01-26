@@ -169,6 +169,7 @@ IF EXIST $(SolutionDir)\assets\ (xcopy /Q /E /Y /I $(SolutionDir)\assets ..\bin\
     <ClInclude Include="src\GameClientImplementation.h" />
     <ClInclude Include="src\Header.h" />
     <ClInclude Include="src\ModelFileLoader.h" />
+    <ClInclude Include="src\parseLevelFile.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\vendor\imgui\backends\imgui_impl_opengl3.cpp" />
@@ -181,6 +182,7 @@ IF EXIST $(SolutionDir)\assets\ (xcopy /Q /E /Y /I $(SolutionDir)\assets ..\bin\
     <ClCompile Include="src\GameClientImplementation.cpp" />
     <ClCompile Include="src\Main.cpp" />
     <ClCompile Include="src\ModelFileLoader.cpp" />
+    <ClCompile Include="src\parseLevelFile.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\PovertyEngine\PovertyEngine.vcxproj">

@@ -2,7 +2,8 @@
     "models": [
         {
             "modelFile": "assets/models/monkey/monkey.fbx",
-            "textureFile": "assets/models/monkey/mat.povertyMat"
+            "textureFile": "assets/models/monkey/mat.povertyMat",
+			"name": "Monkey"
         },
         {
             "modelFile": "assets/models/building/vittu.fbx",

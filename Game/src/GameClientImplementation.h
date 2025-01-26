@@ -16,7 +16,9 @@ public:
     void KeepStuffInSight();
 
     void PlayerControls();
+    std::string LoadModels();
     void CycleModels();
+    void StartGame();
     void OnUpdate(float deltaTime) override;
 
     void OnShutdown() override;

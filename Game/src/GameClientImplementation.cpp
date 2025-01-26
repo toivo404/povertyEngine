@@ -7,6 +7,7 @@
 #include "systems/TransformSystem.h"
 #include "MathUtils.h"
 #include "ModelFileLoader.h"
+#include "parseLevelFile.h"
 
 struct Spin
 {
@@ -75,7 +76,7 @@ secs::Entity GameClientImplementation::PlaceAsset(
            .set(Transform{position, glm::vec3(1.0f), glm::vec3(0.0f)})
            .set(Shader{Engine::GetShader("basic")})
            .set(Material{Engine::GetMaterial(materialFile)})
-           .set(Mesh{Engine::GetMesh(modelPath)->mesh})
+           .set(Mesh{Engine::GetMesh(modelPath)})
            .set(AABB{Engine::GetAABB(modelPath)})
            .build();
 }
@@ -87,7 +88,7 @@ secs::Entity PlaceCar(secs::World* world, glm::vec3 position)
            .createEntity()
            .set(Transform{position, glm::vec3(1.0f), glm::vec3(0.0f)})
            .set(Shader{Engine::GetShader("basic")})
-           .set(Mesh{Engine::GetMesh("assets/models/testcar/car.fbx")->mesh})
+           .set(Mesh{Engine::GetMesh("assets/models/testcar/car.fbx")})
            .set(AABB{Engine::GetAABB("assets/models/testcar/car.fbx")})
            .set(Material{Engine::GetMaterial("assets/materials/ritari_palette/colorpalette.povertyMat")})
            .set(Car{})
@@ -228,19 +229,7 @@ void GameClientImplementation::RegisterClientSystems()
             // Reset accelerating flag for next frame
             car->accelerating = false;
 
-            auto* g = w.getComponent<GroundMesh>(groundEntity);
-            auto* gt = w.getComponent<Transform>(groundEntity);
-            float tMin = 0.0f;
-            glm::vec3 intersectionPt;
-            bool meshHit = PEPhysics::RaycastMesh(
-                trans->position + (2.0f * trans->GetDirection()),
-                glm::vec3(0, -1, 0),
-                *g->vertices,
-                *g->indices,
-                *gt,
-                tMin, intersectionPt
-            );
-            Engine::DebugStat("meshHit", ""+std::to_string(meshHit));
+          
         }
     );
     Engine::AddSystem(carSystem);
@@ -506,11 +495,16 @@ void GameClientImplementation::PlayerControls()
 int currentModelIndex = -1;
 secs::Entity prev;
 
+std::string GameClientImplementation::LoadModels()
+{
+    return ModelFileLoader::Load(std::string(Engine::baseFilePath) + "assets/models.json", models);
+}
+
 void GameClientImplementation::CycleModels()
 {
     if (currentModelIndex != -1)
         world.destroyEntity(prev);
-    auto msg = ModelFileLoader::Load( std::string(Engine::baseFilePath)+"assets/models.json", models);
+    auto msg = LoadModels();
     Engine::DebugStat("msg",msg);
     Engine::DebugStat("model no ", std::to_string(currentModelIndex) + " / " + std::to_string(models.size())) ;
     
@@ -520,6 +514,34 @@ void GameClientImplementation::CycleModels()
     Engine::camPos = 2.0f * world.getComponent<AABB>(placedModel)->max;
     prev = placedModel;
     currentModelIndex++;
+}
+
+void GameClientImplementation::StartGame()
+{
+    pcCar = PlaceCar(&world, glm::vec3(10.0f, 0.0f, 0.0f));
+
+    auto levelProps = parseLevelFile("assets/sectors/monkey.sector");
+    LoadModels();
+    for (auto item : models)
+    {
+        for (auto prop : levelProps)
+        {
+            if (prop.first == item.name)
+            {
+                secs::EntityBuilder(world)
+                    .createEntity()
+                    .set(prop.second)
+                    .set(Shader{Engine::GetShader("basic")})
+                    .set(Material{Engine::GetMaterial(item.textureFile)})
+                    .set(Mesh{Engine::GetMesh(item.modelFile)})
+                    .set(AABB{Engine::GetAABB(item.modelFile)})
+                    .build();
+            }
+        }
+    } 
+    
+        
+    isGameOver = !isGameOver;
 }
 
 void GameClientImplementation::OnUpdate(float deltaTime)
@@ -604,27 +626,7 @@ void GameClientImplementation::OnUpdate(float deltaTime)
     }
     if (isGameOver && Engine::GetKeyUp(SDLK_BACKSPACE) && Engine::GetKey(SDLK_LSHIFT))
     {
-        pcCar = PlaceCar(&world, glm::vec3(10.0f, 0.0f, 0.0f));
-        PlaceAsset(glm::vec3(0),
-                   "assets/materials/ritari_palette/colorpalette.povertyMat",
-                   "assets\\models\\building\\vittu.fbx");
-
-        
-        auto groundCollisionMeshModelFilePath = "assets\\models\\gloryhole\\gloryhole.fbx";
-        auto* cachedMesh = Engine::GetMesh(groundCollisionMeshModelFilePath);
-        groundEntity = secs::EntityBuilder(world)
-           .createEntity()
-           .set(Transform{glm::vec3(0), glm::vec3(1.0f), glm::vec3(0.0f)})
-           .set(Shader{Engine::GetShader("basic")})
-           .set(Mesh{cachedMesh->mesh})
-           .set(AABB{Engine::GetAABB(groundCollisionMeshModelFilePath)})
-           .set(Material{Engine::GetMaterial("assets/materials/ritari_palette/colorpalette.povertyMat")})
-           .set(GroundMesh{ &cachedMesh->vertices, &cachedMesh->indices})
-           .build();
-
-        
-        
-        isGameOver = !isGameOver;
+        StartGame();
     }
 
     // if(Engine::GetMouseButtonUp(1))
