@@ -130,39 +130,6 @@ void Engine::DebugStat(const std::string& key, std::string val)
     debugDictionary[key] = std::move(val);
 }
 
-void Engine::OnModelDebugGUI()
-{
-    static char modelPath[128] = ""; // Buffer for first input field
-    static char materialPath[128] = ""; // Buffer for second input field
-
-    // Begin ImGui window
-    ImGui::Begin("Input Fields");
-
-    // First input field
-    ImGui::InputText("Model: ", modelPath, sizeof(modelPath));
-
-    // Second input field
-    ImGui::InputText("Material: ", materialPath, sizeof(materialPath));
-
-    // OK button
-    if (ImGui::Button("OK"))
-    {
-        // Print the contents of the input fields
-        //std::cout << "Input Field 1: " << inputField1 << std::endl;
-        //std::cout << "Input Field 2: " << inputField2 << std::endl;
-        secs::EntityBuilder(client->world)
-            .createEntity()
-            .set(Transform{})
-            .set(AABB{})
-            .set(Mesh{Engine::GetMesh(modelPath)->mesh})
-            .set(Material{Engine::GetMaterial(materialPath)})
-            .build();
-    }
-
-    // End ImGui window
-    ImGui::End();
-}
-
 // Mouse input
 bool Engine::GetMouseButton(int button) {
     return heldMouseButtons.find(button) != heldMouseButtons.end();
@@ -197,7 +164,6 @@ void Engine::MousePositionToRay(glm::vec3& origin, glm::vec3& dir) {
     // Transform clip space to view space
     glm::vec4 rayView = glm::vec4(rayClip.x, rayClip.y, -1.0f, 0.0f); // Z = -1 for direction
 
-    
     // Transform view space to world space
     glm::vec3 rayWorld = glm::vec3(glm::inverse(viewMatrix) * rayView);
     rayWorld = glm::normalize(rayWorld); // Normalize the direction vector
@@ -247,9 +213,9 @@ Material Engine::GetMaterial(const std::string& materialFilePath)
     return MaterialSystem::LoadMaterial(materialFilePath, baseFilePath);
 }
 
-CachedMesh* Engine::GetMesh(const std::string& string)
+Mesh Engine::GetMesh(const std::string& string)
 {
-    return MeshCache::GetMesh(string);
+    return  MeshCache::GetMesh(string);
 }
 
 AABB Engine::GetAABB(const std::string& string)
@@ -373,7 +339,6 @@ void Engine::MainLoop()
 
     imguiHelper.OnFrameStart();
     
-    /*"PIIRTÄ INPUT FIELIT"
     /*
     if (updateCallback) {
         updateCallback();
@@ -397,13 +362,6 @@ void Engine::MainLoop()
 
     const int renderedCount = RenderSystem::Render(client->world);
     debugLineRenderer->Render(viewMatrix, projectionMatrix, debugLineShader);
-
-    if (currentMessage != nullptr)
-    {
-        ImGui::Begin("");
-        ImGui::Text(currentMessage);
-        ImGui::End();
-    }
 
     debugDictionary["deltaTime"] = std::to_string(deltaTime),
     debugDictionary["time"] = std::to_string(time);

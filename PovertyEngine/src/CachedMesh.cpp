@@ -17,13 +17,3 @@ Transform CachedMesh::GetChildTransform(std::string name)
 {
     return nodes[name];
 }
-
-void CachedMesh::CopyVerticesTo(glm::vec3* buffer, size_t bufferSize) const
-{
-    if (vertices.size() > bufferSize)
-    {
-        throw std::runtime_error("Provided buffer is too small to hold all vertices.");
-    }
-
-    std::memcpy(buffer, vertices.data(), vertices.size() * sizeof(glm::vec3));
-}

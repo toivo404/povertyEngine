@@ -35,14 +35,17 @@ void MeshCache::Load(const std::string& path)
 {
     AssimpLoader loader;
     std::vector<float> vertices;
+    std::vector<unsigned int> indices;
     CachedMesh cachedMesh = {};
-    
-    if (!loader.LoadModel(path, vertices, cachedMesh.indices, cachedMesh.nodes)) {
+
+    if (!loader.LoadModel(path, vertices, indices, cachedMesh.nodes)) {
         std::cerr << "Failed to load model from: " << path << std::endl;
         exit(1);
     }
 
-    MakeCalculations(vertices, cachedMesh);
+    AABB aabb = MeshCache::CalculateAABB(vertices);
+    cachedMesh.aabb = aabb;
+
     GLuint VAO, VBO, EBO;
     glGenVertexArrays(1, &VAO);
     glGenBuffers(1, &VBO);
@@ -53,23 +56,23 @@ void MeshCache::Load(const std::string& path)
     glBufferData(GL_ARRAY_BUFFER, vertices.size() * sizeof(float), vertices.data(), GL_STATIC_DRAW);
 
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
-    glBufferData(GL_ELEMENT_ARRAY_BUFFER, cachedMesh.indices.size() * sizeof(unsigned int), cachedMesh.indices.data(), GL_STATIC_DRAW);
+    glBufferData(GL_ELEMENT_ARRAY_BUFFER, indices.size() * sizeof(unsigned int), indices.data(), GL_STATIC_DRAW);
 
     SetGLVertexAttributes();
 
-    cachedMesh.mesh = Mesh{VAO, VBO, EBO, static_cast<GLsizei>(cachedMesh.indices.size())};
+    cachedMesh.mesh = Mesh{VAO, VBO, EBO, static_cast<GLsizei>(indices.size())};
     cache[path] = cachedMesh;
 }
 
-CachedMesh* MeshCache::GetMesh(const std::string& path)
+Mesh MeshCache::GetMesh(const std::string& path)
 {
     auto it = cache.find(path);
     if (it == cache.end())
     {
         Load(path);
-        return &cache[path];
+        return cache[path].mesh;
     }
-    return &it->second;
+    return it->second.mesh;
 }
 
 AABB MeshCache::GetAABB(const std::string& path)
@@ -83,7 +86,7 @@ AABB MeshCache::GetAABB(const std::string& path)
     return it->second.aabb;
 }
 
-void MeshCache::MakeCalculations(const std::vector<float>& vertices, CachedMesh& cachedMesh) {
+AABB MeshCache::CalculateAABB(const std::vector<float>& vertices) {
     if (vertices.empty()) {
         throw std::invalid_argument("Vertex data is empty!");
     }
@@ -93,19 +96,18 @@ void MeshCache::MakeCalculations(const std::vector<float>& vertices, CachedMesh&
 
     // Extract position data from interleaved vertex data
     size_t stride = 8; // 8 floats per vertex
-    cachedMesh.aabb.min = glm::vec3(vertices[0],vertices[1],vertices[2]);
-    cachedMesh.aabb.max = glm::vec3(vertices[0],vertices[1],vertices[2]);
+    AABB aabb;
+    aabb.min = glm::vec3(vertices[0],vertices[1],vertices[2]);
+    aabb.max = glm::vec3(vertices[0],vertices[1],vertices[2]);
     
     for (size_t i = stride; i < vertices.size(); i += stride) {
         glm::vec3 position(vertices[i], vertices[i + 1], vertices[i + 2]);
-        cachedMesh.vertices.push_back(position);
-        cachedMesh.aabb.min = position;
+
         // Update AABB bounds
-        cachedMesh.aabb.Encapsulate(position);
+        aabb.Encapsulate(position);
     }
 
-    
-    
+    return aabb;
 }
 
 
