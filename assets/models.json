@@ -6,8 +6,45 @@
 			"name": "Monkey"
         },
         {
-            "modelFile": "assets/models/building/vittu.fbx",
+            "modelFile": "assets/models/TUOMIOKIRKKO/KUBL_Assetit_TUOMIOKIRKKO.fbx",
             "textureFile": "assets/materials/ritari_palette/colorpalette.povertyMat"
+        },
+        {
+            "modelFile": "assets/models/RAKENNUSKOLME/RAKENNUSKOLME.obj",
+            "textureFile": "assets/materials/ritari_palette/colorpalette.povertyMat",
+			"name": "RAKENNUSKOLME"
+        },
+        {
+            "modelFile": "assets/models/RAKENNUSKAKSI/RAKENNUSKAKSI.obj",
+            "textureFile": "assets/materials/ritari_palette/colorpalette.povertyMat"
+        },
+        {
+            "modelFile": "assets/models/RAKENNUSYKSI/RAKENNUSYKSI.obj",
+            "textureFile": "assets/materials/ritari_palette/colorpalette.povertyMat"
+        },
+        {
+            "modelFile": "assets/models/TUOMIOKIRKKO/TUOMIOKIRKKO.obj",
+            "textureFile": "assets/materials/ritari_palette/colorpalette.povertyMat"
+        },
+        {
+            "modelFile": "assets/models/RAUTATIEASEMA/RAUTATIEASEMA.obj",
+            "textureFile": "assets/materials/ritari_palette/colorpalette.povertyMat"
+        },
+        {
+            "modelFile": "assets/models/PUUYKSI/PUUYKSI.obj",
+            "textureFile": "assets/materials/ritari_palette/colorpalette.povertyMat"
+        },
+        {
+            "modelFile": "assets/models/PUUKAKSI/PUUKAKSI.obj",
+            "textureFile": "assets/materials/ritari_palette/colorpalette.povertyMat"
+        },
+        {
+            "modelFile": "assets/models/PUUKOLME/PUUKOLME.obj",
+            "textureFile": "assets/materials/ritari_palette/colorpalette.povertyMat"
+        },
+        {
+            "modelFile": "assets/models/KUPLA/KUPLA.obj",
+            "textureFile": "assets/materials/ritari_palette/KUPLAMATER.povertyMat"
         }
     ]
 }
