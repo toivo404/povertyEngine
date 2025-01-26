@@ -217,8 +217,7 @@ bool PEPhysics::RaycastMesh(const glm::vec3& rayOrigin,
                             const std::vector<unsigned int>& indices,
                             const Transform& transform,
                             float& tMin,
-                            glm::vec3& intersectionPoint,
-                            bool debug)
+                            glm::vec3& intersectionPoint)
 {
     // Early out: sanity checks
     if (vertices.empty() || indices.size() < 3)
@@ -265,10 +264,7 @@ bool PEPhysics::RaycastMesh(const glm::vec3& rayOrigin,
                 closestT = t;
                 bestLocalIntersection = localRayOrigin + localRayDirection * t;
                 hit = true;
-                if (debug)
-                {
-                    Engine::DebugDrawLine(  ,v1, glm::vec3(1.0f,1.0f,0.0f));
-                }
+               
             }
         }
     }

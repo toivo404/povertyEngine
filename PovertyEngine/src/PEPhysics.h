@@ -40,6 +40,5 @@ public:
                             const std::vector<unsigned int>& indices,
                             const Transform& transform,
                             float& tMin,
-                            glm::vec3& intersectionPoint,
-                            bool debug = false);
+                            glm::vec3& intersectionPoint);
 };

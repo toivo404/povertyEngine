@@ -1,0 +1,8 @@
+{
+    "models": [
+        {
+            "modelFile": "assets/models/building/vittu.fbx",
+            "textureFile": "assets/materials/ritari_palette/colorpalette.povertyMat"
+        }
+    ]
+}

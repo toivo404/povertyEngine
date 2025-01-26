@@ -47,8 +47,8 @@ double Engine::time;
 SDL_GLContext Engine::glContext = nullptr;
 SDL_Window* Engine::graphicsApplicationWindow = nullptr;
 bool Engine::quit = false;
-int windowWidth = 1920;
-int windowHeight= 1080;
+int windowWidth = 640;
+int windowHeight= 480;
 int mouseX;
 int mouseY;
 
@@ -397,6 +397,13 @@ void Engine::MainLoop()
 
     const int renderedCount = RenderSystem::Render(client->world);
     debugLineRenderer->Render(viewMatrix, projectionMatrix, debugLineShader);
+
+    if (currentMessage != nullptr)
+    {
+        ImGui::Begin("");
+        ImGui::Text(currentMessage);
+        ImGui::End();
+    }
 
     debugDictionary["deltaTime"] = std::to_string(deltaTime),
     debugDictionary["time"] = std::to_string(time);

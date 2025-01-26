@@ -16,6 +16,9 @@
     <Filter Include="vendor\imgui\backends">
       <UniqueIdentifier>{27CEAEAF-933A-6AAA-5C2E-0208C8598C12}</UniqueIdentifier>
     </Filter>
+    <Filter Include="vendor\lohmann">
+      <UniqueIdentifier>{2F307351-1BFE-6657-0492-D77DF0FE42BC}</UniqueIdentifier>
+    </Filter>
     <Filter Include="vendor\stb">
       <UniqueIdentifier>{8BD3C5A8-778B-07F6-E092-E051CC69A2E6}</UniqueIdentifier>
     </Filter>
@@ -54,6 +57,9 @@
     <ClInclude Include="..\vendor\imgui\imstb_truetype.h">
       <Filter>vendor\imgui</Filter>
     </ClInclude>
+    <ClInclude Include="..\vendor\lohmann\json.hpp">
+      <Filter>vendor\lohmann</Filter>
+    </ClInclude>
     <ClInclude Include="..\vendor\stb\stb_image.h">
       <Filter>vendor\stb</Filter>
     </ClInclude>
@@ -82,6 +88,9 @@
       <Filter>src</Filter>
     </ClInclude>
     <ClInclude Include="src\MaterialCache.h">
+      <Filter>src</Filter>
+    </ClInclude>
+    <ClInclude Include="src\MathUtils.h">
       <Filter>src</Filter>
     </ClInclude>
     <ClInclude Include="src\MeshCache.h">

@@ -6,6 +6,7 @@
 #include "backends/imgui_impl_opengl3_loader.h"
 #include "systems/TransformSystem.h"
 #include "MathUtils.h"
+#include "ModelFileLoader.h"
 
 struct Spin
 {
@@ -83,7 +84,7 @@ secs::Entity PlaceCar(secs::World* world, glm::vec3 position)
            .set(Shader{Engine::GetShader("basic")})
            .set(Mesh{Engine::GetMesh("assets/models/testcar/car.fbx")->mesh})
            .set(AABB{Engine::GetAABB("assets/models/testcar/car.fbx")})
-           .set(Material{Engine::GetMaterial("assets/models/monkey/mat.povertyMat")})
+           .set(Material{Engine::GetMaterial("assets/materials/ritari_palette/colorpalette.povertyMat")})
            .set(Car{})
            .build();
 }
@@ -235,7 +236,6 @@ void GameClientImplementation::RegisterClientSystems()
                 tMin, intersectionPt
             );
             Engine::DebugStat("meshHit", ""+std::to_string(meshHit));
-            DrawCross()
         }
     );
     Engine::AddSystem(carSystem);
@@ -454,14 +454,30 @@ void GameClientImplementation::PlayerControls()
     }
 }
 
+int currentModelIndex = -1;
+
+void GameClientImplementation::CycleModels()
+{
+    auto msg = ModelFileLoader::Load( std::string(Engine::baseFilePath)+"assets/models.json", models);
+    Engine::DebugStat("msg",msg);
+    Engine::DebugStat("model no ", std::to_string(currentModelIndex) + " / " + std::to_string(models.size())) ;
+
+    auto model = models[currentModelIndex % models.size()];
+    PlaceAsset(glm::vec3(0),  model.textureFile, model.modelFile);
+}
+
 void GameClientImplementation::OnUpdate(float deltaTime)
 {
     Engine::DebugStat("isGameOver", std::to_string(isGameOver));
-    DrawCross();
 
     //KeepStuffInSight();
     PlayerControls();
 
+    if (isGameOver && Engine::GetKeyUp(SDLK_SPACE))
+    {
+        CycleModels();   
+    }
+    
     if (Engine::GetKeyUp(SDLK_PERIOD))
     {
         const int amount = std::max(static_cast<int>(placedAssets.size()), 1);
@@ -533,6 +549,11 @@ void GameClientImplementation::OnUpdate(float deltaTime)
     if (isGameOver && Engine::GetKeyUp(SDLK_BACKSPACE) && Engine::GetKey(SDLK_LSHIFT))
     {
         pcCar = PlaceCar(&world, glm::vec3(10.0f, 0.0f, 0.0f));
+        PlaceAsset(glm::vec3(0),
+                   "assets/materials/ritari_palette/colorpalette.povertyMat",
+                   "assets\\models\\building\\vittu.fbx");
+
+        
         auto groundCollisionMeshModelFilePath = "assets\\models\\gloryhole\\gloryhole.fbx";
         auto* cachedMesh = Engine::GetMesh(groundCollisionMeshModelFilePath);
         groundEntity = secs::EntityBuilder(world)
@@ -541,10 +562,11 @@ void GameClientImplementation::OnUpdate(float deltaTime)
            .set(Shader{Engine::GetShader("basic")})
            .set(Mesh{cachedMesh->mesh})
            .set(AABB{Engine::GetAABB(groundCollisionMeshModelFilePath)})
-           .set(Material{Engine::GetMaterial("assets/models/monkey/mat.povertyMat")})
+           .set(Material{Engine::GetMaterial("assets/materials/ritari_palette/colorpalette.povertyMat")})
            .set(GroundMesh{ &cachedMesh->vertices, &cachedMesh->indices})
            .build();
 
+        
         
         isGameOver = !isGameOver;
     }
