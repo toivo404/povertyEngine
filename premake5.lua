@@ -34,6 +34,7 @@ workspace "PovertyEngine"
             "%{prj.name}/src/**.cpp",
 			"%{prj.name}/src/**.cpp",
 			"%{IncludeDir.GLAD}/glad.c",
+			"%{prj.name}/include/**.h",
 	--		"vendor/flecs/**.h" ,
 --			"vendor/flecs/**.c", 
 			"vendor/imgui/**.cpp",
@@ -55,6 +56,7 @@ workspace "PovertyEngine"
         {
 			"PovertyEngine/vendor/SDL2/include",
             "%{prj.name}/src",
+			"%{prj.name}/include",
             "%{IncludeDir.spdlog}",
 			"%{IncludeDir.GLAD}/",
 			"%{IncludeDir.GLM}/",
@@ -123,21 +125,18 @@ workspace "PovertyEngine"
             "%{prj.name}/src/**.cpp",
 --			"vendor/flecs/**.h",
 --			"vendor/flecs/**.c",
-			"vendor/imgui/**.cpp",
-			"vendor/imgui/**.h",
-			"vendor/stb/stb_image.h",
-			"vendor/lohmann/json.hpp"
+--			"vendor/imgui/**.cpp",
+			--"vendor/imgui/**.h",
+--			"vendor/stb/stb_image.h",
+--			"vendor/lohmann/json.hpp"
 
         }
 
         includedirs
         {
-            "PovertyEngine/src",
+            "PovertyEngine/include",
             "%{IncludeDir.spdlog}",
 			"%{IncludeDir.GLM}/",
-			"%{IncludeDir.GLAD}/",
-			"PovertyEngine/vendor/SDL2/include",
-		--	"vendor/flecs/",
 			"vendor/imgui/",
 			"vendor/stb/",
 			"vendor/lohmann/"

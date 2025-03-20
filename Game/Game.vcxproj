@@ -79,7 +79,7 @@
       <PrecompiledHeader>NotUsing</PrecompiledHeader>
       <WarningLevel>Level3</WarningLevel>
       <PreprocessorDefinitions>PE_PLATFORM_WINDOWS;PE_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>..\PovertyEngine\src;..\PovertyEngine\vendor\spdlog\include;..\vendor\glm;..\PovertyEngine\vendor\Glad;..\PovertyEngine\vendor\SDL2\include;..\vendor\imgui;..\vendor\stb;..\vendor\lohmann;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\PovertyEngine\include;..\PovertyEngine\vendor\spdlog\include;..\vendor\glm;..\vendor\imgui;..\vendor\stb;..\vendor\lohmann;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <DebugInformationFormat>EditAndContinue</DebugInformationFormat>
       <Optimization>Disabled</Optimization>
       <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
@@ -103,7 +103,7 @@ IF EXIST $(SolutionDir)\assets\ (xcopy /Q /E /Y /I $(SolutionDir)\assets ..\bin\
       <PrecompiledHeader>NotUsing</PrecompiledHeader>
       <WarningLevel>Level3</WarningLevel>
       <PreprocessorDefinitions>PE_PLATFORM_WINDOWS;PE_RELEASE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>..\PovertyEngine\src;..\PovertyEngine\vendor\spdlog\include;..\vendor\glm;..\PovertyEngine\vendor\Glad;..\PovertyEngine\vendor\SDL2\include;..\vendor\imgui;..\vendor\stb;..\vendor\lohmann;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\PovertyEngine\include;..\PovertyEngine\vendor\spdlog\include;..\vendor\glm;..\vendor\imgui;..\vendor\stb;..\vendor\lohmann;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <Optimization>Full</Optimization>
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
@@ -131,7 +131,7 @@ IF EXIST $(SolutionDir)\assets\ (xcopy /Q /E /Y /I $(SolutionDir)\assets ..\bin\
       <PrecompiledHeader>NotUsing</PrecompiledHeader>
       <WarningLevel>Level3</WarningLevel>
       <PreprocessorDefinitions>PE_PLATFORM_WINDOWS;PE_DIST;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>..\PovertyEngine\src;..\PovertyEngine\vendor\spdlog\include;..\vendor\glm;..\PovertyEngine\vendor\Glad;..\PovertyEngine\vendor\SDL2\include;..\vendor\imgui;..\vendor\stb;..\vendor\lohmann;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\PovertyEngine\include;..\PovertyEngine\vendor\spdlog\include;..\vendor\glm;..\vendor\imgui;..\vendor\stb;..\vendor\lohmann;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <Optimization>Full</Optimization>
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
@@ -155,34 +155,7 @@ IF EXIST $(SolutionDir)\assets\ (xcopy /Q /E /Y /I $(SolutionDir)\assets ..\bin\
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClInclude Include="..\vendor\imgui\backends\imgui_impl_opengl3.h" />
-    <ClInclude Include="..\vendor\imgui\backends\imgui_impl_opengl3_loader.h" />
-    <ClInclude Include="..\vendor\imgui\backends\imgui_impl_sdl2.h" />
-    <ClInclude Include="..\vendor\imgui\imconfig.h" />
-    <ClInclude Include="..\vendor\imgui\imgui.h" />
-    <ClInclude Include="..\vendor\imgui\imgui_internal.h" />
-    <ClInclude Include="..\vendor\imgui\imstb_rectpack.h" />
-    <ClInclude Include="..\vendor\imgui\imstb_textedit.h" />
-    <ClInclude Include="..\vendor\imgui\imstb_truetype.h" />
-    <ClInclude Include="..\vendor\lohmann\json.hpp" />
-    <ClInclude Include="..\vendor\stb\stb_image.h" />
-    <ClInclude Include="src\GameClientImplementation.h" />
-    <ClInclude Include="src\Header.h" />
-    <ClInclude Include="src\ModelFileLoader.h" />
-    <ClInclude Include="src\parseLevelFile.h" />
-  </ItemGroup>
-  <ItemGroup>
-    <ClCompile Include="..\vendor\imgui\backends\imgui_impl_opengl3.cpp" />
-    <ClCompile Include="..\vendor\imgui\backends\imgui_impl_sdl2.cpp" />
-    <ClCompile Include="..\vendor\imgui\imgui.cpp" />
-    <ClCompile Include="..\vendor\imgui\imgui_demo.cpp" />
-    <ClCompile Include="..\vendor\imgui\imgui_draw.cpp" />
-    <ClCompile Include="..\vendor\imgui\imgui_tables.cpp" />
-    <ClCompile Include="..\vendor\imgui\imgui_widgets.cpp" />
-    <ClCompile Include="src\GameClientImplementation.cpp" />
     <ClCompile Include="src\Main.cpp" />
-    <ClCompile Include="src\ModelFileLoader.cpp" />
-    <ClCompile Include="src\parseLevelFile.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\PovertyEngine\PovertyEngine.vcxproj">
