@@ -31,9 +31,9 @@ glm::mat4                             Engine::viewMatrix;
 glm::vec3                             Engine::lightColor = glm::vec3(1.0f, 0.8f, 0.6f); 
 glm::vec3                             Engine::lightDir = glm::vec3(-0.5f, -1.0f, -0.5f); 
 std::vector<secs::System>             Engine::systems;
-std::unordered_map<SDL_Keycode, bool> Engine::heldKeys;        
-std::unordered_map<SDL_Keycode, bool> Engine::justPressedKeys; 
-std::unordered_map<SDL_Keycode, bool> Engine::justReleasedKeys;
+std::unordered_map<char, bool>        Engine::heldKeys;        
+std::unordered_map<char, bool>        Engine::justPressedKeys;
+std::unordered_map<char, bool>        Engine::justReleasedKeys;
 std::unordered_map<int, bool>         Engine::heldMouseButtons;
 std::unordered_map<int, bool>         Engine::justPressedMouseButtons;
 std::unordered_map<int, bool>         Engine::justReleasedMouseButtons;
@@ -42,10 +42,10 @@ std::unordered_map<std::string, std::string> Engine::debugDictionary;
 
 float Engine::deltaTime;
 double Engine::time;
+static SDL_GLContext glContext;
+static SDL_Window* graphicsApplicationWindow;
 
 
-SDL_GLContext Engine::glContext = nullptr;
-SDL_Window* Engine::graphicsApplicationWindow = nullptr;
 bool Engine::quit = false;
 int windowWidth = 640;
 int windowHeight= 480;
@@ -114,7 +114,7 @@ void Engine::Init(GameClient* gameClientImplementation)
     CleanUp();
 }
 
-bool Engine::IsKeyPressed(SDL_Keycode key)
+bool Engine::IsKeyPressed(char key)
 {
     const Uint8* state = SDL_GetKeyboardState(nullptr);
     return state[SDL_GetScancodeFromKey(key)];
@@ -202,11 +202,12 @@ bool Engine::IsOnScreen(const glm::vec3& position)
     return false; // Out of bounds
 }
 
-
+/*
 GLuint Engine::GetShader(const std::string& str)
 {
     return ShaderLoader::GetShaderProgram(str);
 }
+*/
 
 Material Engine::GetMaterial(const std::string& materialFilePath)
 {
@@ -227,12 +228,12 @@ void Engine::AddSystem(secs::System& system)
 {
     systems.push_back(system); 
 }
-bool Engine::GetKey(SDL_Keycode key)
+bool Engine::GetKey(char key)
 {
     return heldKeys.find(key) != heldKeys.end();
 }
 
-bool Engine::GetKeyUp(SDL_Keycode key)
+bool Engine::GetKeyUp(char key)
 {
     return justReleasedKeys.find(key) != justReleasedKeys.end();
 }

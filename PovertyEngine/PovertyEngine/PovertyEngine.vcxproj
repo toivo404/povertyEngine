@@ -55,22 +55,22 @@
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <LinkIncremental>true</LinkIncremental>
-    <OutDir>..\bin\Debug-windows-x86_64\PovertyEngine\</OutDir>
-    <IntDir>..\bin-int\Debug-windows-x86_64\PovertyEngine\</IntDir>
+    <OutDir>..\..\bin\Debug-windows-x86_64\PovertyEngine\</OutDir>
+    <IntDir>..\..\bin-int\Debug-windows-x86_64\PovertyEngine\</IntDir>
     <TargetName>PovertyEngine</TargetName>
     <TargetExt>.dll</TargetExt>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <LinkIncremental>false</LinkIncremental>
-    <OutDir>..\bin\Release-windows-x86_64\PovertyEngine\</OutDir>
-    <IntDir>..\bin-int\Release-windows-x86_64\PovertyEngine\</IntDir>
+    <OutDir>..\..\bin\Release-windows-x86_64\PovertyEngine\</OutDir>
+    <IntDir>..\..\bin-int\Release-windows-x86_64\PovertyEngine\</IntDir>
     <TargetName>PovertyEngine</TargetName>
     <TargetExt>.dll</TargetExt>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Dist|x64'">
     <LinkIncremental>false</LinkIncremental>
-    <OutDir>..\bin\Dist-windows-x86_64\PovertyEngine\</OutDir>
-    <IntDir>..\bin-int\Dist-windows-x86_64\PovertyEngine\</IntDir>
+    <OutDir>..\..\bin\Dist-windows-x86_64\PovertyEngine\</OutDir>
+    <IntDir>..\..\bin-int\Dist-windows-x86_64\PovertyEngine\</IntDir>
     <TargetName>PovertyEngine</TargetName>
     <TargetExt>.dll</TargetExt>
   </PropertyGroup>
@@ -78,8 +78,8 @@
     <ClCompile>
       <PrecompiledHeader>NotUsing</PrecompiledHeader>
       <WarningLevel>Level3</WarningLevel>
-      <PreprocessorDefinitions>PE_PLATFORM_WINDOWS;PE_BUILD_DLL;FLECS_STATIC;PE_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>vendor\SDL2\include;src;vendor\spdlog\include;vendor\Glad;..\vendor\glm;..\vendor\Assimp\include;..\vendor\lohmann;..\vendor\imgui;..\vendor\stb;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>PE_PLATFORM_WINDOWS;PE_BUILD_DLL;PE_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>..\vendor\SDL2\include;src;..\vendor\spdlog\include;..\vendor\Glad;..\..\vendor\glm;..\..\vendor\Assimp\include;..\..\vendor\lohmann;..\..\vendor\imgui;..\..\vendor\stb;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <DebugInformationFormat>EditAndContinue</DebugInformationFormat>
       <Optimization>Disabled</Optimization>
       <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
@@ -90,16 +90,16 @@
       <SubSystem>Windows</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <AdditionalDependencies>SDL2.lib;SDL2main.lib;assimp-vc143-mt.lib;%(AdditionalDependencies)</AdditionalDependencies>
-      <AdditionalLibraryDirectories>vendor\SDL2\lib;..\vendor\Assimp\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-      <ImportLibrary>..\bin\Debug-windows-x86_64\PovertyEngine\PovertyEngine.lib</ImportLibrary>
+      <AdditionalLibraryDirectories>..\vendor\SDL2\lib;..\..\vendor\Assimp\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <ImportLibrary>..\..\bin\Debug-windows-x86_64\PovertyEngine\PovertyEngine.lib</ImportLibrary>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <ClCompile>
       <PrecompiledHeader>NotUsing</PrecompiledHeader>
       <WarningLevel>Level3</WarningLevel>
-      <PreprocessorDefinitions>PE_PLATFORM_WINDOWS;PE_BUILD_DLL;FLECS_STATIC;PE_RELEASE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>vendor\SDL2\include;src;vendor\spdlog\include;vendor\Glad;..\vendor\glm;..\vendor\Assimp\include;..\vendor\lohmann;..\vendor\imgui;..\vendor\stb;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>PE_PLATFORM_WINDOWS;PE_BUILD_DLL;PE_RELEASE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>..\vendor\SDL2\include;src;..\vendor\spdlog\include;..\vendor\Glad;..\..\vendor\glm;..\..\vendor\Assimp\include;..\..\vendor\lohmann;..\..\vendor\imgui;..\..\vendor\stb;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <Optimization>Full</Optimization>
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
@@ -114,16 +114,16 @@
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
       <AdditionalDependencies>SDL2.lib;SDL2main.lib;assimp-vc143-mt.lib;%(AdditionalDependencies)</AdditionalDependencies>
-      <AdditionalLibraryDirectories>vendor\SDL2\lib;..\vendor\Assimp\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-      <ImportLibrary>..\bin\Release-windows-x86_64\PovertyEngine\PovertyEngine.lib</ImportLibrary>
+      <AdditionalLibraryDirectories>..\vendor\SDL2\lib;..\..\vendor\Assimp\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <ImportLibrary>..\..\bin\Release-windows-x86_64\PovertyEngine\PovertyEngine.lib</ImportLibrary>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Dist|x64'">
     <ClCompile>
       <PrecompiledHeader>NotUsing</PrecompiledHeader>
       <WarningLevel>Level3</WarningLevel>
-      <PreprocessorDefinitions>PE_PLATFORM_WINDOWS;PE_BUILD_DLL;FLECS_STATIC;PE_DIST;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>vendor\SDL2\include;src;vendor\spdlog\include;vendor\Glad;..\vendor\glm;..\vendor\Assimp\include;..\vendor\lohmann;..\vendor\imgui;..\vendor\stb;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>PE_PLATFORM_WINDOWS;PE_BUILD_DLL;PE_DIST;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>..\vendor\SDL2\include;src;..\vendor\spdlog\include;..\vendor\Glad;..\..\vendor\glm;..\..\vendor\Assimp\include;..\..\vendor\lohmann;..\..\vendor\imgui;..\..\vendor\stb;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <Optimization>Full</Optimization>
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
@@ -138,61 +138,32 @@
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
       <AdditionalDependencies>SDL2.lib;SDL2main.lib;assimp-vc143-mt.lib;%(AdditionalDependencies)</AdditionalDependencies>
-      <AdditionalLibraryDirectories>vendor\SDL2\lib;..\vendor\Assimp\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-      <ImportLibrary>..\bin\Dist-windows-x86_64\PovertyEngine\PovertyEngine.lib</ImportLibrary>
+      <AdditionalLibraryDirectories>..\vendor\SDL2\lib;..\..\vendor\Assimp\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <ImportLibrary>..\..\bin\Dist-windows-x86_64\PovertyEngine\PovertyEngine.lib</ImportLibrary>
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClInclude Include="..\vendor\imgui\backends\imgui_impl_opengl3.h" />
-    <ClInclude Include="..\vendor\imgui\backends\imgui_impl_opengl3_loader.h" />
-    <ClInclude Include="..\vendor\imgui\backends\imgui_impl_sdl2.h" />
-    <ClInclude Include="..\vendor\imgui\imconfig.h" />
-    <ClInclude Include="..\vendor\imgui\imgui.h" />
-    <ClInclude Include="..\vendor\imgui\imgui_internal.h" />
-    <ClInclude Include="..\vendor\imgui\imstb_rectpack.h" />
-    <ClInclude Include="..\vendor\imgui\imstb_textedit.h" />
-    <ClInclude Include="..\vendor\imgui\imstb_truetype.h" />
-    <ClInclude Include="..\vendor\lohmann\json.hpp" />
-    <ClInclude Include="..\vendor\stb\stb_image.h" />
-    <ClInclude Include="src\AssimpLoader.h" />
-    <ClInclude Include="src\CachedMesh.h" />
-    <ClInclude Include="src\Core.h" />
-    <ClInclude Include="src\DebugLineRenderer.h" />
-    <ClInclude Include="src\Engine.h" />
-    <ClInclude Include="src\EngineInfo.h" />
-    <ClInclude Include="src\GameClient.h" />
-    <ClInclude Include="src\ImGUIHelper.h" />
-    <ClInclude Include="src\MaterialCache.h" />
-    <ClInclude Include="src\MathUtils.h" />
-    <ClInclude Include="src\MeshCache.h" />
-    <ClInclude Include="src\PEPhysics.h" />
-    <ClInclude Include="src\PEPhysicsTests.h" />
-    <ClInclude Include="src\Secs.h" />
-    <ClInclude Include="src\ShaderLoader.h" />
-    <ClInclude Include="src\systems\RenderSystem.h" />
-    <ClInclude Include="src\systems\TransformSystem.h" />
+    <ClInclude Include="..\..\vendor\imgui\backends\imgui_impl_opengl3.h" />
+    <ClInclude Include="..\..\vendor\imgui\backends\imgui_impl_opengl3_loader.h" />
+    <ClInclude Include="..\..\vendor\imgui\backends\imgui_impl_sdl2.h" />
+    <ClInclude Include="..\..\vendor\imgui\imconfig.h" />
+    <ClInclude Include="..\..\vendor\imgui\imgui.h" />
+    <ClInclude Include="..\..\vendor\imgui\imgui_internal.h" />
+    <ClInclude Include="..\..\vendor\imgui\imstb_rectpack.h" />
+    <ClInclude Include="..\..\vendor\imgui\imstb_textedit.h" />
+    <ClInclude Include="..\..\vendor\imgui\imstb_truetype.h" />
+    <ClInclude Include="..\..\vendor\lohmann\json.hpp" />
+    <ClInclude Include="..\..\vendor\stb\stb_image.h" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="..\vendor\imgui\backends\imgui_impl_opengl3.cpp" />
-    <ClCompile Include="..\vendor\imgui\backends\imgui_impl_sdl2.cpp" />
-    <ClCompile Include="..\vendor\imgui\imgui.cpp" />
-    <ClCompile Include="..\vendor\imgui\imgui_demo.cpp" />
-    <ClCompile Include="..\vendor\imgui\imgui_draw.cpp" />
-    <ClCompile Include="..\vendor\imgui\imgui_tables.cpp" />
-    <ClCompile Include="..\vendor\imgui\imgui_widgets.cpp" />
-    <ClCompile Include="src\AssimpLoader.cpp" />
-    <ClCompile Include="src\CachedMesh.cpp" />
-    <ClCompile Include="src\Engine.cpp" />
-    <ClCompile Include="src\EngineInfo.cpp" />
-    <ClCompile Include="src\GameClient.cpp" />
-    <ClCompile Include="src\ImGUIHelper.cpp" />
-    <ClCompile Include="src\MaterialCache.cpp" />
-    <ClCompile Include="src\MeshCache.cpp" />
-    <ClCompile Include="src\PEPhysics.cpp" />
-    <ClCompile Include="src\PEPhysicsTests.cpp" />
-    <ClCompile Include="src\ShaderLoader.cpp" />
-    <ClCompile Include="src\systems\RenderSystem.cpp" />
-    <ClCompile Include="vendor\Glad\glad.c" />
+    <ClCompile Include="..\..\vendor\imgui\backends\imgui_impl_opengl3.cpp" />
+    <ClCompile Include="..\..\vendor\imgui\backends\imgui_impl_sdl2.cpp" />
+    <ClCompile Include="..\..\vendor\imgui\imgui.cpp" />
+    <ClCompile Include="..\..\vendor\imgui\imgui_demo.cpp" />
+    <ClCompile Include="..\..\vendor\imgui\imgui_draw.cpp" />
+    <ClCompile Include="..\..\vendor\imgui\imgui_tables.cpp" />
+    <ClCompile Include="..\..\vendor\imgui\imgui_widgets.cpp" />
+    <ClCompile Include="..\vendor\Glad\glad.c" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

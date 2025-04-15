@@ -1,7 +1,7 @@
 #include "MaterialCache.h"
 #include <iostream>
 #include <unordered_map>
-
+#include <glad.h>
 #define STB_IMAGE_IMPLEMENTATION
 #include <fstream>
 #include <stb_image.h>
@@ -12,7 +12,7 @@ std::unordered_map<std::string, MaterialFile> cache;
 std::vector<MaterialFile> materials;
 
 // Helper function to load a single texture
-static GLuint LoadTextureFromFile(const std::string& texturePath)
+static TextureHandle LoadTextureFromFile(const std::string& texturePath)
 {
     int width, height, channels;
     stbi_set_flip_vertically_on_load(false);

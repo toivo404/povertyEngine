@@ -1,0 +1,87 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="vendor">
+      <UniqueIdentifier>{B3738122-9F15-ACF8-88D0-BF4C74113349}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="vendor\imgui">
+      <UniqueIdentifier>{5D3BD0F0-499E-5F95-F223-984BDE652B18}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="vendor\imgui\backends">
+      <UniqueIdentifier>{27CEAEAF-933A-6AAA-5C2E-0208C8598C12}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="vendor\lohmann">
+      <UniqueIdentifier>{2F307351-1BFE-6657-0492-D77DF0FE42BC}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="vendor\stb">
+      <UniqueIdentifier>{8BD3C5A8-778B-07F6-E092-E051CC69A2E6}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="vendor">
+      <UniqueIdentifier>{B3738122-9F15-ACF8-88D0-BF4C74113349}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="vendor\Glad">
+      <UniqueIdentifier>{7A0268C1-E6B7-E0B6-6FAC-DA8DDB60D7BA}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="..\..\vendor\imgui\backends\imgui_impl_opengl3.h">
+      <Filter>vendor\imgui\backends</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\vendor\imgui\backends\imgui_impl_opengl3_loader.h">
+      <Filter>vendor\imgui\backends</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\vendor\imgui\backends\imgui_impl_sdl2.h">
+      <Filter>vendor\imgui\backends</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\vendor\imgui\imconfig.h">
+      <Filter>vendor\imgui</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\vendor\imgui\imgui.h">
+      <Filter>vendor\imgui</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\vendor\imgui\imgui_internal.h">
+      <Filter>vendor\imgui</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\vendor\imgui\imstb_rectpack.h">
+      <Filter>vendor\imgui</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\vendor\imgui\imstb_textedit.h">
+      <Filter>vendor\imgui</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\vendor\imgui\imstb_truetype.h">
+      <Filter>vendor\imgui</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\vendor\lohmann\json.hpp">
+      <Filter>vendor\lohmann</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\vendor\stb\stb_image.h">
+      <Filter>vendor\stb</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="..\..\vendor\imgui\backends\imgui_impl_opengl3.cpp">
+      <Filter>vendor\imgui\backends</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\vendor\imgui\backends\imgui_impl_sdl2.cpp">
+      <Filter>vendor\imgui\backends</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\vendor\imgui\imgui.cpp">
+      <Filter>vendor\imgui</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\vendor\imgui\imgui_demo.cpp">
+      <Filter>vendor\imgui</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\vendor\imgui\imgui_draw.cpp">
+      <Filter>vendor\imgui</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\vendor\imgui\imgui_tables.cpp">
+      <Filter>vendor\imgui</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\vendor\imgui\imgui_widgets.cpp">
+      <Filter>vendor\imgui</Filter>
+    </ClCompile>
+    <ClCompile Include="..\vendor\Glad\glad.c">
+      <Filter>vendor\Glad</Filter>
+    </ClCompile>
+  </ItemGroup>
+</Project>

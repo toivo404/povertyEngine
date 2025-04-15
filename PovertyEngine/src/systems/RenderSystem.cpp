@@ -3,7 +3,7 @@
 #include <unordered_map>
 #include "Engine.h"
 #include "MaterialCache.h"
-
+#include <glad.h>
 void RenderSystem::RegisterComponents(secs::World* world)
 {
     secs::ComponentRegistry::registerType<Transform>("Transform");

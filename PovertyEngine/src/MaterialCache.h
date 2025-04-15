@@ -1,13 +1,15 @@
 #pragma once
-#include <glad.h>
 #include <string>
 #include <core.h>
+
+using TextureHandle = uint32_t;
+
 struct Material {
     int materialId;
-    GLuint diffuseTextureID;
+    TextureHandle diffuseTextureID;
     /*
-    GLuint specularTextureID;
-    GLuint normalTextureID;
+    TextureHandle specularTextureID;
+    TextureHandle normalTextureID;
     */
     
 };

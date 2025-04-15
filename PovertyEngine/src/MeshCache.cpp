@@ -1,5 +1,5 @@
 #include "MeshCache.h"
-
+#include "glad.h"
 #include <iostream>
 #include <optional>
 #include <string>
@@ -60,7 +60,12 @@ void MeshCache::Load(const std::string& path)
 
     SetGLVertexAttributes();
 
-    cachedMesh.mesh = Mesh{VAO, VBO, EBO, static_cast<GLsizei>(indices.size())};
+    cachedMesh.mesh = Mesh{
+        static_cast<uint32_t>(VAO),
+        static_cast<uint32_t>(VBO),
+        static_cast<uint32_t>(EBO),
+        static_cast<uint32_t>(indices.size())
+    };
     cache[path] = cachedMesh;
 }
 

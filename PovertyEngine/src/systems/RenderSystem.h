@@ -1,22 +1,22 @@
 #pragma once
 #include <Core.h>
-#include <glad.h>
 #include <glm.hpp>
 #include <memory>
 #include <gtc/type_ptr.hpp>
 
 #include "Secs.h"
-
+using ShaderHandle = uint32_t;
+using MeshHandle = uint32_t;
 
 struct Shader
 {
-    GLuint program;
+    ShaderHandle program;
 };
 
 struct Mesh {
-    GLuint VAO;
-    GLuint VBO, EBO;
-    GLsizei indexCount;
+    uint32_t  VAO;
+    uint32_t  VBO, EBO;
+    uint32_t  indexCount;
 };
 
 
