@@ -6,11 +6,11 @@ IncludeDir["GLM"] = "vendor/glm"
 -- Engine Project
 project "PovertyEngine"
 	location "povertyEngine"
-	kind "SharedLib" -- Creates a DLL
+	kind "StaticLib" -- Creates a DLL
 	language "C++"
 	cppdialect "C++20"
-	staticruntime "off"
-
+	staticruntime "on"
+	
 	targetdir ("bin/" .. outputdir .. "/%{prj.name}")
 	objdir ("bin-int/" .. outputdir .. "/%{prj.name}")
 
@@ -64,7 +64,8 @@ project "PovertyEngine"
 		defines
 		{
 			"PE_PLATFORM_WINDOWS",
-			"PE_BUILD_DLL",
+			--"PE_BUILD_DLL",
+			"PE_STATIC",
 			"FLECS_STATIC"
 		}
 

@@ -1,8 +1,10 @@
 #pragma once
-#ifdef PE_BUILD_DLL
-	#define PE_API __declspec(dllexport)
+#ifdef PE_STATIC
+#define PE_API
+#elif defined(PE_BUILD_DLL)
+#define PE_API __declspec(dllexport)
 #else
-	#define PE_API __declspec(dllimport)
+#define PE_API __declspec(dllimport)
 #endif
 #include <fwd.hpp>
 #include <iostream>
